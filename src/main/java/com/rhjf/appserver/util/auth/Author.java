@@ -1,7 +1,7 @@
 package com.rhjf.appserver.util.auth;
 
 public class Author {
-	public static final String NEW_API = "";
+	public static final String NEW_API = " ";
 	public static final String KEY = "";
 	public static final String FUNC_CODE = "";
 	public static final String CHARACTERSET = "UTF-8";
