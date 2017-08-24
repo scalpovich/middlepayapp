@@ -12,6 +12,19 @@ import net.sf.json.JSONObject;
 public class LoginUserDB extends DBBase{
 	
 	
+	/**
+	 *  查询商户是否在平台入网成功
+	 */
+	public static boolean merchantPortalStatus(String LoginID){
+		String sql = "select * from tab_loginuser where loginID=? and BankInfoStatus='1' ";
+		Map<String,Object> map = queryForMap(sql, new Object[]{LoginID});
+		if(map != null && !map.isEmpty()){
+			return true;
+		}
+		return false;
+	}
+	
+	
 	
 	/**
 	 *   用户注册
@@ -105,7 +118,7 @@ public class LoginUserDB extends DBBase{
 	
 	
 	/**
-	 *    完善用户信息
+	 *    H5完善用户信息
 	 * @param obj
 	 * @return
 	 */
@@ -122,20 +135,6 @@ public class LoginUserDB extends DBBase{
 	 */
 	public static int saveOrUpBankInfo(Object[] obj){
 		String sql = "insert into tab_pay_userbankcard (ID,UserID,AccountName,AccountNo,BankBranch,BankProv,BankCity,BankCode,BankName,SettleCreditCard,SettleBankType)"
-				+ " value(?,?,?,?,?,?,?,?,?,?,?)"
-				+ "on duplicate key update AccountName=?,AccountNo=?,BankBranch=?,BankProv=?,BankCity=?,BankCode=?,BankName=?,SettleCreditCard=?,SettleBankType=?";
-		return executeSql(sql, obj);
-	}
-	
-	
-	/**
-	 *   保存结算卡信息
-	 * @param obj
-	 * @return
-	 * 
-	 */
-	public static int saveOrUpBankInfotest(Object[] obj){
-		String sql = "insert into tab_pay_userbankcard_test (ID,UserID,AccountName,AccountNo,BankBranch,BankProv,BankCity,BankCode,BankName,SettleCreditCard,SettleBankType)"
 				+ " value(?,?,?,?,?,?,?,?,?,?,?)"
 				+ "on duplicate key update AccountName=?,AccountNo=?,BankBranch=?,BankProv=?,BankCity=?,BankCode=?,BankName=?,SettleCreditCard=?,SettleBankType=?";
 		return executeSql(sql, obj);

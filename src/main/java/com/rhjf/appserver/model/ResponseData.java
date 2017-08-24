@@ -58,9 +58,15 @@ public class ResponseData implements Serializable {
 
 	/** 银行名称 **/
 	private String bankName;
-
+	
 	/** 支行名称 **/
 	private String bankSubbranch;
+	
+	/**  开户行所在省 **/
+	private String bankProv;
+	
+	/** 开户行所在市  **/
+	private String bankCity;
 
 	/** 账号状态 **/
 	private String accountStatus;
@@ -190,6 +196,10 @@ public class ResponseData implements Serializable {
 	
 	/**  用户签到签到获取秘钥  **/
 	private String secretKey;
+	
+	/** 信用卡账号 **/
+	private String creditCardNo;
+	
 	
 	
 	/** MPOS 设备sn 号 **/
@@ -635,6 +645,29 @@ public class ResponseData implements Serializable {
 
 	public void setSn(String sn) {
 		this.sn = sn;
+	}
+
+	public String getBankProv() {
+		return bankProv;
+	}
+
+	public void setBankProv(String bankProv) {
+		this.bankProv = bankProv;
+	}
+
+	public String getBankCity() {
+		return bankCity;
+	}
+	public void setBankCity(String bankCity) {
+		this.bankCity = bankCity;
+	}
+
+	public String getCreditCardNo() {
+		return creditCardNo;
+	}
+
+	public void setCreditCardNo(String creditCardNo) {
+		this.creditCardNo = creditCardNo;
 	}
 	
 }

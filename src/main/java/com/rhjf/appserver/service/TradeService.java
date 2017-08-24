@@ -10,6 +10,8 @@ import com.rhjf.appserver.constant.RespCode;
 import com.rhjf.appserver.constant.StringEncoding;
 import com.rhjf.appserver.db.AgentDB;
 import com.rhjf.appserver.db.AppconfigDB;
+import com.rhjf.appserver.db.LoginUserDB;
+import com.rhjf.appserver.db.PayOrderDB;
 import com.rhjf.appserver.db.TradeDB;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
@@ -37,18 +39,53 @@ public class TradeService {
 		log.info("用户"+  loginUser.getLoginID() + "发起支付请求") ;
 		
 		if("AGENT".equals(loginUser.getUserType())){
-			
 			repData.setRespCode(RespCode.SystemConfigError[0]);
 			repData.setRespDesc("该用户为代理商商户，无法进行交易操作"); 
 			return;
 		}
 		
 		
+		if(loginUser.getBankInfoStatus()!=1||loginUser.getPhotoStatus()!=1){
+			repData.setRespCode("F002");
+			repData.setRespDesc("该用户没有通过审核无法进行交易"); 
+			return ;
+		}
+		
+		EhcacheUtil ehcache = EhcacheUtil.getInstance();
+
+		
+		/**  查询结算卡信息 **/
+		Map<String,Object> bankInfoMap =  null;
+		Object bankInfoObj = ehcache.get(Constant.cacheName, loginUser.getID()  + "userbankinfo");
+		if(bankInfoObj == null){
+			bankInfoMap = LoginUserDB.getUserBankCard(loginUser.getID());
+			if(bankInfoMap!=null && !bankInfoMap.isEmpty()){
+				ehcache.put(Constant.cacheName,  loginUser.getID()  + "userbankinfo", bankInfoMap);
+			}
+		}else{
+			bankInfoMap = (Map<String,Object>)bankInfoObj;
+		}
+		
+		if(bankInfoMap!=null&&!bankInfoMap.isEmpty()){
+			Integer totalAmount =  PayOrderDB.dayTradeAmount(new Object[]{loginUser.getLoginID() , DateUtil.getNowTime(DateUtil.yyyyMMdd)});
+			if("".equals(UtilsConstant.ObjToStr(bankInfoMap.get("SettleCreditCard")))){
+				//  没有通过信用卡鉴权
+				if(totalAmount+Integer.parseInt(reqData.getAmount()) > 3000000 ){
+					repData.setRespCode("F003");
+					repData.setRespDesc(""); 
+					return ;
+				}
+			}else{
+				if(totalAmount+Integer.parseInt(reqData.getAmount()) > 20000000 ){
+					repData.setRespCode("F003");
+					repData.setRespDesc(""); 
+					return ;
+				}
+			}
+		}
 		
 		/**  获取支付类型 **/
 		String payChannel = reqData.getPayChannel();
-		
-		EhcacheUtil ehcache = EhcacheUtil.getInstance();
 		
 		Map<String,Object> agentconfigmap = null;
 		Object agentConfigobj = ehcache.get(Constant.cacheName, loginUser.getAgentID() + payChannel + "agentConfig");
@@ -62,11 +99,11 @@ public class TradeService {
 				repData.setRespDesc(RespCode.AgentTradeConfigError[1]); 
 				return ;
 			}
+			ehcache.put(Constant.cacheName, loginUser.getAgentID() + payChannel + "agentConfig", agentconfigmap);
 		}else{
 			log.info("缓存中读取代理商交易信息[成功] ,  交易类型：" + payChannel + "代理商ID：" + loginUser.getAgentID());
 			agentconfigmap = (Map<String,Object>) agentConfigobj;
 		}
-		
 		
 		/** 查询用户交易配置信息  **/
 		Map<String,Object> map = null;
@@ -101,7 +138,6 @@ public class TradeService {
 			map = (Map<String,Object>) obj;
 			obj = null;
 		}
-		
 		
 		/**  获取交易商户  **/
 		Map<String,Object> merchantMap = TradeDB.getMerchantInfo(new Object[]{loginUser.getID() ,  payChannel}); 

@@ -112,9 +112,9 @@ public class H5PerfectInfoService {
 		Map<String,Object> bankinfomap = BankCodeDB.bankInfo(new Object[]{bankName,bankBranch,bankProv,bankCity});
 		if(bankinfomap!=null){
 			log.info("查询到的银行信息:" + bankinfomap.toString()); 
-			LoginUserDB.saveOrUpBankInfotest(new Object[]{UtilsConstant.getUUID(),userID,accountName,accountNo,bankinfomap.get("BankBranch"),
-					bankProv,bankCity,bankinfomap.get("BankCode"),bankinfomap.get("BankName"),creditCardNo,bankType
-					,accountName,accountNo,bankinfomap.get("BankBranch"),bankProv,bankCity,bankinfomap.get("BankCode"),bankinfomap.get("BankName"),creditCardNo,bankType});
+//			LoginUserDB.saveOrUpBankInfotest(new Object[]{UtilsConstant.getUUID(),userID,accountName,accountNo,bankinfomap.get("BankBranch"),
+//					bankProv,bankCity,bankinfomap.get("BankCode"),bankinfomap.get("BankName"),creditCardNo,bankType
+//					,accountName,accountNo,bankinfomap.get("BankBranch"),bankProv,bankCity,bankinfomap.get("BankCode"),bankinfomap.get("BankName"),creditCardNo,bankType});
 		}else{
 			bankinfomap = BankCodeDB.bankInfo(new Object[]{bankName,"分行营业部",bankProv,bankCity});
 			if(bankinfomap!=null){
@@ -314,35 +314,54 @@ public class H5PerfectInfoService {
 	}
 	
 	public String levelUp(String UserID) {
-//		Map<String, Object> topuserMap=new HashMap<String, Object>();
-		//查询出审核用户的上一级用户商户类型和用户ID (topUser)
+		// 查询出审核用户的上一级用户商户类型和用户ID (topUser)
 		try {
-			TabLoginuser user =LoginUserDB.LoginuserInfo(UserID);
-			if(user!=null){
-				int MerchantLevel=user.getMerchantLeve();
-				if(MerchantLevel<2){
-				    int userCount=LoginUserDB.getUserCount(UserID);
-				    Map<String, Object> result =LoginUserDB.userLevelUpCount(MerchantLevel+1);
-				    int levelUpCount = Integer.parseInt(result.get("MerchantLevel").toString());
-				    if(userCount>=levelUpCount){
-				    	//升级
-				    	int modifyLoginUserMerchantLevel= LoginUserDB.updateUserLev(MerchantLevel+1, UserID);
-				    	if (modifyLoginUserMerchantLevel==0) {
-				    		return "fail";
-						}
-				    	//同时查出升级之后费率（使用升级后商户类型查询费率）
-				    	int statusResult= LoginUserDB.updateUserRate(MerchantLevel+1, UserID);
-				    	if (statusResult==0) {
+			TabLoginuser user = LoginUserDB.LoginuserInfo(UserID);
+			if (user != null) {
+				int MerchantLevel = user.getMerchantLeve();
+
+				log.info("上级商户 " + UserID + "目前等级为：" + MerchantLevel);
+
+				if (MerchantLevel < 2) {
+					int userCount = LoginUserDB.getUserCount(UserID);
+					log.info("上级商户：" + UserID + "直接扩展商户 ，  并且通过审核的数量：" + userCount);
+					
+					Map<String, Object> result = LoginUserDB.userLevelUpCount(MerchantLevel + 1);
+					
+					int levelUpCount = Integer.parseInt(result.get("MerchantLevel").toString());
+					
+					log.info("上级商户：" + UserID + "如果升级需要扩展的人数：" + levelUpCount);
+					
+					if (userCount >= levelUpCount) {
+						
+						log.info("上级商户：" + UserID + "符合升级条件：当前扩展人数：" + userCount + "，系统需要扩展人数：" + levelUpCount ); 
+						
+						// 升级
+						int modifyLoginUserMerchantLevel = LoginUserDB.updateUserLev(MerchantLevel + 1, UserID);
+						if (modifyLoginUserMerchantLevel == 0) {
+							log.info("上级商户：" + UserID + "更新商户等级失败");
+							
 							return "fail";
 						}
-				    }
+						// 同时查出升级之后费率（使用升级后商户类型查询费率）
+						int statusResult = LoginUserDB.updateUserRate(MerchantLevel + 1, UserID);
+						if (statusResult == 0) {
+							
+							log.info("上级商户：" + UserID + "更新商户费率失败");
+							return "fail";
+						}
+					}
+				}else{
+					log.info("上级商户：" + UserID + "目前等级已经为2 是最高等级，无需升级");
 				}
 			}
 		} catch (Exception e) {
-			log.equals("商户升级失败,错误信息为"+e.getMessage());
+			log.info("商户升级失败,错误信息为" + e.getMessage());
 			return "fail";
 		}
 		
+		log.info("上级商户：" + UserID + "升级成功");
+
 		return "success";
 	}
 	

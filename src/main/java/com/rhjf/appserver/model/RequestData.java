@@ -93,6 +93,9 @@ public class RequestData implements Serializable{
 	/** 联系地址 **/
 	private String address;
 	
+	/** 门牌号 **/
+	private String houseNumber;
+	
 	/** 邮箱 **/
 	private String email;
 	
@@ -627,6 +630,14 @@ public class RequestData implements Serializable{
 	}
 	public void setRefetno(String refetno) {
 		this.refetno = refetno;
+	}
+
+	public String getHouseNumber() {
+		return houseNumber;
+	}
+
+	public void setHouseNumber(String houseNumber) {
+		this.houseNumber = houseNumber;
 	}
 	
 }

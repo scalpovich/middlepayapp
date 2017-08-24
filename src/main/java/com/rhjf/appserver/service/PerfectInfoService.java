@@ -11,6 +11,7 @@ import java.util.TreeMap;
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
 import com.rhjf.appserver.constant.StringEncoding;
+import com.rhjf.appserver.db.AuthenticationDB;
 import com.rhjf.appserver.db.BankCodeDB;
 import com.rhjf.appserver.db.LoginUserDB;
 import com.rhjf.appserver.db.TradeDB;
@@ -39,6 +40,17 @@ public class PerfectInfoService {
 	
 	public void PerfectInfo(TabLoginuser user , RequestData reqData , ResponseData respData) throws Exception{
 
+		
+		boolean flag = LoginUserDB.merchantPortalStatus(user.getLoginID());
+		
+		if(flag){
+			logger.info("商户：" + user.getLoginID() + "已经入网成功");
+			respData.setRespCode("F001");
+			respData.setRespDesc("");
+			return ;
+		}
+		
+		
 		// 商户名称
 		String merchantName = reqData.getMerchantName();
 		// 真实性名
@@ -58,7 +70,7 @@ public class PerfectInfoService {
 		// 所在区
 		String county = reqData.getCounty();
 		// 详细地址
-		String address = reqData.getAddress();
+		String address = reqData.getAddress() + "" + UtilsConstant.ObjToStr(reqData.getHouseNumber());
 		// 邮箱
 		String email = "";
 		// 营业执照号
@@ -156,7 +168,6 @@ public class PerfectInfoService {
 			//鉴权成功，向上游报商户
 			
 			int alipaylength = Constant.alipayMCCType.length;
-			
 			Random random = new Random(alipaylength-1);
 			int index = random.nextInt(alipaylength-1);
 			String alipaymcccNumber = Constant.alipayMCCType[index];
@@ -240,13 +251,15 @@ public class PerfectInfoService {
 					list.add(objs);
 					LoginUserDB.saveMerchantInfo(list);
 					
-					LoginUserDB.updateUserBankStatus(new Object[]{1, 0 , user.getLoginID()});
-					if (user.getThreeLevel()!=null && !user.getThreeLevel().toString().equals("")) {
-						logger.info("判断商户上级商户是否需要升级");
-						String levelUpResult=this.levelUp(user.getThreeLevel().toString());
+					LoginUserDB.updateUserBankStatus(new Object[] { 1, 0, user.getLoginID() });
+					if (user.getThreeLevel() != null && !user.getThreeLevel().toString().equals("")) {
+						logger.info("判断商户上级商户是否需要升级 , 上级商户ID：" + user.getThreeLevel());
+						String levelUpResult = this.levelUp(user.getThreeLevel().toString());
 						if (levelUpResult.equals("fail")) {
-							logger.info("用户上级商户ID："+user.getThreeLevel()+"升级失败;当前等级--"+user.getMerchantLeve());
+							logger.info("用户上级商户ID：" + user.getThreeLevel() + "升级失败;当前等级--" + user.getMerchantLeve());
 						}
+					} else {
+						logger.info("商户：" + user.getLoginID() + "没有上级商户");
 					}
 					
 					respData.setRespCode("00");
@@ -255,62 +268,98 @@ public class PerfectInfoService {
 					LoginUserDB.updateUserBankStatus(new Object[]{2 , 0 , user.getLoginID()});
 					logger.info(user.getLoginID()+"入网异常：上游报备失败");
 					respData.setRespCode("01");
-					respData.setRespDesc("信息已完善，等待进一步审核");
+					respData.setRespDesc(respJS.getString("respMsg"));
 				}
 			} catch (Exception e) {
 				logger.info(user.getLoginID() + "入网异常：" + e.getMessage());
 				respData.setRespCode("01");
 				respData.setRespDesc(e.getMessage());
 			}
-	}else{
-		respData.setRespCode(reqMap.get("respCode"));
-		respData.setRespDesc(reqMap.get("respMsg"));
-		logger.info(user.getLoginID()+"入网异常：鉴权失败");
-	}
-		
+		}else{
+			respData.setRespCode(reqMap.get("respCode"));
+			respData.setRespDesc(reqMap.get("respMsg"));
+			logger.info(user.getLoginID()+"入网异常：鉴权失败");
+		}
 	}
 	
 	public Map<String,String> Auth(String name,String bankCardNo,String IDcardNumber){
-		Map<String,String> authMap=new HashMap<String,String>();
-		AuthService authService = new AuthService();
-		authMap.put("accName", name);
-		authMap.put("cardNo", bankCardNo);
-		authMap.put("certificateNo", IDcardNumber);
-		Map<String,String> reqMap=authService.authKuai(authMap);
-		System.out.println(reqMap.toString());
-		return reqMap;
+		 Map<String, Object> bankAuthencationMan = AuthenticationDB.bankAuthenticationInfo(new Object[]{bankCardNo});
+		 Map<String,String> reqMap=new HashMap<String,String>();
+		 if (bankAuthencationMan == null || bankAuthencationMan.isEmpty()){
+			 Map<String,String> authMap=new HashMap<String,String>();
+				AuthService authService = new AuthService();
+				authMap.put("accName", name);
+				authMap.put("cardNo", bankCardNo);
+				authMap.put("certificateNo", IDcardNumber);
+				reqMap=authService.authKuai(authMap);
+				System.out.println(reqMap.toString());
+				if(reqMap.get("respCode").equals(Author.SUCESS_CODE)){
+				AuthenticationDB.addAuthencationInfo(new Object[]{UtilsConstant.getUUID() , IDcardNumber , name , bankCardNo , "00" , reqMap.get("respMsg") });
+				}
+				return reqMap;
+		 }else{
+			 if (name.equals(bankAuthencationMan.get("RealName")) &&IDcardNumber.equals(bankAuthencationMan.get("IdNumber"))) {
+				 reqMap.put("respCode", Author.SUCESS_CODE);
+				 reqMap.put("respMsg","鉴权成功");
+	             return reqMap;
+	            }else{
+	            reqMap.put("respCode", "001");
+	            reqMap.put("respMsg", "鉴权信息不一致");
+		        return reqMap;
+	            }
+		 }
+		
 	}
 	
 	public String levelUp(String UserID) {
-//		Map<String, Object> topuserMap=new HashMap<String, Object>();
-		//查询出审核用户的上一级用户商户类型和用户ID (topUser)
+		// 查询出审核用户的上一级用户商户类型和用户ID (topUser)
 		try {
-			TabLoginuser user =LoginUserDB.LoginuserInfo(UserID);
-			if(user!=null){
-				int MerchantLevel=user.getMerchantLeve();
-				if(MerchantLevel<2){
-				    int userCount=LoginUserDB.getUserCount(UserID);
-				    Map<String, Object> result =LoginUserDB.userLevelUpCount(MerchantLevel+1);
-				    int levelUpCount = Integer.parseInt(result.get("MerchantLevel").toString());
-				    if(userCount>=levelUpCount){
-				    	//升级
-				    	int modifyLoginUserMerchantLevel= LoginUserDB.updateUserLev(MerchantLevel+1, UserID);
-				    	if (modifyLoginUserMerchantLevel==0) {
-				    		return "fail";
-						}
-				    	//同时查出升级之后费率（使用升级后商户类型查询费率）
-				    	int statusResult= LoginUserDB.updateUserRate(MerchantLevel+1, UserID);
-				    	if (statusResult==0) {
+			TabLoginuser user = LoginUserDB.LoginuserInfo(UserID);
+			if (user != null) {
+				int MerchantLevel = user.getMerchantLeve();
+
+				logger.info("上级商户 " + UserID + "目前等级为：" + MerchantLevel);
+
+				if (MerchantLevel < 2) {
+					int userCount = LoginUserDB.getUserCount(UserID);
+					logger.info("上级商户：" + UserID + "直接扩展商户 ，  并且通过审核的数量：" + userCount);
+					
+					Map<String, Object> result = LoginUserDB.userLevelUpCount(MerchantLevel + 1);
+					
+					int levelUpCount = Integer.parseInt(result.get("MerchantLevel").toString());
+					
+					logger.info("上级商户：" + UserID + "如果升级需要扩展的人数：" + levelUpCount);
+					
+					if (userCount >= levelUpCount) {
+						
+						logger.info("上级商户：" + UserID + "符合升级条件：当前扩展人数：" + userCount + "，系统需要扩展人数：" + levelUpCount ); 
+						
+						// 升级
+						int modifyLoginUserMerchantLevel = LoginUserDB.updateUserLev(MerchantLevel + 1, UserID);
+						if (modifyLoginUserMerchantLevel == 0) {
+							logger.info("上级商户：" + UserID + "更新商户等级失败");
+							
 							return "fail";
 						}
-				    }
+						// 同时查出升级之后费率（使用升级后商户类型查询费率）
+						int statusResult = LoginUserDB.updateUserRate(MerchantLevel + 1, UserID);
+						if (statusResult == 0) {
+							
+							logger.info("上级商户：" + UserID + "更新商户费率失败");
+							return "fail";
+						}
+					}
+				}else{
+					logger.info("上级商户：" + UserID + "目前等级已经为2 是最高等级，无需升级");
 				}
 			}
 		} catch (Exception e) {
-			logger.equals("商户升级失败,错误信息为"+e.getMessage());
+			logger.info("商户升级失败,错误信息为" + e.getMessage());
 			return "fail";
 		}
 		
+		logger.info("上级商户：" + UserID + "升级成功");
+
 		return "success";
 	}
 }

@@ -1,10 +1,11 @@
 package com.rhjf.appserver.service;
 
-import java.util.Map;
+import java.util.Map; 
 
 import com.rhjf.appserver.constant.RespCode;
 import com.rhjf.appserver.db.CreaditCardDB;
 import com.rhjf.appserver.db.DevicetokenDB;
+import com.rhjf.appserver.db.LoginUserDB;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
 import com.rhjf.appserver.model.TabLoginuser;
@@ -28,9 +29,20 @@ public class QueryUserInfoService {
 		respData.setFeeBalance(user.getFeeBalance());
 		
 		respData.setiDCardNo(user.getIDCardNo()); 
-		respData.setBankCardNo(user.getBankCardNo());
-		respData.setBankName(user.getBankName());
-		respData.setBankSubbranch(user.getBankSubbranch());
+		
+		
+		Map<String,Object> bankInfoMap = LoginUserDB.getUserBankCard(user.getID());
+		
+		
+		if(bankInfoMap!=null&&!bankInfoMap.isEmpty()){
+			respData.setBankCardNo(UtilsConstant.ObjToStr(bankInfoMap.get("AccountNo")));
+			respData.setBankName(UtilsConstant.ObjToStr(bankInfoMap.get("BankName"))); 
+			respData.setBankSubbranch(UtilsConstant.ObjToStr(bankInfoMap.get("BankBranch"))); 
+			respData.setBankProv(UtilsConstant.ObjToStr(bankInfoMap.get("BankProv")));
+			respData.setBankCity(UtilsConstant.ObjToStr(bankInfoMap.get("BankCity")));
+			respData.setCreditCardNo(UtilsConstant.ObjToStr(bankInfoMap.get("SettleCreditCard")));
+		}
+		
 		respData.setAccountStatus(user.getAccountStatus());
 		
 		respData.setPhotoStatus(user.getPhotoStatus());

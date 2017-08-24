@@ -42,6 +42,13 @@ LoggerTool log  = new LoggerTool(this.getClass());
 		EhcacheUtil ehcache = EhcacheUtil.getInstance();
 		
 		
+		if(loginUser.getBankInfoStatus()!=1||loginUser.getPhotoStatus()!=1){
+			repData.setRespCode("F002");
+			repData.setRespDesc("该用户没有通过审核无法进行交易"); 
+			return ;
+		}
+		
+		
 		
 		/**  查询代理商交易配置信息 **/
 		Map<String,Object> agentconfigmap = null;

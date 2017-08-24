@@ -41,8 +41,8 @@ public class BankCodeDB extends DBBase {
 	 */
 	public static List<Map<String,Object>> bankBranchList(Map<String,String> map){
 		String sql = "SELECT BankBranch from tab_pay_bankcode"
-				+ " where  BankName like CONCAT(CONCAT('%' , #{bankName}) , '%') and #{bankProv} like CONCAT(CONCAT('%' , BankProv) , '%') "
-				+ " and  #{bankCity} like CONCAT(CONCAT('%' , bankCity),'%')";
+				+ " where  BankName like CONCAT(CONCAT('%' , ?) , '%') and ? like CONCAT(CONCAT('%' , BankProv) , '%') "
+				+ " and  ? like CONCAT(CONCAT('%' , bankCity),'%')";
 		return queryForList(sql, new Object[]{map.get("bankName") , map.get("bankProv") , map.get("bankCity")});
 	}
 }

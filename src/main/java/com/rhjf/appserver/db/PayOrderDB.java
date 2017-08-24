@@ -100,4 +100,25 @@ public class PayOrderDB extends DBBase{
 	}
 	
 	
+	
+	/**
+	 *   查询用户当天交易金额
+	 * @param obj
+	 * @return
+	 */
+	public static Integer dayTradeAmount(Object[] obj){
+		
+		String sql = "select ifnull(sum(Amount),'0') as amount from tab_pay_order where UserID=? and LocalDate=? and PayRetCode='0000'";
+		
+		Map<String,Object> map = queryForMap(sql, obj);
+		
+		if(map!=null && !map.isEmpty()){
+			return Integer.parseInt(UtilsConstant.ObjToStr(map.get("amount")));
+		}else{
+			return 0;
+		}
+	}
+	
+	
+	
 }
