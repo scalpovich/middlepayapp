@@ -86,36 +86,36 @@ public class Constant {
 	
 	/** 请根据银联分配的信息填写，如有问题可咨询银联技术支持人员 **/
 	/** 用户 */
-	public static final String USER_ID = "rh0000000001";
+	public static final String USER_ID = "";
 	/** 渠道 */
-	public static final String CHANNEL_ID = "TJ0000000033";
+	public static final String CHANNEL_ID = "";
 	/** 3DES秘钥 */
-	public static final String DES3_KEY = "cx0vaubvr6gxjgb58s9laf61";
+	public static final String DES3_KEY = "";
 	/** MD5秘钥 */
 	
-	public static final String MD5_KEY = "f58aa3d91e6500a1ffec1d539e55d82d";
+	public static final String MD5_KEY = "";
 	
-	public static final String URL = "https://62tj.unionpay.com:8443";
+	public static final String URL = "https://";
 	
 	
 	
 	
 	/**********************************   信鸽配置参数  *************************************/
 	/**  ACCESS ID  **/
-	public static final long XingeApp_IOS_ACCESS_ID = 2200254891L;
+	public static final long XingeApp_IOS_ACCESS_ID = ;
 	/**  ACCESS_KEY **/
-	public static final String XingApp_IOS_ACCESS_KEY = "5821963c82c58486b783c01bd93bbaf4";
+	public static final String XingApp_IOS_ACCESS_KEY = "";
 	
 	
-	public static final long XingApp_Android_ACCESS_ID = 2100254617L;
+	public static final long XingApp_Android_ACCESS_ID = ;
 	
-	public static final String XingApp_Android_ACCESS_KEY = "e51ff9b4ee9255dc9e07d7beb13950fa";
+	public static final String XingApp_Android_ACCESS_KEY = "";
 	
 	
 	
 	/*************************************   平台pos 参数   ****************************************/
 	/** 代理商编号 **/
-	public static final String POS_AGENTNO = "284473885";
+	public static final String POS_AGENTNO = "";
 	
 	/** 商户入网地址 **/
 	public static final String POS_ADDMERCHANT_URL = "http://111.207.6.230:18088/back/customerApplay/addCustomerByInterface";
@@ -128,27 +128,20 @@ public class Constant {
 	/***************************  新平台   参数 ***************************************/
 	
 	/** 爱码付秘钥 **/
-	public static final String REPORT_CHANNELNO = "8934238750";
+	public static final String REPORT_CHANNELNO = "";
 	
-	public static final String REPORT_CHANNELNAME = "爱码付加强版";
+	public static final String REPORT_CHANNELNAME = "";
 	
-	public static final String REPORT_DES3_KEY = "212876ea28cc11e7b8590894";
+	public static final String REPORT_DES3_KEY = "";
 	
-	public static final String REPORT_SIGN_KEY = "212876ea28cc11e7b8590894ef29bfa8";
+	public static final String REPORT_SIGN_KEY = "";
 	
-	public static final String REPORT_QUERY_KEY = "212876ea28cc11e7b8590894ef29bfa8";
+	public static final String REPORT_QUERY_KEY = "";
+	
+
 	
 	
-//	/** 融汇金服本部秘钥 **/
-//	public static final String REPORT_CHANNELNO = "8934738753";
-//	
-//	public static final String REPORT_CHANNELNAME = "融汇金服本部";
-//	
-//	public static final String REPORT_DES3_KEY = "pDOm9MY2z5M0fgWUSpMk6E3H";
-//	
-//	public static final String REPORT_SIGN_KEY = "ScUdy75fa4pUt52PD2LYV3X3zIxPM1ak";
-//	
-//	public static final String REPORT_QUERY_KEY = "ScUdy75fa4pUt52PD2LYV3X3zIxPM1ak";
+	
 	
 	
 	public static final String REPORT_URL = "http://10.10.20.101:11024/middlepayportal/merchant/in";

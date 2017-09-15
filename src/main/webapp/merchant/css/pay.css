@@ -1,0 +1,163 @@
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/_reset\.scss}line{font-family:\000033}}
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/_reset\.scss}line{font-family:\0000320}}
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/_reset\.scss}line{font-family:\0000324}}
+a {
+  text-decoration: none;
+  color: #666666; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/_reset\.scss}line{font-family:\0000328}}
+ul, ol, li {
+  list-style: none; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/_reset\.scss}line{font-family:\0000331}}
+body {
+  width: 100%;
+  /*font-family:"SimHei";*/
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/_reset\.scss}line{font-family:\0000338}}
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  border: none;
+  outline: none; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/_reset\.scss}line{font-family:\0000346}}
+input::-webkit-search-cancel-button {
+  display: none; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/_reset\.scss}line{font-family:\0000350}}
+input[type=search]::-ms-clear {
+  display: none; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/pay\.scss}line{font-family:\000034}}
+body {
+  position: relative;
+  background-color: #f0effd; }
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/pay\.scss}line{font-family:\000039}}
+  body section.box .form {
+    margin-top: 0.56rem; }
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/pay\.scss}line{font-family:\0000311}}
+    body section.box .form p {
+      background-color: #fff;
+      height: 1.17333rem;
+      line-height: 1.17333rem;
+      font-size: 0.4rem;
+      border-bottom: 1px #c5c5c5 solid;
+      border-top: 1px #c5c5c5 solid;
+      padding: 0 5%;
+      padding-left: 5%;
+      font-family: "SimHei";
+      font-weight: bold; }
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/pay\.scss}line{font-family:\0000322}}
+      body section.box .form p img {
+        vertical-align: middle;
+        margin-right: 0.48rem;
+        width: 0.58667rem;
+        height: 0.64rem; }
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/pay\.scss}line{font-family:\0000329}}
+    body section.box .form ul {
+      background-color: #fff; }
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/pay\.scss}line{font-family:\0000331}}
+      body section.box .form ul li {
+        display: flex;
+        border-bottom: 1px #c5c5c5 solid;
+        height: 1.17333rem;
+        line-height: 1.17333rem;
+        margin-left: 0.26667rem;
+        background: #fff; }
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/pay\.scss}line{font-family:\0000338}}
+        body section.box .form ul li label {
+          font-family: "SimHei";
+          font-size: 0.4rem;
+          display: inline-block;
+          width: 35%;
+          height: 1.17333rem;
+          line-height: 1.17333rem;
+          padding-left: 0.2rem;
+          color: #000000; }
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/pay\.scss}line{font-family:\0000348}}
+        body section.box .form ul li input {
+          padding-right: 0.46667rem;
+          width: 65%;
+          font-size: 0.4rem;
+          text-align: right; }
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/pay\.scss}line{font-family:\0000354}}
+        body section.box .form ul li img {
+          width: 0.37333rem;
+          height: 0.37333rem;
+          margin-top: 0.4rem;
+          margin-right: 0.4rem; }
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/pay\.scss}line{font-family:\0000362}}
+    body section.box .form div {
+      margin-top: 1.53333rem; }
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/pay\.scss}line{font-family:\0000364}}
+      body section.box .form div #postInfo {
+        background: #dcdcdc;
+        width: 8.4rem;
+        height: 1.06667rem;
+        line-height: 1.06667rem;
+        font-size: 0.42667rem;
+        border-radius: 0.13333rem;
+        display: block;
+        margin: 0 auto;
+        color: #ffffff; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/pay\.scss}line{font-family:\0000380}}
+#remindBox {
+  position: absolute;
+  top: 5.33333rem;
+  left: 0.56rem;
+  width: 8.93333rem;
+  height: 3.33333rem;
+  padding: 0.66667rem;
+  font-size: 0.4rem;
+  background-color: #fff;
+  z-index: 999; }
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/pay\.scss}line{font-family:\0000390}}
+  #remindBox div {
+    margin-top: 0.64rem;
+    text-align: right; }
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/pay\.scss}line{font-family:\0000393}}
+    #remindBox div a {
+      color: #cbb049; }
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/pay\.scss}line{font-family:\0000396}}
+    #remindBox div a:first-child {
+      margin-right: 1.06667rem; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/F\:\/xampp\/htdocs\/bussiness-style-finish\/sass\/pay\.scss}line{font-family:\00003103}}
+.zhezhao {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 1;
+  display: none; }
+
+/*# sourceMappingURL=pay.css.map */

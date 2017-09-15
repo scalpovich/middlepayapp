@@ -200,10 +200,21 @@ public class ResponseData implements Serializable {
 	/** 信用卡账号 **/
 	private String creditCardNo;
 	
+	/**  app 敏感信息开关  0 关 1开  **/
+	private String open;
 	
+	/**  商户注册时间 **/
+	private String registerDate;
 	
 	/** MPOS 设备sn 号 **/
 	private String sn;
+	
+	
+	/** 拓客金额 **/
+	private String tokerAmount;
+	
+	/** 返利金额 **/
+	private String antiAmount;
 	
 	public String getMerchantNo() {
 		return merchantNo;
@@ -669,5 +680,35 @@ public class ResponseData implements Serializable {
 	public void setCreditCardNo(String creditCardNo) {
 		this.creditCardNo = creditCardNo;
 	}
-	
+
+	public String getOpen() {
+		return open;
+	}
+
+	public void setOpen(String open) {
+		this.open = open;
+	}
+
+	public String getRegisterDate() {
+		return registerDate;
+	}
+
+	public void setRegisterDate(String registerDate) {
+		this.registerDate = registerDate;
+	}
+
+	public String getTokerAmount() {
+		return tokerAmount;
+	}
+
+	public void setTokerAmount(String tokerAmount) {
+		this.tokerAmount = tokerAmount;
+	}
+
+	public String getAntiAmount() {
+		return antiAmount;
+	}
+	public void setAntiAmount(String antiAmount) {
+		this.antiAmount = antiAmount;
+	}
 }

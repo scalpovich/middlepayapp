@@ -50,9 +50,13 @@ public class RespCode {
 	
 	public static final String[] AccountNoError = {"E019","结算卡账号只支持储蓄卡"};
 	
-	public static final String[] SYSTEMError = {"E018" , "服务器异常"};
+	public static final String[] SYSTEMError = {"E018" , "网络异常"};
 	
 	public static final String[] BankCardInfoErroe = {"E020" , "银行卡信息异常"};
+	
+	public static final String[] MerchantNameError = {"E021" , "商户名不和法，长度大于5位，并且小于12位；名称不能使用数字和英文"};
+	
+	public static final String[] TurnWalletError = {"E022" , "今天已经转入过"};
 
 	public static final String[] TXAMOUNTError = {"T001" , "提现金额无效"};
 	

@@ -184,7 +184,8 @@ public class RequestData implements Serializable{
 	/**  mpos 交易参考号 **/
 	private String refetno;
 	
-	
+	/**  文本内容 (意见反馈) **/
+	private String message;
 	
 	public String getOrderNumber() {
 		return orderNumber;
@@ -639,5 +640,12 @@ public class RequestData implements Serializable{
 	public void setHouseNumber(String houseNumber) {
 		this.houseNumber = houseNumber;
 	}
-	
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
 }

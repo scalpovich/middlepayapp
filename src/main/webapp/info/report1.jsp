@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<%@ page import="com.rom.util.md5.KeyBean" %> 
+<%@ page import="com.rhjf.appserver.util.KeyBean" %> 
 <!DOCTYPE html >
 <html style="font-size: 40px;">
 	<head>

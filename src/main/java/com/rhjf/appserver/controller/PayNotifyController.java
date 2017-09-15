@@ -1,6 +1,7 @@
 package com.rhjf.appserver.controller;
 
-import java.util.ArrayList; 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -8,7 +9,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.catalina.tribes.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +21,7 @@ import com.rhjf.appserver.db.DevicetokenDB;
 import com.rhjf.appserver.db.LoginUserDB;
 import com.rhjf.appserver.db.SalesManDB;
 import com.rhjf.appserver.db.TradeDB;
+import com.rhjf.appserver.db.UserProfitDB;
 import com.rhjf.appserver.model.Fee;
 import com.rhjf.appserver.model.PayOrder;
 import com.rhjf.appserver.model.TabLoginuser;
@@ -172,6 +173,9 @@ public class PayNotifyController {
 				String content = "您的" + orderName + "支付成功，请查看";
 				PushUtils.IOSPush(content, tonken);
 				PushUtils.AndroidPush("支付通知", content, tonken); 
+				
+//				PushUtil.iosSend("分润通知" , content, tonken , "2");
+//				PushUtil.androidSend("分润通知", content, tonken, "2");
 			}
 			
 			
@@ -193,7 +197,7 @@ public class PayNotifyController {
 			
 			if(objs.size()>0){
 				/**  保存三级分销各个商户的利润  **/
-				TradeDB.saveDistributeProfit(objs);
+				UserProfitDB.saveDistributeProfit(objs);
 				/** 更新用户信息表中的 分润总额 **/
 				List<Object[]> profitlist = new ArrayList<Object[]>();
 				for (Object[] objects : objs) {

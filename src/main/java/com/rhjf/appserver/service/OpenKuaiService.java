@@ -185,6 +185,7 @@ public class OpenKuaiService {
 					map.put("accNo", DESUtil.encode(Constant.REPORT_DES3_KEY , bankCardno));
 					map.put("merchantNo", merchantMap.get("MerchantID"));
 					map.put("orderNum", UtilsConstant.getOrderNumber());
+					map.put("callbackUrl", "http://test.zhoufy.com:8085/appserver/OpenKuaiNotify");
 					
 					int status = 0;
 					

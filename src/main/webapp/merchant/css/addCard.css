@@ -1,0 +1,101 @@
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0; }
+
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block; }
+
+a {
+  text-decoration: none;
+  color: #666666; }
+
+ul, ol, li {
+  list-style: none; }
+
+body {
+  width: 100%;
+  /*font-family:"SimHei";*/
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box; }
+
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  border: none;
+  outline: none; }
+
+input::-webkit-search-cancel-button {
+  display: none; }
+
+input[type=search]::-ms-clear {
+  display: none; }
+
+body.addCard {
+  background-color: #F0EFFD; }
+  body.addCard .box > #cardInfo {
+    margin-top: 0.56rem; }
+    body.addCard .box > #cardInfo p {
+      height: 1.1733333333rem;
+      line-height: 1.1733333333rem;
+      font-size: 0.4rem;
+      border-bottom: 1px #c5c5c5 solid;
+      border-top: 1px #c5c5c5 solid;
+      padding-left: 0.4rem;
+      font-family: "SimHei";
+      font-weight: bold;
+      background-color: #fff; }
+      body.addCard .box > #cardInfo p img {
+        vertical-align: middle;
+        margin-right: 0.48rem;
+        width: 0.72rem;
+        height: 0.5333333333rem; }
+    body.addCard .box > #cardInfo ul li {
+      display: flex;
+      width: 100%;
+      border-bottom: solid 1px #c8c7cc;
+      background-color: #fff; }
+      body.addCard .box > #cardInfo ul li label {
+        font-family: "SimHei";
+        font-size: 0.4rem;
+        display: inline-block;
+        width: 35%;
+        height: 1.1733333333rem;
+        line-height: 1.1733333333rem;
+        padding-left: 0.4rem;
+        color: #000000; }
+      body.addCard .box > #cardInfo ul li #bankNum {
+        padding-right: 0.4666666667rem;
+        width: 65%;
+        font-size: 0.4rem;
+        text-align: right;
+        font-family: "SimHei"; }
+    body.addCard .box > #cardInfo div {
+      margin-top: 1.76rem; }
+      body.addCard .box > #cardInfo div #addInfoBtn {
+        background: #dcdcdc;
+        width: 76%;
+        height: 1.0666666667rem;
+        line-height: 1.0666666667rem;
+        font-size: 0.4266666667rem;
+        border-radius: 0.1333333333rem;
+        display: block;
+        margin: 0 auto;
+        color: #ffffff; }
+
+/*# sourceMappingURL=addCard.css.map */

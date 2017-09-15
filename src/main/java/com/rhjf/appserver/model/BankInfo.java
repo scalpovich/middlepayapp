@@ -30,4 +30,6 @@ public class BankInfo {
 	public void setPlatTermNo(String platTermNo) {
 		this.platTermNo = platTermNo;
 	}
+	
+	
 }

@@ -10,6 +10,8 @@ import com.rhjf.appserver.constant.RespCode;
 import com.rhjf.appserver.constant.StringEncoding;
 import com.rhjf.appserver.db.AgentDB;
 import com.rhjf.appserver.db.AppconfigDB;
+import com.rhjf.appserver.db.LoginUserDB;
+import com.rhjf.appserver.db.PayOrderDB;
 import com.rhjf.appserver.db.TermkeyDB;
 import com.rhjf.appserver.db.TradeDB;
 import com.rhjf.appserver.model.RequestData;
@@ -46,6 +48,38 @@ LoggerTool log  = new LoggerTool(this.getClass());
 			repData.setRespCode("F002");
 			repData.setRespDesc("该用户没有通过审核无法进行交易"); 
 			return ;
+		}
+		
+		
+		
+		/**  查询结算卡信息 **/
+		Map<String,Object> bankInfoMap =  null;
+		Object bankInfoObj = ehcache.get(Constant.cacheName, loginUser.getID()  + "userbankinfo");
+		if(bankInfoObj == null){
+			bankInfoMap = LoginUserDB.getUserBankCard(loginUser.getID());
+			if(bankInfoMap!=null && !bankInfoMap.isEmpty()){
+				ehcache.put(Constant.cacheName,  loginUser.getID()  + "userbankinfo", bankInfoMap);
+			}
+		}else{
+			bankInfoMap = (Map<String,Object>)bankInfoObj;
+		}
+		
+		if(bankInfoMap!=null&&!bankInfoMap.isEmpty()){
+			Integer totalAmount =  PayOrderDB.dayTradeAmount(new Object[]{loginUser.getLoginID() , DateUtil.getNowTime(DateUtil.yyyyMMdd)});
+			if("".equals(UtilsConstant.ObjToStr(bankInfoMap.get("SettleCreditCard")))){
+				//  没有通过信用卡鉴权
+				if(totalAmount+Integer.parseInt(reqData.getAmount()) > 3000000 ){
+					repData.setRespCode("F003");
+					repData.setRespDesc("当前单日限额3万元，提供信用卡信息可提升至20万元，是否提供？"); 
+					return ;
+				}
+			}else{
+				if(totalAmount+Integer.parseInt(reqData.getAmount()) > 20000000 ){
+					repData.setRespCode("F003");
+					repData.setRespDesc("当前单日限额20万元"); 
+					return ;
+				}
+			}
 		}
 		
 		
@@ -181,6 +215,8 @@ LoggerTool log  = new LoggerTool(this.getClass());
 			encrypt = Constant.T1;
 		}*/
 		
+		String feeRate = map.get("T1SettlementRate").toString();
+		
 		if(Constant.T1.equals(encrypt)){
 			// ChannelRate , AgentRate , MerchantRate , T0ChannelRate , T0AgentRate , T0MerchantRate
 			if("".equals(UtilsConstant.ObjToStr(agentconfigmap.get("ChannelRate")))||"".equals(UtilsConstant.ObjToStr(agentconfigmap.get("AgentRate")))
@@ -191,6 +227,9 @@ LoggerTool log  = new LoggerTool(this.getClass());
 				return ;
 			}
 		}else{
+			
+			feeRate = map.get("T0SettlementRate").toString();
+			
 			if("".equals(UtilsConstant.ObjToStr(agentconfigmap.get("T0ChannelRate")))||"".equals(UtilsConstant.ObjToStr(agentconfigmap.get("T0AgentRate")))
 					||"".equals(UtilsConstant.ObjToStr(agentconfigmap.get("T0MerchantRate")))){
 				log.info("用户：" + loginUser.getLoginID() + "对应代理商交易类型：" + payChannel + "配置 [ T0 ] 信息不完整 , 对应代理商ID：" +  loginUser.getAgentID());
@@ -220,7 +259,7 @@ LoggerTool log  = new LoggerTool(this.getClass());
 		
 		/** 向数据库插入初始化数据 **/
 		int ret = TradeDB.tradeInit(new Object[]{UtilsConstant.getUUID(),reqData.getAmount() ,DateUtil.getNowTime(DateUtil.yyyyMMdd),DateUtil.getNowTime(DateUtil.HHmmss),
-				tradeDate,tradeTime , reqData.getSendSeqId(), Constant.TradeType[0] , encrypt, loginUser.getID(),payChannel, merchantID,orderNumber});
+				tradeDate,tradeTime , reqData.getSendSeqId(), Constant.TradeType[0] , encrypt, loginUser.getID(),payChannel, feeRate ,merchantID,orderNumber});
 		
 		if(ret < 1 ){
 			log.info("数据库保存信息失败");

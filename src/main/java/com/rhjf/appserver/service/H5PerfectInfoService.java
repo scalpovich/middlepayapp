@@ -1,7 +1,6 @@
 package com.rhjf.appserver.service;
 
-import java.util.ArrayList; 
-import java.util.HashMap;
+import java.util.ArrayList;  
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -21,6 +20,7 @@ import com.rhjf.appserver.util.HttpClient;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.MD5;
 import com.rhjf.appserver.util.UtilsConstant;
+import com.rhjf.appserver.util.auth.AuthUtil;
 import com.rhjf.appserver.util.auth.Author;
 
 import net.sf.json.JSONObject;
@@ -37,10 +37,24 @@ public class H5PerfectInfoService {
 	 */
 	public JSONObject updateUserInfo(String userID , JSONObject json) throws Exception{
 		
+		JSONObject js = new JSONObject();
+		
 		// 用户登录的手机号
 		String loginID = json.getString("loginID");
 		//  商户名称
 		String merchantName = json.getString("merchantName"); 
+		
+		
+		boolean flag = UtilsConstant.checkMerchantName(merchantName);
+		if(flag){
+			log.info("用户："+ userID + "商户名不合法," + merchantName);
+			js.put("respCode", "01");
+//			js.put("respMsg", RespCode.MerchantInfoError[1]);
+			js.put("respMsg" , "商户名无效，长度大于5位，并且小于12位；不能为纯数字或英文；");
+			return js;
+		}
+		
+		
 		//  签购单显示名称
 		String merchantBillName = json.getString("merchantName");
 		//  商户联系人名称
@@ -83,7 +97,7 @@ public class H5PerfectInfoService {
 		// 开户行城市
 		String bankCity = json.getString("bankCity");
 		
-		JSONObject js = new JSONObject();
+		
 		Map<String,Object> bankmap = BankCodeDB.bankBinMap(new Object[]{accountNo});
 		if(bankmap == null){
 			log.info("银行卡号：" + accountNo + "获取银行名称和银联号失败");
@@ -115,6 +129,9 @@ public class H5PerfectInfoService {
 //			LoginUserDB.saveOrUpBankInfotest(new Object[]{UtilsConstant.getUUID(),userID,accountName,accountNo,bankinfomap.get("BankBranch"),
 //					bankProv,bankCity,bankinfomap.get("BankCode"),bankinfomap.get("BankName"),creditCardNo,bankType
 //					,accountName,accountNo,bankinfomap.get("BankBranch"),bankProv,bankCity,bankinfomap.get("BankCode"),bankinfomap.get("BankName"),creditCardNo,bankType});
+			bankCode = bankinfomap.get("BankCode").toString();
+			bankName = bankinfomap.get("BankName").toString();
+			bankBranch = bankinfomap.get("BankBranch").toString();
 		}else{
 			bankinfomap = BankCodeDB.bankInfo(new Object[]{bankName,"分行营业部",bankProv,bankCity});
 			if(bankinfomap!=null){
@@ -134,17 +151,19 @@ public class H5PerfectInfoService {
 			}
 		}
 		
-		
 		LoginUserDB.saveOrUpBankInfo(new Object[]{UtilsConstant.getUUID(),userID,accountName,accountNo,bankBranch,bankProv,bankCity,bankCode,bankName,creditCardNo,bankType
 				,accountName,accountNo,bankBranch,bankProv,bankCity,bankCode,bankName,creditCardNo,bankType});
 		
-		/**********  鉴权   *************************/
-		Map<String,String> authMap=new HashMap<String,String>();
-		AuthService authService = new AuthService();
-		authMap.put("accName", accountName);
-		authMap.put("cardNo", accountNo);
-		authMap.put("certificateNo", legalPersonID);
-		Map<String,String> reqMap=authService.authKuai(authMap);
+//		/**********  鉴权   *************************/
+//		Map<String,String> authMap=new HashMap<String,String>();
+//		AuthService authService = new AuthService();
+//		authMap.put("accName", accountName);
+//		authMap.put("cardNo", accountNo);
+//		authMap.put("certificateNo", legalPersonID);
+//		Map<String,String> reqMap=authService.authKuai(authMap);
+		
+		Map<String,String> reqMap = AuthUtil.authentication(accountName,accountNo,legalPersonID);
+		
 		if(reqMap.get("respCode").equals(Author.SUCESS_CODE)){
 			//鉴权成功，向上游报商户
 			EhcacheUtil ehcache = EhcacheUtil.getInstance();
@@ -208,11 +227,7 @@ public class H5PerfectInfoService {
 			String sign = MD5.sign( JSONObject.fromObject(map).toString() + Constant.REPORT_SIGN_KEY , StringEncoding.UTF_8);
 			map.put("sign", sign.toUpperCase());
 			
-			
 			log.info("用户" + loginID + "入网请求报文:" + map.toString());
-			
-			
-			
 			
 			try {
 				String content = HttpClient.post(Constant.REPORT_URL, map, null);
@@ -288,16 +303,13 @@ public class H5PerfectInfoService {
 		return LoginUserDB.LoginuserInfo(loginID);
 	}
 	
-	
 	public Map<String,Object> getUserBankCard(String userID){
 		return LoginUserDB.getUserBankCard(userID);
 	}
 	
-	
 	public Map<String,Object> getUserConfig(Object[] obj){
 		return TradeDB.getUserConfig(obj);
 	}
-	
 	
 	public TabLoginuser loginuser(String loginID){
 		return LoginUserDB.LoginuserInfo(loginID);
@@ -306,8 +318,6 @@ public class H5PerfectInfoService {
 	public int updateUserBankStatus(Object[] obj){
 		return LoginUserDB.updateUserBankStatus(obj);
 	}
-	
-	
 	
 	public Map<String,Object> bankBinMap(Object[] obj){
 		return BankCodeDB.bankBinMap(obj);

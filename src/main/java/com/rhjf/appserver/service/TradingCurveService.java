@@ -60,11 +60,11 @@ public class TradingCurveService {
 			stringBuffer.insert(4, "0");
 		}
 		//  sum(Amount) as amount , sum(Fee) as fee , count(1) as count , sum(amount)-sum(fee) as pureProfit 
-		Map<String,Object> map = PayOrderDB.tradeTotal(new Object[]{user.getID(),stringBuffer.toString()});
+		Map<String,String> map = PayOrderDB.tradeTotal(new Object[]{user.getID(),stringBuffer.toString()});
 		
 		response.setList(JSONArray.fromObject(list).toString());
 		response.setTotalCount(Integer.parseInt(map.get("count").toString()));
-		response.setTotal(map.get("amount").toString());
+		response.setTotal(String.valueOf(map.get("amount")));
 		response.setFee(map.get("fee").toString()); 
 		response.setPureProfit(map.get("pureProfit").toString()); 
 		

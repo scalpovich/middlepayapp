@@ -26,4 +26,9 @@ public class PushUtils {
         message.setStyle(style);
         log.info(xinge.pushSingleDevice(token, message).toString().toLowerCase());
 	}
+	
+	
+	public static void main(String[] args) {
+		PushUtils.AndroidPush("123", "12312", "09d371afbdd350244dd0b7a3e038626974c2f932"); 
+	}
 }

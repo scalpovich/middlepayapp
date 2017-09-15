@@ -100,8 +100,8 @@ public class TradeDB extends DBBase{
 	 * @return
 	 */
 	public static int tradeInit(Object[] obj){
-		String sql = "insert into tab_pay_order (ID,Amount,LocalDate,LocalTimes,TradeDate,TradeTime,TermSerno,TradeType,TradeCode,UserID,PayChannel,MerchantID,OrderNumber) values "
-				+ "(?,?,?,?,?,?,?,?,?,?,?,?,?)";
+		String sql = "insert into tab_pay_order (ID,Amount,LocalDate,LocalTimes,TradeDate,TradeTime,TermSerno,TradeType,TradeCode,UserID,PayChannel,FeeRate,MerchantID,OrderNumber) values "
+				+ "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 		return executeSql(sql, obj);
 	}
 	
@@ -171,17 +171,6 @@ public class TradeDB extends DBBase{
 		return executeSql(sql, obj);
 	}
 	
-	/** 
-	 *   保存三级分销 各个商户的利润
-	 * @param obj
-	 * @return
-	 */
-	public static int[] saveDistributeProfit(List<Object[]> obj){
-		String sql = "insert ignore  into tab_user_profit (ID,UserID,Amount,TradeTime,TradeID) "
-				+ "values (?,?,?,?,?)";
-		return executeBatchSql(sql, obj);
-	}
-	
 	
 	/***
 	 *    终端用户查询自己的交易记录
@@ -227,25 +216,6 @@ public class TradeDB extends DBBase{
 	}
 	
 	
-	/**
-	 *    终端用户查询自己的收益记录
-	 * @param obj
-	 * @return
-	 */
-	public static List<Map<String,Object>> userQueryProfitList(Object[] obj){
-		String sql = "select Tradetime,Amount from tab_user_profit where UserID=?  order by TradeTime desc  limit ? , ? ";
-		return queryForList(sql, obj);
-	}
-	
-	
-	public static Integer userQueryProfitCount(Object[] obj){
-		String sql = "select count(1) as count from tab_user_profit where UserID=? ";
-		Map<String,Object> map = queryForMap(sql, obj);
-		if(map!=null&&!map.isEmpty()){
-			return Integer.parseInt(map.get("count").toString());
-		}
-		return 0;
-	}
 	
 	/**
 	 *   查询结算信息

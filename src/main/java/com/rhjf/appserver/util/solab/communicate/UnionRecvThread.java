@@ -47,12 +47,10 @@ public class UnionRecvThread extends Thread {
 					// 解析szRecvMessage,获取到商户号、终端号、交易流水号
 					recvList.putMessage(transType, field3, merId, terId, batchNum, seq, message);
 				} catch (ParseException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-
-			} else// 没有值，重新建连
-			{
+			} else {
+				// 没有值，重新建连
 				TcpServer tcpServer1 = new TcpServer(config.getUnionPayServerIp(), config.getUnionPayServerPort());
 				umsSession.setTcpServer(tcpServer1);
 				tcpserver = tcpServer1;

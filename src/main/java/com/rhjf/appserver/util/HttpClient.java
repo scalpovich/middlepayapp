@@ -15,6 +15,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -40,15 +41,10 @@ public class HttpClient {
 	 */
 	public static  String post(String url, Map<String, Object> params, String paramtype) {
 		
-		RequestConfig config = RequestConfig.custom()
-				.setConnectionRequestTimeout(400000)
-				.setConnectTimeout(400000)
-				.setSocketTimeout(400000)
-				.setExpectContinueEnabled(false)
-				.build();
+		RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(400000).setConnectTimeout(400000)
+				.setSocketTimeout(400000).setExpectContinueEnabled(false).build();
 
 		HttpPost httppost = new HttpPost(url);
-//		httppost.getParams().getBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE, false);
 		
 		CloseableHttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(config).build();// 设置进去
 		if (params != null) {
@@ -112,5 +108,38 @@ public class HttpClient {
 			}
 		}
 		return "";
+	}
+
+
+	public static String xml(String callURL, String xmlData) throws ClientProtocolException, IOException {
+		
+		RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(400000).setConnectTimeout(400000)
+				.setSocketTimeout(400000).setExpectContinueEnabled(false)
+				.build();
+
+		HttpPost httppost = new HttpPost(callURL);
+		CloseableHttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(config).build();// 设置进去
+
+		StringEntity entity = new StringEntity(xmlData, "UTF-8");
+
+		httppost.setHeader("User-Agent", "Mozilla/5.0");
+
+		httppost.setEntity(entity);
+		CloseableHttpResponse response = null;
+		response = httpClient.execute(httppost);
+
+		HttpEntity rspentity = response.getEntity();
+		InputStream in = rspentity.getContent();
+
+		String temp;
+		BufferedReader data = new BufferedReader(new InputStreamReader(in, "utf-8"));
+		StringBuffer result = new StringBuffer();
+		while ((temp = data.readLine()) != null) {
+			result.append(temp);
+			temp = null;
+		}
+		response.close();
+		httpClient.close();
+		return result.toString();
 	}
 }

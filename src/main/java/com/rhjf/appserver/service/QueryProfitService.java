@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.TradeDB;
+import com.rhjf.appserver.db.UserProfitDB;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
 import com.rhjf.appserver.model.TabLoginuser;
@@ -37,10 +37,9 @@ public class QueryProfitService {
 			page = 0;
 		}
 		
+		List<Map<String,Object>> list = UserProfitDB.userQueryProfitList(new Object[]{user.getID(), page*pageSize , pageSize});
 		
-		List<Map<String,Object>> list = TradeDB.userQueryProfitList(new Object[]{user.getID(), page*pageSize , pageSize});
-		
-		Integer count  = TradeDB.userQueryProfitCount(new Object[]{user.getID()});
+		Integer count  = UserProfitDB.userQueryProfitCount(new Object[]{user.getID()});
 		
 		
 		JSONArray  jsonArray = new JSONArray();

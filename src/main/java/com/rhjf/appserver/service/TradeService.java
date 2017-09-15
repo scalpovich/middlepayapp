@@ -72,13 +72,13 @@ public class TradeService {
 				//  没有通过信用卡鉴权
 				if(totalAmount+Integer.parseInt(reqData.getAmount()) > 3000000 ){
 					repData.setRespCode("F003");
-					repData.setRespDesc(""); 
+					repData.setRespDesc("当前单日限额3万元，提供信用卡信息可提升至20万元，是否提供？"); 
 					return ;
 				}
 			}else{
 				if(totalAmount+Integer.parseInt(reqData.getAmount()) > 20000000 ){
 					repData.setRespCode("F003");
-					repData.setRespDesc(""); 
+					repData.setRespDesc("当前单日限额20万元"); 
 					return ;
 				}
 			}
@@ -134,8 +134,9 @@ public class TradeService {
 			}
 			ehcache.put(Constant.cacheName, loginUser.getID() + payChannel +"userConfig" , map);
 		}else{
-			log.info("用户：" + loginUser.getID() + " , 支付类型:" + payChannel + "缓存读取信息成功 继续操作");
 			map = (Map<String,Object>) obj;
+			
+			log.info("用户：" + loginUser.getID() + " , 支付类型:" + payChannel + "缓存读取信息成功 继续操作" + map.toString());
 			obj = null;
 		}
 		
@@ -240,6 +241,8 @@ public class TradeService {
 			encrypt = Constant.T1;
 		}
 		
+		String feeRate = map.get("T1SettlementRate").toString();
+		
 		/** 根据交易类型判断代理商费率的完整性，如果代理商只存在T0费率，商户发起T1交易将不通过 **/
 		if(Constant.T1.equals(loginUser.getTradeCode())){
 			// ChannelRate , AgentRate , MerchantRate , T0ChannelRate , T0AgentRate , T0MerchantRate
@@ -251,6 +254,9 @@ public class TradeService {
 				return ;
 			}
 		}else{
+			
+			feeRate = map.get("T0SettlementRate").toString();
+			
 			if("".equals(UtilsConstant.ObjToStr(agentconfigmap.get("T0ChannelRate")))||"".equals(UtilsConstant.ObjToStr(agentconfigmap.get("T0AgentRate")))
 					||"".equals(UtilsConstant.ObjToStr(agentconfigmap.get("T0MerchantRate")))){
 				log.info("用户：" + loginUser.getLoginID() + "对应代理商交易类型：" + payChannel + "配置 [ T0 ] 信息不完整 , 对应代理商ID：" +  loginUser.getAgentID());
@@ -304,7 +310,7 @@ public class TradeService {
 		
 		/** 向数据库插入初始化数据 **/
 		int ret = TradeDB.tradeInit(new Object[]{UtilsConstant.getUUID(),reqData.getAmount() ,DateUtil.getNowTime(DateUtil.yyyyMMdd),DateUtil.getNowTime(DateUtil.HHmmss),
-				tradeDate,tradeTime , reqData.getSendSeqId(), Constant.TradeType[0] , encrypt, loginUser.getID(),payChannel, merchantID,orderNumber});
+				tradeDate,tradeTime , reqData.getSendSeqId(), Constant.TradeType[0] , encrypt, loginUser.getID(),payChannel, feeRate , merchantID,orderNumber});
 		
 		if(ret < 1 ){
 			log.info("数据库保存信息失败");

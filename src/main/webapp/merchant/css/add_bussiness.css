@@ -1,0 +1,165 @@
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0; }
+
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block; }
+
+a {
+  text-decoration: none;
+  color: #666666; }
+
+ul, ol, li {
+  list-style: none; }
+
+body {
+  width: 100%;
+  /*font-family:"SimHei";*/
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box; }
+
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  border: none;
+  outline: none; }
+
+input::-webkit-search-cancel-button {
+  display: none; }
+
+input[type=search]::-ms-clear {
+  display: none; }
+
+body.add_member {
+  background-color: #f0effd; }
+
+h3 {
+  background: #fafafa;
+  width: 100%;
+  text-align: center;
+  font-weight: normal;
+  height: 2.75rem;
+  line-height: 2.75rem;
+  border-bottom: 2px solid #e0e0e0; }
+
+ul {
+  width: 100%; }
+
+li {
+  width: 100%;
+  background-color: #ffffff;
+  border-bottom: solid 1px #eeeeee;
+  margin-bottom: 0.875rem; }
+
+form {
+  margin-top: 0.56rem; }
+
+.four_size {
+  font-size: 0.4rem; }
+
+.four_size_input {
+  font-size: 0.3733333333rem; }
+
+li.merchantInfos > p, li.registerInfo > p.merchantImg {
+  height: 1.1733333333rem;
+  line-height: 1.1733333333rem;
+  font-size: 0.4rem;
+  border-bottom: 1px #c5c5c5 solid;
+  border-top: 1px #c5c5c5 solid;
+  padding: 0 5%;
+  padding-left: 5%;
+  font-family: "SimHei";
+  font-weight: bold; }
+  li.merchantInfos > p img, li.registerInfo > p.merchantImg img {
+    vertical-align: middle;
+    margin-right: 0.48rem;
+    width: 0.5866666667rem;
+    height: 0.64rem; }
+
+li .merchantInfo {
+  display: flex;
+  border-bottom: 1px #c5c5c5 solid;
+  height: 1.1733333333rem;
+  line-height: 1.1733333333rem;
+  margin-left: 0.2666666667rem; }
+  li .merchantInfo label, li .merchantInfo span {
+    font-family: "SimHei";
+    font-size: 0.4rem;
+    display: inline-block;
+    width: 35%;
+    height: 1.1733333333rem;
+    line-height: 1.1733333333rem;
+    padding-left: 0.2rem;
+    color: #000000; }
+    li .merchantInfo label i, li .merchantInfo span i {
+      font-size: 0.2933333333rem;
+      color: #b9b9b9; }
+  li .merchantInfo span {
+    display: inline-block;
+    width: 35%;
+    font-size: 0.4rem; }
+  li .merchantInfo input, li .merchantInfo #operateAddress {
+    padding-right: 0.4666666667rem;
+    width: 65%;
+    font-size: 0.4rem;
+    text-align: right; }
+  li .merchantInfo #operateAddress {
+    color: #757575; }
+
+li .merchantInfo:last-child {
+  margin-left: 0rem;
+  margin-right: 0rem; }
+  li .merchantInfo:last-child label {
+    padding-left: 0.4666666667rem;
+    width: 35%; }
+
+#merchantPersonName {
+  width: 30%;
+  text-align: center; }
+
+.receiveCode a.required {
+  color: #e9c259;
+  text-decoration: none;
+  padding-left: 1.27rem; }
+
+.codeInfo {
+  height: 1.0666666667rem;
+  line-height: 1.0666666667rem;
+  font-size: 0.2933333333rem;
+  padding: 0 5%;
+  color: #c5c5c5; }
+  .codeInfo img {
+    vertical-align: middle;
+    margin-right: 0.2rem; }
+
+#next {
+  background: #dcdcdc;
+  width: 76%;
+  height: 1.0666666667rem;
+  line-height: 1.0666666667rem;
+  font-size: 0.4266666667rem;
+  border-radius: 0.1333333333rem;
+  display: block;
+  margin: 0.5rem auto;
+  color: #ffffff; }
+
+#next.active {
+  background-color: #E9C256; }
+
+/*# sourceMappingURL=add_bussiness.css.map */

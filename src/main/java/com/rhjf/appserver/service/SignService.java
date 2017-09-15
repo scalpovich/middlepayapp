@@ -6,12 +6,15 @@ import java.util.Random;
 
 import org.springframework.stereotype.Service;
 
+import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
+import com.rhjf.appserver.db.AppVersionDB;
 import com.rhjf.appserver.db.TermkeyDB;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
 import com.rhjf.appserver.model.TabLoginuser;
 import com.rhjf.appserver.util.DESUtil;
+import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.LoadPro;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.UtilsConstant;
@@ -22,6 +25,7 @@ public class SignService {
 	
 	LoggerTool log = new LoggerTool(this.getClass());
 	
+	@SuppressWarnings("unchecked")
 	public void send(TabLoginuser user , RequestData reqData , ResponseData respData) throws Exception{
 		
 		
@@ -45,8 +49,30 @@ public class SignService {
 		
 		respData.setSecretKey(PINKEY.get("keyTerm")  + PINKEY.get("checkCode") + MACKEY.get("keyTerm")  + MACKEY.get("checkCode") + TDKEY.get("keyTerm") + TDKEY.get("checkCode"));
 		
-		
 		log.info("用户 : " + user.getLoginID() + "获取秘钥" + PINKEY.get("keyTerm")  + PINKEY.get("checkCode") + MACKEY.get("keyTerm")  + MACKEY.get("checkCode") + TDKEY.get("keyTerm") + TDKEY.get("checkCode"));
+		
+		
+		String deviceType = reqData.getDeviceType();
+		if(!UtilsConstant.strIsEmpty(deviceType)){
+			EhcacheUtil ehcache = EhcacheUtil.getInstance();
+			
+			Map<String,Object> map = null;
+			Object obj = ehcache.get(Constant.cacheName,  deviceType + "appversion");
+			if(obj==null){
+				map = AppVersionDB.getAppVersionInfo(new Object[]{deviceType});
+				ehcache.put(Constant.cacheName,  deviceType +  "appversion", map);
+			}else{
+				map = (Map<String,Object>) obj;
+			}
+			respData.setOpen(UtilsConstant.ObjToStr(map.get("Open")));
+		}
+		
+		if(user.getRegisterTime()!=null){
+			respData.setRegisterDate(user.getRegisterTime().substring(0, 8));
+		}else{
+			respData.setRegisterDate(user.getRegisterTime());
+		}
+		
 		
 		if(i > 0){
 			log.info("用户 : " + user.getLoginID() + "签到成功");

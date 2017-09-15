@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.sf.json.JSONObject;
 
@@ -179,7 +181,27 @@ public class UtilsConstant {
         return retVal;    
     } 
     
-    public static void main(String[] args) {
-		System.out.println(getOrderNumber());
- 	}
+	public static  boolean checkMerchantName(String merchantName){
+		
+		if(merchantName.length() < 5 || merchantName.length() > 12){
+			return true;
+		}
+		
+		Pattern pattern = Pattern.compile("[0-9]*");
+		Matcher isNum = pattern.matcher(merchantName);
+		if (isNum.matches()) {
+			return true;
+		}
+		
+		if(merchantName.matches("[a-zA-Z]*")){
+			return true;
+		}
+		
+		Pattern p = Pattern.compile("[\u4e00-\u9fa5]+");
+		Matcher m = p.matcher(merchantName);
+		if (!m.find()){
+			return true;
+		}
+		return false;
+	}
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.rhjf.appserver.constant.Constant;
+import com.rhjf.appserver.db.LoginUserDB;
 import com.rhjf.appserver.model.TabLoginuser;
 import com.rhjf.appserver.service.H5PerfectInfoService;
 import com.rhjf.appserver.util.EhcacheUtil;
@@ -365,4 +367,29 @@ public class MerchantAction {
 			return null;
 		}
 	}
+	
+	
+	@RequestMapping("/getmerchantinfo")
+	@ResponseBody
+	public Object getmerchantinfo(HttpServletRequest request , HttpServletResponse response){
+		
+		String loginID = request.getParameter("tjr");
+		TabLoginuser user = LoginUserDB.LoginuserInfo(loginID);
+		
+		JSONObject json = new JSONObject();
+		
+		try {
+			String name = user.getName().replace(String.valueOf(user.getName().charAt(1)), "*");
+			loginID = loginID.replace(loginID.substring(3, 7), "****");
+			
+			json.put("shoujihao", loginID);
+			json.put("xingming", name);
+		} catch (Exception e) {
+			
+			json.put("shoujihao", "");
+			json.put("xingming", "");
+		}
+		return json;
+	}
+	
 }

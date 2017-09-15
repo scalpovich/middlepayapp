@@ -110,13 +110,9 @@ public class DBBase {
 						for (int i = 0; i < params.length; i++) {
 							if (params[i] != null) {
 								if (params[i] instanceof java.util.Date) {
-									preparedStatement.setTimestamp(
-											i + 1,
-											new Timestamp(((Date) params[i])
-													.getTime()));
+									preparedStatement.setTimestamp(i + 1,new Timestamp(((Date) params[i]).getTime()));
 								} else {
-									preparedStatement.setObject(i + 1,
-											params[i]);
+									preparedStatement.setObject(i + 1,params[i]);
 								}
 							} else {
 								preparedStatement.setString(i + 1, "");
@@ -147,26 +143,35 @@ public class DBBase {
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 		ResultSet resultSet = null;
-		
+
 		connection = getConnection();
 		Statement state = null;
 		try {
-			if(sql!=null&&sql.length>0){
+			if (sql != null && sql.length > 0) {
 				boolean autoCommit = connection.getAutoCommit();
 				connection.setAutoCommit(false);
-			    state = connection.createStatement();
+				state = connection.createStatement();
 				for (int i = 0; i < sql.length; i++) {
 					state.addBatch(sql[i]);
 				}
 				int j[] = state.executeBatch();
+
+				int a = Arrays.binarySearch(j, 0);
+				if (a > 0) {
+					log.info("sql 数组中 返回值包含 0  执行回滚操作");
+					connection.rollback();
+					return j;
+				} else {
+					log.info(" 批量执行sql 正常 ");
+				}
+				
 				connection.commit();
 				connection.setAutoCommit(autoCommit);
 				state.close();
-				
 				return j;
 			}
 		} catch (SQLException e) {
-			log.error( "sql :" + sql + " errorInfo :" + e.getMessage());
+			log.error("sql :" + Arrays.toString(sql) + " errorInfo :" + e.getMessage());
 			try {
 				connection.rollback();
 			} catch (SQLException e1) {
@@ -343,6 +348,50 @@ public class DBBase {
 				rowData = new HashMap<String, Object>(columnCount);
 				for (int i = 1; i <= columnCount; i++) {
 					rowData.put(md.getColumnLabel(i), resultSet.getObject(i));
+				}
+				break;
+			}
+
+			return rowData;
+		} catch (SQLException e) {
+			log.error(e.getMessage() + "code = " + e.getErrorCode()+",sql:" + sql  + ", params:" + Arrays.toString(params));
+		} finally {
+			closeConnection(connection, preparedStatement, resultSet);
+		}
+		return null;
+	}
+	
+	
+	
+	/**
+	 *    查询单条记录
+	 * @param sql     查询sql语句
+	 * @param params  查询需要的参数
+	 * @return
+	 */
+	protected static Map<String, String> queryForMapStr(String sql, Object[] params) {
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			connection = getConnection();
+			preparedStatement = connection.prepareStatement(sql);
+			// 设置sql语句参数
+			if (params != null) {
+				for (int i = 0; i < params.length; i++) {
+					// log.debug("params[i] = " + params[i]);
+					preparedStatement.setObject(i + 1, params[i]);
+				}
+			}
+			resultSet = preparedStatement.executeQuery();
+			ResultSetMetaData md = resultSet.getMetaData(); // 得到结果集(rs)的结构信息，比如字段数、字段名等
+			int columnCount = md.getColumnCount();
+			Map<String, String> rowData = null;
+			while (resultSet.next()) {
+				rowData = new HashMap<String, String>(columnCount);
+				for (int i = 1; i <= columnCount; i++) {
+					rowData.put(md.getColumnLabel(i), resultSet.getString(i));
 				}
 				break;
 			}

@@ -22,7 +22,7 @@ public class UnionPayMessageUnit {
 		m.setIsoHeader(message.getIsoHeader());
 		for(int i=2;i<65;i++){
 			if(message.getObjectValue(i)!=null && !message.getObjectValue(i).toString().equals("")){
-				IsoValue val1 = message.getField(i);
+				IsoValue<?> val1 = message.getField(i);
 				m.setValue(i, val1.getValue(), val1.getType(), val1.getOriLen());
 			}
 		}
@@ -38,7 +38,7 @@ public class UnionPayMessageUnit {
 		
 		for(int i=2;i<65;i++){
 			if(srcMsg.getObjectValue(i)!=null && !srcMsg.getObjectValue(i).toString().equals("")){
-				IsoValue val1 = srcMsg.getField(i);
+				IsoValue<?> val1 = srcMsg.getField(i);
 				destMsg.setValue(i, val1.getValue(), val1.getType(), val1.getOriLen());
 			}
 		}

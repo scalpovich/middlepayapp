@@ -20,10 +20,15 @@ public class LoggerTool {
 	}
 	
 	
-	
 	public void error(String content){
 		Log log = LogFactory.getLog("error");
 		log.error(claName + "^" + content);
+	}
+	
+	
+	public void error(String content , Exception e){
+		Log log = LogFactory.getLog("error");
+		log.error(claName + "^" + content , e);
 	}
 	
 	

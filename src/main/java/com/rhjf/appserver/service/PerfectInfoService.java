@@ -1,17 +1,14 @@
 package com.rhjf.appserver.service;
 
-import java.util.ArrayList; 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 
-
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
 import com.rhjf.appserver.constant.StringEncoding;
-import com.rhjf.appserver.db.AuthenticationDB;
 import com.rhjf.appserver.db.BankCodeDB;
 import com.rhjf.appserver.db.LoginUserDB;
 import com.rhjf.appserver.db.TradeDB;
@@ -24,6 +21,7 @@ import com.rhjf.appserver.util.HttpClient;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.MD5;
 import com.rhjf.appserver.util.UtilsConstant;
+import com.rhjf.appserver.util.auth.AuthUtil;
 import com.rhjf.appserver.util.auth.Author;
 
 import net.sf.json.JSONObject;
@@ -50,9 +48,18 @@ public class PerfectInfoService {
 			return ;
 		}
 		
-		
 		// 商户名称
 		String merchantName = reqData.getMerchantName();
+		
+		flag = UtilsConstant.checkMerchantName(merchantName);
+		if(flag){
+			logger.info("用户："+ user.getLoginID() + "商户名不合法," + merchantName);
+			
+			respData.setRespDesc(RespCode.MerchantNameError[0]);
+			respData.setRespDesc(RespCode.MerchantNameError[1]);
+			return ;
+		}
+		
 		// 真实性名
 		String name = reqData.getName();
 		// 身份证号
@@ -162,7 +169,7 @@ public class PerfectInfoService {
 		}
 		
 		/**********  鉴权   *************************/
-		Map<String,String>  reqMap=  this.Auth(name,bankCardNo,IDcardNumber);
+		Map<String,String> reqMap = AuthUtil.authentication(name,bankCardNo,IDcardNumber);
 		logger.info("鉴权三要素:"+name+bankCardNo+IDcardNumber);
 		if(reqMap.get("respCode").equals(Author.SUCESS_CODE)){
 			//鉴权成功，向上游报商户
@@ -282,34 +289,34 @@ public class PerfectInfoService {
 		}
 	}
 	
-	public Map<String,String> Auth(String name,String bankCardNo,String IDcardNumber){
-		 Map<String, Object> bankAuthencationMan = AuthenticationDB.bankAuthenticationInfo(new Object[]{bankCardNo});
-		 Map<String,String> reqMap=new HashMap<String,String>();
-		 if (bankAuthencationMan == null || bankAuthencationMan.isEmpty()){
-			 Map<String,String> authMap=new HashMap<String,String>();
-				AuthService authService = new AuthService();
-				authMap.put("accName", name);
-				authMap.put("cardNo", bankCardNo);
-				authMap.put("certificateNo", IDcardNumber);
-				reqMap=authService.authKuai(authMap);
-				System.out.println(reqMap.toString());
-				if(reqMap.get("respCode").equals(Author.SUCESS_CODE)){
-				AuthenticationDB.addAuthencationInfo(new Object[]{UtilsConstant.getUUID() , IDcardNumber , name , bankCardNo , "00" , reqMap.get("respMsg") });
-				}
-				return reqMap;
-		 }else{
-			 if (name.equals(bankAuthencationMan.get("RealName")) &&IDcardNumber.equals(bankAuthencationMan.get("IdNumber"))) {
-				 reqMap.put("respCode", Author.SUCESS_CODE);
-				 reqMap.put("respMsg","鉴权成功");
-	             return reqMap;
-	            }else{
-	            reqMap.put("respCode", "001");
-	            reqMap.put("respMsg", "鉴权信息不一致");
-		        return reqMap;
-	            }
-		 }
-		
-	}
+//	public Map<String,String> Auth(String name,String bankCardNo,String IDcardNumber){
+//		 Map<String, Object> bankAuthencationMan = AuthenticationDB.bankAuthenticationInfo(new Object[]{bankCardNo});
+//		 Map<String,String> reqMap=new HashMap<String,String>();
+//		 if (bankAuthencationMan == null || bankAuthencationMan.isEmpty()){
+//			 Map<String,String> authMap=new HashMap<String,String>();
+//				AuthService authService = new AuthService();
+//				authMap.put("accName", name);
+//				authMap.put("cardNo", bankCardNo);
+//				authMap.put("certificateNo", IDcardNumber);
+//				reqMap=authService.authKuai(authMap);
+//				System.out.println(reqMap.toString());
+//				if(reqMap.get("respCode").equals(Author.SUCESS_CODE)){
+//				AuthenticationDB.addAuthencationInfo(new Object[]{UtilsConstant.getUUID() , IDcardNumber , name , bankCardNo , "00" , reqMap.get("respMsg") });
+//				}
+//				return reqMap;
+//		 }else{
+//			 if (name.equals(bankAuthencationMan.get("RealName")) &&IDcardNumber.equals(bankAuthencationMan.get("IdNumber"))) {
+//				 reqMap.put("respCode", Author.SUCESS_CODE);
+//				 reqMap.put("respMsg","鉴权成功");
+//	             return reqMap;
+//	            }else{
+//	            reqMap.put("respCode", "001");
+//	            reqMap.put("respMsg", "鉴权信息不一致");
+//		        return reqMap;
+//	            }
+//		 }
+//		
+//	}
 	
 	public String levelUp(String UserID) {
 		// 查询出审核用户的上一级用户商户类型和用户ID (topUser)
@@ -362,4 +369,6 @@ public class PerfectInfoService {
 
 		return "success";
 	}
+	
+	
 }

@@ -25,10 +25,6 @@ public class ExportTradeService {
 	
 	public void ExportTrade(TabLoginuser user , RequestData request, ResponseData response){
 		
-//		request.setTradeDate("201706"); 
-//		request.setEmail("zfy0098@163.com");
-		
-		
 		String tradeDate = request.getTradeDate();
 		StringBuffer stringBuffer = new StringBuffer(tradeDate);	
 		
@@ -40,7 +36,7 @@ public class ExportTradeService {
 		
 		List<Map<String,Object>> list = PayOrderDB.exportTrade(user.getID() , stringBuffer.toString());
 	
-		String[] title = {"商户名称" ,"手机号"  , "支付类型" , "订单号" , "交易时间" , "交易金额" , "交易手续费" , "结算周期" , "分润"};
+		String[] title = {"商户名称" ,"手机号"  , "支付类型" , "订单号" , "交易时间" , "交易金额" , "交易手续费" , "结算周期" , "返利"};
 		
 		if(!user.getEmail().equals(request.getEmail())){
 			//  用户上传的邮箱和系统中保存的邮箱不一致 ， 将用户上传的邮箱更新到系统中

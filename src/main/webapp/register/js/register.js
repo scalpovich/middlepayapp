@@ -84,13 +84,7 @@ $(function(){
 			return;
 			pwd.focus();
 		}
-		// 验证两次密码输入是否一致
-		var repwd=$("#repwd");
-		var pwd=$("#pwd");
-		if(repwd.val()!=pwd.val()){
-			alert("两次密码输入不一致！");
-			return;
-		}
+		
 		if($("#submit").hasClass('notclick')){
 			alert('请阅读并同意本公司的《融汇金服签订协议》！');
 			return;
@@ -127,7 +121,8 @@ $(function(){
 			success: function(data, textStatus){
 				var objResp = eval(data);
 				if(objResp.respCode=="00"){
-					window.location.href="registerSuccess.html";
+					alert("注册成功")
+					window.location.href="downLoad.html";
 				}else{
 					alert(objResp.respDesc);
 				}
