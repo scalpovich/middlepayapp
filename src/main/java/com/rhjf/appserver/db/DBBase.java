@@ -18,26 +18,28 @@ import java.util.Map;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.rhjf.appserver.util.LoggerTool;
 import com.sun.rowset.CachedRowSetImpl;
 
+@SuppressWarnings("restriction")
 public class DBBase {
 	
 	static LoggerTool log = new LoggerTool(DBBase.class);
 
 	private static BasicDataSource dataSource = null;   
 
-	public DBBase(){
-		
-	}
+	protected static JdbcTemplate jdbc;
+	
+	public DBBase(){}
 	
 	static{
 		@SuppressWarnings("resource")
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("spring-dataSource.xml");  
 		dataSource = (BasicDataSource) ctx.getBean("dataSource"); 
+		jdbc = new JdbcTemplate(dataSource);
 	}
-	
 	
 	
 	
@@ -140,6 +142,7 @@ public class DBBase {
 	 * @return
 	 */
 	protected static int[] executeBatchSql(String[] sql){
+		
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 		ResultSet resultSet = null;
@@ -155,16 +158,6 @@ public class DBBase {
 					state.addBatch(sql[i]);
 				}
 				int j[] = state.executeBatch();
-
-				int a = Arrays.binarySearch(j, 0);
-				if (a > 0) {
-					log.info("sql 数组中 返回值包含 0  执行回滚操作");
-					connection.rollback();
-					return j;
-				} else {
-					log.info(" 批量执行sql 正常 ");
-				}
-				
 				connection.commit();
 				connection.setAutoCommit(autoCommit);
 				state.close();
@@ -184,7 +177,7 @@ public class DBBase {
 		return null;
 	}
 	
-
+	
 	/**
 	 * 批量执行sql语句 paramsArr是个2维数组，第一维度表示各条记录，第二维度表示各条记录里的各个parameter值
 	 * @param sql
@@ -261,9 +254,9 @@ public class DBBase {
 			ResultSetMetaData md = resultSet.getMetaData(); // 得到结果集(rs)的结构信息，比如字段数、字段名等
 			int columnCount = md.getColumnCount();
 			List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-			Map<String, Object> rowData = new HashMap<String, Object>();
+			Map<String, Object> rowData = null;
 			while (resultSet.next()) {
-				rowData = new HashMap<String, Object>(columnCount);
+				rowData = new HashMap<String, Object>();
 				for (int i = 1; i <= columnCount; i++) {
 					rowData.put(md.getColumnLabel(i), resultSet.getObject(i));
 				}
@@ -405,7 +398,8 @@ public class DBBase {
 		return null;
 	}
 	
-	 public static ResultSet executeProcedure(String name,String param1, String param2,
+	
+	public static ResultSet executeProcedure(String name,String param1, String param2,
 				String param3,String param4){
 		 	CallableStatement cStmt = null;
 			Connection conn = null;

@@ -1,15 +1,18 @@
-		$('#gou img').attr("src","./images/gou.png");
+		$('#gou img').attr("src","images/gou.png");
 		$('#gou').click(function(){
 			if($("#gou img").attr("src")==""){
-				$('#btn').css('background', '#ebc35b');
-				$('#gou img').attr("src","./images/gou.png");
-				$("#btn").removeAttr("disabled");
-			}else if($('#gou img').attr("src","./images/gou.png")){
-				$('#btn').css('background', '#999999');
+				$('#submit').css('background', '#eb2835');
+				$('#gou img').attr("src","images/gou.png");
+				$("#submit").removeAttr("disabled");
+			}else if($('#gou img').attr("src","images/gou.png")){
+				$('#submit').css('background', '#999999');
 				$('#gou img').attr('src',"");
-				$("#btn").attr({"disabled":"disabled"});
+				$("#submit").attr({"disabled":"disabled"});
 			}
 		})
+
+
+
 		// 正则判断手机号
 		function checkPhone(){ 
 		    var phone = document.getElementById('phone').value;
@@ -28,10 +31,12 @@
 		$('#phone').blur(function(){
 		  checkPhone();
 		});
-//		$('#btn').click(function() {
-//			alert('注册成功');
-//			// ajax();
-//		});
+		$('#btn').click(function() {
+			// ajax();
+			alert('注册成功');
+		});
+		//判定密码框只能输入6-18位数
+		
 	// function ajax(){
 	// 	$.ajax({
  //            type: "get",//数据发送的方式（post 或者 get）

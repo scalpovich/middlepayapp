@@ -21,17 +21,30 @@ public class BankCodeDB extends DBBase {
 	
 	
 	public static Map<String,Object> bankInfo(Object[] obj){
-		String sql = "select * from  tab_pay_bankcode  where BankName like  CONCAT('%', ? ,'%')  and BankBranch like CONCAT('%', ? ,'%') "
+//		String sql = "select * from  tab_pay_bankcode  where BankName like  CONCAT('%', ? ,'%')  and BankBranch like CONCAT('%', ? ,'%') "
+//				+ " and ? like CONCAT(BankProv ,'%')  and  ? like  CONCAT(BankCity ,'%')";
+		String sql = "select * from  tab_pay_bankcode  where BankName like  CONCAT('%', ? ,'%')  and BankBranch=? "
 				+ " and ? like CONCAT(BankProv ,'%')  and  ? like  CONCAT(BankCity ,'%')";
 		List<Map<String,Object>> list =  queryForList(sql, obj);
-		System.out.println(list); 
-		if(list!=null&&list.size()==1){
+		if(list!=null&&list.size() > 0){
 			return list.get(0);
 		}
 		return null;
 	}
 	
 	 
+	
+	/**
+	 *  更具信用卡卡号获取银行信息
+	 * @param obj
+	 * @return
+	 */
+	public static Map<String,Object> creditCardBin(Object[] obj){
+		String sql = "select tpb.BankName , tpb.BankBranch , tpb.BankSymbol ,unite_bank_no , BankProv , BankCity"
+				+ " from tab_cardinfo c ,unite_bank u , tab_pay_bankcode as tpb "
+				+ " where substring(c.bankid,2,3)=substring(u.unite_bank_no,1,3) and  Substring(?,1,length(CardBin))=CardBin and tpb.BankCode=unite_bank_no";
+		return queryForMap(sql, obj);
+	}	
 	
 	
 	/**

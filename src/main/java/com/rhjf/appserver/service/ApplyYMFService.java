@@ -48,7 +48,7 @@ public class ApplyYMFService {
 		String date = sdf.format(new Date());
 		
 		
-		List<Map<String,Object>> ymflist = YMFTradeDB.getUserYMFlist(new Object[]{user.getID() ,reqdata.getTradeCode()});
+		List<Map<String,String>> ymflist = YMFTradeDB.getUserYMFlist(new Object[]{user.getID() ,reqdata.getTradeCode()});
 		
 		if(ymflist!=null&&ymflist.size()>0){
 			respData.setRespCode(RespCode.BindedErrir[0]);

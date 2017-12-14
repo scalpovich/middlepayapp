@@ -1,11 +1,12 @@
 package com.rhjf.appserver.service;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
+import com.rhjf.appserver.db.UserBankCardDB;
+import com.rhjf.appserver.db.UserProfitDB;
 import com.rhjf.appserver.db.UserWalletDB;
 import com.rhjf.appserver.db.WithdrawDB;
 import com.rhjf.appserver.model.RequestData;
@@ -16,6 +17,7 @@ import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.UtilsConstant;
 
 import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 /**
  *    钱包提现
@@ -54,20 +56,34 @@ public class DrawMoneyService {
 	    	return ;
 		}
 		
-		int[] ret = UserWalletDB.drawMoney(Integer.parseInt(request.getAmount()), user.getID(), request.getSendSeqId());
+		/**  获取用户结算卡信息 **/
+		Map<String,Object> map = UserBankCardDB.getBankInfo(user.getID());
 		
-		int a =  Arrays.binarySearch(ret, 0);
-	    if(a > 0){
-	    	log.info("执行的sql中返回的数据包含0");
+		String orderNumber = UtilsConstant.getOrderNumber();
+		
+		int[] ret = UserWalletDB.drawMoney(Integer.parseInt(request.getAmount()), user.getID(), request.getSendSeqId() ,
+					UtilsConstant.ObjToStr(map.get("AccountNo")) , orderNumber );
+		
+		if(ret == null){
+			log.info("执行的sql中返回的数据包含0");
 	    	response.setRespCode(RespCode.SYSTEMError[0]);
 			response.setRespDesc(RespCode.SYSTEMError[1]);
-	    }else{
-	    	response.setFeeBalance(String.valueOf(Integer.parseInt(WalletBalance) - Integer.parseInt(request.getAmount())));
-	    	
-	    	response.setRespCode(RespCode.SUCCESS[0]);
-			response.setRespDesc(RespCode.SUCCESS[1]);
-	    }
+			return ;
+		}
+	    
+		try {
+			JSONObject json = new JSONObject();
+			json.put("orderNumber", orderNumber);
+			json.put("dfType", "TX");
+//			RabbitmqSend.sendMessage(json.toString());
+//			Runtime.getRuntime().exec("java -jar /daifu.jar > /log.log");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
+		response.setFeeBalance(String.valueOf(Integer.parseInt(WalletBalance) - Integer.parseInt(request.getAmount())));
+    	response.setRespCode(RespCode.SUCCESS[0]);
+		response.setRespDesc(RespCode.SUCCESS[1]);
 		EhcacheUtil ehcache = EhcacheUtil.getInstance();
 		ehcache.clear(Constant.cacheName);
 	}
@@ -100,7 +116,11 @@ public class DrawMoneyService {
 		}
 				
 		List<Map<String,String>> list = WithdrawDB.getTxRecordList(user.getID(), sbf.toString() , page, pageSize);
+		
+		String totalAmount = UserProfitDB.monthProfitTotalAmount(new Object[]{ user.getID() ,tradeDate});
+		
 		response.setList(JSONArray.fromObject(list).toString());
+		response.setTotal(totalAmount);
 		response.setRespCode(RespCode.SUCCESS[0]);
 		response.setRespDesc(RespCode.SUCCESS[1]);
 	}

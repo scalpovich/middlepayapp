@@ -1,6 +1,6 @@
 package com.rhjf.appserver.controller;
 
-import java.util.ArrayList;
+import java.util.ArrayList; 
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -27,10 +27,11 @@ import com.rhjf.appserver.model.Fee;
 import com.rhjf.appserver.model.PayOrder;
 import com.rhjf.appserver.model.TabLoginuser;
 import com.rhjf.appserver.service.NotifyService;
+import com.rhjf.appserver.util.AmountUtil;
 import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.MD5;
-import com.rhjf.appserver.util.PushUtils;
+import com.rhjf.appserver.util.PushUtil;
 import com.rhjf.appserver.util.UtilsConstant;
 
 /**
@@ -149,11 +150,11 @@ public class YMFPayNotifyController {
 				String tonken = DevicetokenDB.getDeviceToken(loginUser.getID());
 				logger.info("============================订单编号:" + order.getOrderNumber() + "支付成功，用户tonken:" + tonken + "开始发送push");
 				if(!UtilsConstant.strIsEmpty(tonken)){
-					String content = "您的有一笔固定码交易支付成功，请查看";
-					PushUtils.IOSPush(content, tonken);
-					PushUtils.AndroidPush("支付通知", content, tonken);
-//					PushUtil.iosSend("分润通知" , content , tonken , "2");
-//					PushUtil.androidSend("分润通知", content , tonken, "2");
+					String content = "爱码付收款金额" + AmountUtil.div(order.getAmount(), "100")  + "元";
+//					PushUtils.IOSPush(content, tonken);
+//					PushUtils.AndroidPush("支付通知", content, tonken);
+					PushUtil.iosSend("收款通知" , content , tonken , "1");
+					PushUtil.androidSend("收款通知", content , tonken, "1");
 				}
 				
 				TradeDB.saveProfit(new Object[]{

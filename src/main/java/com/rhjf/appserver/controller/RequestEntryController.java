@@ -155,7 +155,15 @@ public class RequestEntryController {
 					loginuser = (TabLoginuser) obj;
 				}
 				
-				if(!Txndir.equals("A006")&&!"A005".equals(Txndir)){
+				if("SALESMAN".equals(loginuser.getUserType())){
+					logger.info("账号：" + loginuser.getLoginID() + " , 身份为业务员"); 
+					respData.setRespCode(RespCode.LOGINError[0]);
+					respData.setRespDesc("该账号没有权限进行此操作");
+					return  paraFilterReturn(respData);
+				}
+				
+				
+				if(!Txndir.startsWith("A")&&!Txndir.startsWith("G")){
 					if(!requestData.getTerminalInfo().equals(loginuser.getLoginPSN())){
 						logger.info(loginID + "被其他设备登录 , 终端上传: " + requestData.getTerminalInfo() + ",数据库保存" +loginuser.getLoginPSN() );
 						respData.setRespCode(RespCode.LOGINError[0]);
@@ -178,13 +186,13 @@ public class RequestEntryController {
 				}
 				
 				//获取 函数入口
-				Class<?> cls= Class.forName("com.rhjf.appserver.service." + className);
+				Class<?> cls = Class.forName("com.rhjf.appserver.service." + className);
 				Method m = cls.getDeclaredMethod(funName,new Class[]{ TabLoginuser.class , RequestData.class , ResponseData.class});
 	
 				m.invoke(cls.newInstance(), loginuser , requestData , respData);
 			}else{
 				//获取 函数入口
-				Class<?> cls= Class.forName("com.rhjf.appserver.service." + className);
+				Class<?> cls = Class.forName("com.rhjf.appserver.service." + className);
 				Method m = cls.getDeclaredMethod(funName,new Class[]{RequestData.class,ResponseData.class});
 	
 				m.invoke(cls.newInstance(), requestData,respData);
@@ -196,8 +204,7 @@ public class RequestEntryController {
 				respData.setMac(mac);
 			}
 		}catch(Exception e){
-			e.printStackTrace();
-			logger.info(e.getMessage()); 
+			logger.error(e.getMessage(), e); 
 		}
 		Object obj =  paraFilterReturn(respData);
 		logger.info("响应报文：" + loginID  + " ======== "  + respData.getTxndir()  + "---" + obj.toString());

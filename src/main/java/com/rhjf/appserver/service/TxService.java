@@ -18,18 +18,18 @@ public class TxService {
 	
 	LoggerTool logger = new LoggerTool(this.getClass());
 
-	public ResponseData send(TabLoginuser loginuser,RequestData reqData , ResponseData repData){
+	public void send(TabLoginuser loginuser,RequestData reqData , ResponseData repData){
 		if(reqData.getAmount()==null ){
 			logger.info("提现金额为空");
 			repData.setRespCode(RespCode.TXAMOUNTError[0]);
 			repData.setRespDesc(RespCode.TXAMOUNTError[1]);
-	    	return repData;
+	    	return  ;
 		}
 		if(Long.parseLong(reqData.getAmount())==0 ){
 			logger.info("提现金额无效");
 			repData.setRespCode(RespCode.TXAMOUNTError[0]);
 			repData.setRespDesc(RespCode.TXAMOUNTError[1]);
-	    	return repData;
+	    	return  ;
 		}
 		
 		
@@ -39,13 +39,13 @@ public class TxService {
 			logger.info("余额不足");
 			repData.setRespCode(RespCode.TXAMOUNTNOTENOUGH[0]);
 			repData.setRespDesc(RespCode.TXAMOUNTNOTENOUGH[1]);
-	    	return repData;
+	    	return  ;
 		}
 		else if(nRet==3 || nRet==4){
 			logger.info("系统故障,nRet="+nRet);
 			repData.setRespCode(RespCode.ServerDBError[0]);
 			repData.setRespDesc(RespCode.ServerDBError[1]);
-	    	return repData;
+	    	return  ;
 		}
 		else if(nRet==1){
 			repData.setRespCode(RespCode.SUCCESS[0]);
@@ -57,10 +57,9 @@ public class TxService {
 		}
 		EhcacheUtil ehcache = EhcacheUtil.getInstance();
 		ehcache.remove(Constant.cacheName, loginuser.getLoginID() + "UserInfo");
-		return repData;
 	}
 	
-	public ResponseData getTxRecord(TabLoginuser loginuser,RequestData reqData , ResponseData repData){
+	public void getTxRecord(TabLoginuser loginuser,RequestData reqData , ResponseData repData){
 		
 		// 当前页数
 		Integer page = reqData.getPage();
@@ -80,7 +79,6 @@ public class TxService {
 		repData.setTotalCount(count);
 		repData.setRespCode(RespCode.SUCCESS[0]);
 		repData.setRespDesc(RespCode.SUCCESS[1]);
-		return repData;
 	}
 
 }

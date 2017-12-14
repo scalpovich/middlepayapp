@@ -2,7 +2,6 @@ package com.rhjf.appserver.service;
 
 import java.util.List; 
 import java.util.Map;
-import java.util.Set;
 
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
@@ -14,7 +13,6 @@ import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.LoggerTool;
 
 import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 /**
  *    用户查询费率
@@ -44,23 +42,9 @@ public class QueryUserFeeRateService {
 			list = (List<Map<String,Object>>) obj;
 		}
 		
+		logger.info("用户" + user.getLoginID() + "费率信息：" + JSONArray.fromObject(list));
 		
-		JSONArray  jsonArray = new JSONArray();
-		for (int i = 0; i < list.size(); i++){
-			JSONObject json = new JSONObject();
-			Map<String,Object> map = list.get(i);
-			
-			Set<String> keys = map.keySet();
-			for (String key : keys) {
-				
-				json.put(key, map.get(key));
-			}
-			jsonArray.add(json);
-		}
-		
-		logger.info("用户" + user.getLoginID() + "费率信息：" + jsonArray.toString());
-		
-		respdata.setTranslist(jsonArray.toString()); 
+		respdata.setTranslist(JSONArray.fromObject(list).toString()); 
 		respdata.setRespCode(RespCode.SUCCESS[0]);
 		respdata.setRespDesc(RespCode.SUCCESS[1]);
 		

@@ -5,16 +5,23 @@
 
 #warp {
   height: 16.07407rem;
-  background: url(../images/bg1.png) no-repeat center center;
+  background: url(../images/111.png);
   background-size: 100%;
 }
 #warp .logo {
-  width: 3.24074rem;
   margin: 0 auto;
 }
 #warp .logo img {
-  width: 100%;
-  margin-top: 1.34259rem;
+  display: block;
+  margin: 0 auto;
+}
+#warp .logo img:nth-child(1) {
+  width: 20%;
+  padding-top: 2.5rem;
+}
+#warp .logo img:nth-child(2) {
+  margin-top: 0.46296rem;
+  width: 20%;
 }
 #warp .input {
   width: 90%;
@@ -23,22 +30,21 @@
 #warp .input label {
   display: flex;
   width: 100%;
-  height: 1.11111rem;
   margin: 0 auto;
   border: none;
-  border-radius: 0.22222rem;
-  background: url(../images/l1.png) no-repeat center center;
-  background-size: 100%;
 }
 #warp .input label input {
-  width: 50%;
-  margin-top: 0.23148rem;
+  width: 80%;
+  margin-top: 0.41667rem;
   border: none;
+  border-radius: 0;
   height: 0.64815rem;
   background: transparent;
   outline: none;
-  font-size: 0.34259rem;
+  font-size: 0.41667rem;
   color: #666;
+  border-bottom: 1px solid #e5e5e5;
+  padding-bottom: 0.27778rem;
 }
 #warp .input label div {
   width: 15%;
@@ -47,51 +53,53 @@
   width: 30%;
   display: block;
   margin: 0 auto;
-  margin-top: 0.27778rem;
+  margin-top: 0.50926rem;
 }
 #warp .input label:nth-child(1) {
-  margin-top: 0.69444rem;
+  margin-top: 0.50926rem;
 }
 #warp .input label:nth-child(2) {
-  background: url(../images/l2.png) no-repeat center center;
   background-size: 100%;
+  position: relative;
 }
 #warp .input label:nth-child(2) input {
-  width: 55%;
+  width: 80%;
 }
 #warp .input label:nth-child(2) img {
-  width: 45%;
-  margin-top: 0.32407rem;
+  width: 34%;
+  margin-top: 0.60185rem;
 }
 #warp .input label:nth-child(2) span {
   display: block;
-  height: 0.46296rem;
-  font-size: 0.37037rem;
-  padding-left: 0.27778rem;
-  padding-top: 0.00926rem;
-  padding-bottom: 0.00926rem;
-  border-left: 1px solid #999;
-  margin-top: 0.32407rem;
-  color: #fbae15;
-  line-height: 0.50926rem;
-}
-#warp .input label:nth-child(3) {
-  background: url(../images/l3.png) no-repeat center center;
-  background-size: 100%;
+  text-align: center;
+  width: 2.31481rem;
+  height: 0.83333rem;
+  font-size: 0.32407rem;
+  border-radius: 0.55556rem;
+  color: #fff;
+  line-height: 0.83333rem;
+  position: absolute;
+  background: #eb2835;
+  right: 0.41667rem;
+  top: 0.27778rem;
 }
 #warp .tuiJian {
   display: block;
-  width: 82%;
-  margin: 0.27778rem auto;
+  width: 62%;
+  margin: 0 auto;
   font-size: 0.35185rem;
-  color: #fbae15;
+  color: #666;
   margin-bottom: 0.60185rem;
+  margin-top: 0.55556rem;
+  white-space : nowrap ;
+ 
 }
 #warp .footer {
   display: flex;
   width: 82%;
   margin: 0 auto;
   color: #a9acaf;
+  margin-top: 0.37037rem;
 }
 #warp .footer span {
   width: 0.37037rem;
@@ -102,32 +110,30 @@
 #warp .footer p {
   margin-left: 0.13889rem;
   margin-top: 0.0463rem;
+
 }
 #warp .footer p a {
-  color: #fbae15;
+  color: #eb2835;
 }
 #warp .btn {
   width: 82%;
   margin: 0 auto;
-  margin-top: 1.2037rem;
+  margin-top: 0.55556rem;
 }
 #warp .btn button {
   display: block;
   width: 100%;
   height: 1.11111rem;
-  background: #ebc35b;
+  background: #eb2835;
   border: none;
-  border-radius: 0.12963rem;
+  border-radius: 0.83333rem;
   margin-top: 0.27778rem;
   color: #fff;
-  font-size: 0.46296rem;
+  font-size: 0.50926rem;
   outline: none;
 }
 #warp .btn button a {
   color: #fff;
-}
-#warp .btn button:nth-child(1) {
-  margin-bottom: 0.46296rem;
 }
 
 #gou {

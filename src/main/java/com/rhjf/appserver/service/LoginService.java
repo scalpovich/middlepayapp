@@ -72,6 +72,12 @@ public class LoginService {
 		//获取终端主密钥
 	    Map<String,Object> map = TermkeyDB.selectTermKey(user.getID());
 	    
+	    if(map == null || map.isEmpty()){
+	    	TermkeyDB.allocationTermk(user.getID());
+	    	map = TermkeyDB.selectTermKey(user.getID());
+	    }
+	    
+	    
 	    String initKey = LoadPro.loadProperties("jmj", "3");
 	    
 	    String tmk = "";

@@ -23,14 +23,14 @@
         <defaultCache  
                 maxElementsInMemory="10000"  
                 eternal="false"  
-                timeToIdleSeconds="120"  
-                timeToLiveSeconds="120"  
+                timeToIdleSeconds="36000"  
+                timeToLiveSeconds="72000"  
                 overflowToDisk="false"  
                 maxElementsOnDisk="10000000"  
                 diskPersistent="false"  
                 diskExpiryThreadIntervalSeconds="120"  
                 memoryStoreEvictionPolicy="LRU"  
             />  
-     	<cache name="sampleCache2" maxElementsInMemory="10000" eternal="false" timeToLiveSeconds="36000" timeToIdleSeconds="72000"   overflowToDisk="false"/>   
+     	<cache name="sampleCache2" maxElementsInMemory="10000" eternal="false" timeToLiveSeconds="72000" timeToIdleSeconds="36000"   overflowToDisk="false"/>   
                 
     </ehcache>  

@@ -49,7 +49,7 @@ public class AuthUtil {
 //	}
 	
 	
-	public static Map<String, String> authentication(String name, String bankCardNo, String IDcardNumber) {
+	public static Map<String, String> authentication(String name, String bankCardNo, String IDcardNumber ,  String payerPhone) {
 		Map<String, Object> bankAuthencationMan = AuthenticationDB.bankAuthenticationInfo(new Object[] { bankCardNo });
 		Map<String, String> reqMap = new HashMap<String, String>();
 		if (bankAuthencationMan == null || bankAuthencationMan.isEmpty()) {
@@ -59,6 +59,10 @@ public class AuthUtil {
 				map.put("channelName", Constant.REPORT_CHANNELNAME);
 				map.put("orderNo", UtilsConstant.getOrderNumber());
 				map.put("cardNo", DESUtil.encode(Constant.REPORT_DES3_KEY,bankCardNo));
+				if(!UtilsConstant.strIsEmpty(payerPhone)){
+					map.put("mobile", payerPhone);
+				}
+				
 				map.put("name", DESUtil.encode(Constant.REPORT_DES3_KEY,name));
 				map.put("idNo", DESUtil.encode(Constant.REPORT_DES3_KEY,IDcardNumber));
 				
@@ -67,6 +71,7 @@ public class AuthUtil {
 				
 				String url = LoadPro.loadProperties("http", "AUTH_URL");
 				
+				System.out.println(map.toString());	
 				log.info("鉴权请求地址:" + url);
 				log.info("鉴权请求报文：" + map.toString());
 				
@@ -77,7 +82,7 @@ public class AuthUtil {
 				JSONObject json = JSONObject.fromObject(content);
 				
 				if (json.getString("resCode").equals(Constant.payRetCode)) {
-					AuthenticationDB.addAuthencationInfo(new Object[] { UtilsConstant.getUUID(), IDcardNumber, name,bankCardNo, "00", reqMap.get("respMsg") });
+					AuthenticationDB.addAuthencationInfo(new Object[] { UtilsConstant.getUUID(), IDcardNumber, payerPhone ,name,bankCardNo, "00", reqMap.get("respMsg") });
 					reqMap.put("respCode", Author.SUCESS_CODE);
 					reqMap.put("respMsg", "鉴权成功");
 					return reqMap;

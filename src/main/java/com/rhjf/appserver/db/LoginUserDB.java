@@ -124,7 +124,7 @@ public class LoginUserDB extends DBBase{
 	 */
 	public static int h5updateUserInfo(Object[] obj){
 		String sql = "update tab_loginuser set MerchantTypeValue=?, Name=?, IDCardNo=? ,MerchantName=? ,State=? , City=?,Region=? ,BusinessLicense=? ,Address=? ,Email=? , "
-				+ " MerchantBillName = ? , merchantPersonName= ? , BankInfoStatus=2  where LoginID=?";
+				+ " MerchantBillName = ? , merchantPersonName= ? , BankInfoStatus=0  where LoginID=?";
 		return executeSql(sql, obj);
 	}
 	
@@ -134,9 +134,9 @@ public class LoginUserDB extends DBBase{
 	 * @return
 	 */
 	public static int saveOrUpBankInfo(Object[] obj){
-		String sql = "insert into tab_pay_userbankcard (ID,UserID,AccountName,AccountNo,BankBranch,BankProv,BankCity,BankCode,BankName,SettleCreditCard,SettleBankType)"
-				+ " value(?,?,?,?,?,?,?,?,?,?,?)"
-				+ "on duplicate key update AccountName=?,AccountNo=?,BankBranch=?,BankProv=?,BankCity=?,BankCode=?,BankName=?,SettleCreditCard=?,SettleBankType=?";
+		String sql = "insert into tab_pay_userbankcard (ID,UserID,AccountName,AccountNo,BankBranch,BankProv,BankCity,BankCode,BankName,BankSymbol,SettleCreditCard,SettleBankType , PayerPhone)"
+				+ " value(?,?,?,?,?,?,?,?,?,?,?,?,?)"
+				+ "on duplicate key update AccountName=?,AccountNo=?,BankBranch=?,BankProv=?,BankCity=?,BankCode=?,BankName=?,BankSymbol=?,SettleCreditCard=?,SettleBankType=? , PayerPhone=?";
 		return executeSql(sql, obj);
 	}
 	
@@ -203,28 +203,30 @@ public class LoginUserDB extends DBBase{
 	 * @param userID
 	 * @return
 	 */
-	public static String getMyMerchant(String userID) {
-		String sql="SELECT LoginID,ifnull(Name , '') as Name ,MerchantLeve,RegisterTime,BankInfoStatus,PhotoStatus,ThreeLevel,TwoLevel,OneLevel "
-				+ " from tab_loginuser where (ThreeLevel =? or TwoLevel=? or OneLevel=?)";
+	public static String getMyMerchant(Object[] obj ){
+		String sql="SELECT  ID,LoginID,ifnull(Name , '') as Name,ifnull(MerchantName , '') as MerchantName ,MerchantLeve,DATE_FORMAT(RegisterTime,'%Y-%m-%d') as RegisterTime,BankInfoStatus,PhotoStatus,ThreeLevel,TwoLevel,OneLevel "
+				+ " from tab_loginuser where ThreeLevel =? and ifnull(MerchantName,'') like  ? ";
 
-		List<Map<String,Object>> list = queryForList(sql, new Object[]{userID,userID,userID});
+		List<Map<String,Object>> list = queryForList(sql, obj);
 		JSONArray jsonArray=new JSONArray();
 		
 		for (Map<String,Object> map : list) {
 			JSONObject json = new JSONObject();
+			json.put("ID", map.get("ID"));
 			json.put("userId", map.get("LoginID"));
 			json.put("name", map.get("Name"));
+			json.put("merchantName", map.get("MerchantName"));
 			json.put("registerTime", map.get("RegisterTime"));
 			json.put("accountStatus", map.get("BankInfoStatus"));
 			json.put("photoStatus", map.get("PhotoStatus"));
 			json.put("level", map.get("MerchantLeve"));
-			if(map.get("ThreeLevel")!=null && map.get("ThreeLevel").equals(userID)){
+			if(map.get("ThreeLevel")!=null && map.get("ThreeLevel").equals(obj[0])){
 				json.put("topLevel", "1");
 			}
-			if(map.get("TwoLevel")!=null && map.get("TwoLevel").equals(userID)){
+			if(map.get("TwoLevel")!=null && map.get("TwoLevel").equals(obj[0])){
 				json.put("topLevel", "2");
 			}
-			if(map.get("OneLevel")!=null && map.get("OneLevel").equals(userID)){
+			if(map.get("OneLevel")!=null && map.get("OneLevel").equals(obj[0])){
 				json.put("topLevel", "3");
 			}
 			jsonArray.add(json);
@@ -249,11 +251,16 @@ public class LoginUserDB extends DBBase{
 
 	/*保存商户信息*/
 	public static int[] saveMerchantInfo(List<Object[]> list){
-		
 		String sql = "insert into tab_pay_merchant(MerchantID,MerchantName,UserTime,SignKey,DESKey,QueryKey,UserID,PayType)values(?,?,now(),?,?,?,?,?)";
 		return executeBatchSql(sql, list);
 		
 	}
+	
+	public static int delUserMerchant(String userID){
+		String sql = "delete from tab_pay_merchant where UserID=?";
+		return executeSql(sql, new Object[]{userID});
+	}
+	
 	
 	/**
 	 *   更新商户到账类型
@@ -279,33 +286,54 @@ public class LoginUserDB extends DBBase{
 	
 	
 	public static Map<String, Object> userLevelUpCount(int merchantlevel){
-		
 		String sql = "select * from tab_upgrades where MerchantLevel =?";
 		return  queryForMap(sql, new Object[]{merchantlevel});
 		
 	}
 	
 	public static int getUserCount(String userID){
-		String sql = "select count(*) from tab_loginuser where ThreeLevel=? and BankInfoStatus=? and PhotoStatus=?";
-		
-		return executeSql(sql, new Object[]{userID,"1","1"});
+		String sql = "select count(*) as count from tab_loginuser where ThreeLevel=? and BankInfoStatus=?";
+		Map<String,String> map = queryForMapStr(sql,  new Object[]{userID,"1"});
+		try {
+			Integer count = Integer.parseInt(map.get("count"));
+			return count;
+		} catch (NumberFormatException e) {
+		}
+		return -1;
 	}
 	
 	public static int updateUserLev(int mechantLev,String userId){
-		
 		String sql  = "update tab_loginuser set MerchantLeve=? where ID=?";
-		
 		return executeSql(sql, new Object[]{mechantLev,userId});
 	}
 	
 	public static int updateUserRate(int mechantLev,String userId){
 		
 		String sql = "update tab_user_config c,tab_pay_channel_usertype_cfg u,tab_loginuser us set c.SaleAmountMax=u.SaleAmountMax,"
-				+ "c.T0SettlementRate=u.T0SaleRate,c.T1SettlementRate=u.T1SettlementRate,us.MerchantLeve=? where  us.ID=c.UserID "
+				+ "c.T0SettlementRate=u.T0SaleRate,c.T1SettlementRate=u.T1SettlementRate where  us.ID=c.UserID "
 				+ "and us.ID=? and u.MerchantLevel=?";
-		return executeSql(sql, new Object[]{mechantLev,userId});
+		return executeSql(sql, new Object[]{userId , mechantLev});
 	}
 	
+	
+	/**
+	 * 
+	 * @param userID
+	 * @param merchantID
+	 * @return
+	 */
+	public static Integer merchantTokerCount(String userID , String merchantID){
+		
+		String sql = "select ifnull(count(1) , '0') as count from tab_loginuser "
+				+ " where (ThreeLevel=? and TwoLevel=? ) or (TwoLevel=? and OneLevel=?)";
+		Map<String,String> map = queryForMapStr(sql, new Object[]{merchantID ,userID , merchantID ,userID });
+		try{
+			return Integer.parseInt(map.get("count"));
+		}catch(Exception e){}
+		return 0;
+		
+		
+	}
 	
 	
 }

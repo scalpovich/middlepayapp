@@ -57,6 +57,8 @@ public class RespCode {
 	public static final String[] MerchantNameError = {"E021" , "商户名不和法，长度大于5位，并且小于12位；名称不能使用数字和英文"};
 	
 	public static final String[] TurnWalletError = {"E022" , "今天已经转入过"};
+	
+	public static final String[] TradeTimeError = {"E023" , "当前时间段无法交易"};
 
 	public static final String[] TXAMOUNTError = {"T001" , "提现金额无效"};
 	

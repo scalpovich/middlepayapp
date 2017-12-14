@@ -413,7 +413,10 @@ public class DESUtil {
 	
 	
 	public static void main(String[] args) throws Exception {
-		String keyde = DESUtil.encode("740D4D0A0C6C5FE72DB9AB4E8A882E86" , "6226890118244838");
+//		String keyde = DESUtil.encode("740D4D0A0C6C5FE72DB9AB4E8A882E86" , "6226890118244838");
+//		System.out.println(keyde); 
+		
+		String keyde = new String(DESUtil.decrypt3("6061A1401D30BF450D1A5DA418A4A030", "3F27D9CB903EA24EF74E2F7E6D97D63E"));
 		System.out.println(keyde); 
 	}
 }

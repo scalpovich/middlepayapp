@@ -1,5 +1,6 @@
 package com.rhjf.appserver.util;
-import java.net.URL;   
+import java.net.URL;
+import java.util.List;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -71,6 +72,10 @@ public class EhcacheUtil {
     public void clear(String cacheName){
     	Cache cache = manager.getCache(cacheName);
     	cache.removeAll();
+    }
+    
+    public List getAllCacheObjects(String cacheName) {
+    	return manager.getCache(cacheName).getKeys();
     }
     
 }

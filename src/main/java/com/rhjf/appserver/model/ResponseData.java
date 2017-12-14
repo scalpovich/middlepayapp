@@ -216,6 +216,18 @@ public class ResponseData implements Serializable {
 	/** 返利金额 **/
 	private String antiAmount;
 	
+	
+	//  费率
+	private String rate;
+	
+	
+	/** 大额快捷最小交易金额  **/
+	private String largeAmount;
+	
+	
+	/** 类型类型  DEBIT_CARD 储蓄卡  CREDIT_CARD 信用卡 **/
+	private String cardName;
+	
 	public String getMerchantNo() {
 		return merchantNo;
 	}
@@ -711,4 +723,31 @@ public class ResponseData implements Serializable {
 	public void setAntiAmount(String antiAmount) {
 		this.antiAmount = antiAmount;
 	}
+
+	public String getRate() {
+		return rate;
+	}
+
+	public void setRate(String rate) {
+		this.rate = rate;
+	}
+
+	public String getLargeAmount() {
+		return largeAmount;
+	}
+
+	public void setLargeAmount(String largeAmount) {
+		this.largeAmount = largeAmount;
+	}
+
+	public String getCardName() {
+		return cardName;
+	}
+
+	public void setCardName(String cardName) {
+		this.cardName = cardName;
+	}
+
+
+	
 }

@@ -1,6 +1,6 @@
 package com.rhjf.appserver.service;
 
-import java.io.IOException; 
+import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.LinkedHashMap;
@@ -16,6 +16,7 @@ import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.StringEncoding;
 import com.rhjf.appserver.db.LoginUserDB;
 import com.rhjf.appserver.db.TradeDB;
+import com.rhjf.appserver.db.UserBankCardDB;
 import com.rhjf.appserver.db.YMFTradeDB;
 import com.rhjf.appserver.model.TabLoginuser;
 import com.rhjf.appserver.util.AmountUtil;
@@ -94,7 +95,7 @@ public class YMFTradeService2  extends HttpServlet {
 		/** 向数据库插入初始化数据 **/
 		int ret = TradeDB.YMFTradeInit(new Object[]{UtilsConstant.getUUID(),amount ,DateUtil.getNowTime(DateUtil.yyyyMMdd),DateUtil.getNowTime(DateUtil.HHmmss),
 				tradeDate,tradeTime , DateUtil.getNowTime(DateUtil.yyyyMMddHHmmssSSS), Constant.TradeType[1] ,encrypt, 
-				user.getID(),paychannel, merchantID,orderNumber , ymfCode});
+				user.getID(),paychannel, merchantID,orderNumber , ymfCode , user.getAgentID()});
 		if(ret < 1 ){
 			logger.info("数据库保存信息失败");
 			return ;
@@ -129,7 +130,7 @@ public class YMFTradeService2  extends HttpServlet {
 		/** T0 交易上报结算信息  **/
 		if(encrypt.equals(Constant.T0)){
 			try {
-				Map<String,Object> bankMap = TradeDB.getBankInfo(user.getID());
+				Map<String,Object> bankMap = UserBankCardDB.getBankInfo(user.getID());
 				
 				String toibkn = UtilsConstant.ObjToStr(bankMap.get("BankCode")); 
 				
@@ -179,7 +180,7 @@ public class YMFTradeService2  extends HttpServlet {
 					message = json.getString("retMsg");
 				}
 				message = URLEncoder.encode(message, "UTF-8");  
-				resp.getWriter().print("<script>alert(decodeURIComponent('" + message + "'));window.location.href='http://www.ronghuijinfubj.com/pay/';</script>");
+				resp.getWriter().print("<script>alert(decodeURIComponent('" + message + "'));window.location.href='http://www.ronghuijinfubj.com';</script>");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

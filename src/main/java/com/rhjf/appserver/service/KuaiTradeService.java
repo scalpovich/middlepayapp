@@ -17,6 +17,7 @@ import com.rhjf.appserver.db.TradeDB;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
 import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.service.creditcard.KuaiTradeInterfaceService;
 import com.rhjf.appserver.util.AmountUtil;
 import com.rhjf.appserver.util.DES3;
 import com.rhjf.appserver.util.DESUtil;
@@ -31,11 +32,12 @@ import com.rhjf.appserver.util.UtilsConstant;
 
 import net.sf.json.JSONObject;
 
-public class KuaiTradeService {
+public class KuaiTradeService implements KuaiTradeInterfaceService{
 LoggerTool log  = new LoggerTool(this.getClass());
 	
 	@SuppressWarnings("unchecked")
 	public void send(TabLoginuser loginUser,RequestData reqData , ResponseData repData){
+		
 		log.info("用户"+  loginUser.getLoginID() + "发起支付请求") ;
 		
 		/**  获取支付类型 **/
@@ -43,14 +45,11 @@ LoggerTool log  = new LoggerTool(this.getClass());
 		
 		EhcacheUtil ehcache = EhcacheUtil.getInstance();
 		
-		
 		if(loginUser.getBankInfoStatus()!=1||loginUser.getPhotoStatus()!=1){
 			repData.setRespCode("F002");
 			repData.setRespDesc("该用户没有通过审核无法进行交易"); 
 			return ;
 		}
-		
-		
 		
 		/**  查询结算卡信息 **/
 		Map<String,Object> bankInfoMap =  null;
@@ -86,7 +85,7 @@ LoggerTool log  = new LoggerTool(this.getClass());
 		
 		/**  查询代理商交易配置信息 **/
 		Map<String,Object> agentconfigmap = null;
-		Object agentConfigobj = ehcache.get(Constant.cacheName, loginUser.getAgentID() + payChannel + "agentConfig");
+		Object agentConfigobj = ehcache.get(Constant.cacheName , loginUser.getAgentID() + payChannel + "agentConfig");
 		
 		if(agentConfigobj == null){
 			log.info("缓存读取代理商交易信息失败，将从数据库中读取: 交易类型：" + payChannel + "代理商ID：" + loginUser.getAgentID()); 
@@ -206,6 +205,11 @@ LoggerTool log  = new LoggerTool(this.getClass());
 		if(nowHour>=startHour&&nowHour<EndHour){
 			log.info("属于T0交易时间段");
 			encrypt = Constant.T0;
+		}else{
+			log.info("当前时间：" + nowHour + "不属于交易时间段");
+			repData.setRespCode(RespCode.TradeTimeError[0]);
+			repData.setRespDesc(RespCode.TradeTimeError[1]); 
+			return ;
 		}
 		
 		/** 判断交易金额是否小于T0最低金额 **/
@@ -219,7 +223,7 @@ LoggerTool log  = new LoggerTool(this.getClass());
 		
 		if(Constant.T1.equals(encrypt)){
 			// ChannelRate , AgentRate , MerchantRate , T0ChannelRate , T0AgentRate , T0MerchantRate
-			if("".equals(UtilsConstant.ObjToStr(agentconfigmap.get("ChannelRate")))||"".equals(UtilsConstant.ObjToStr(agentconfigmap.get("AgentRate")))
+			if("".equals(UtilsConstant.ObjToStr(agentconfigmap.get("AgentRate")))
 					||"".equals(UtilsConstant.ObjToStr(agentconfigmap.get("AgentRate")))){
 				log.info("用户：" + loginUser.getLoginID() + "对应代理商交易类型：" + payChannel + "配置 [ T1 ] 信息不完整 , 对应代理商ID：" +  loginUser.getAgentID());
 				repData.setRespCode(RespCode.AgentTradeConfigError[0]);
@@ -230,7 +234,7 @@ LoggerTool log  = new LoggerTool(this.getClass());
 			
 			feeRate = map.get("T0SettlementRate").toString();
 			
-			if("".equals(UtilsConstant.ObjToStr(agentconfigmap.get("T0ChannelRate")))||"".equals(UtilsConstant.ObjToStr(agentconfigmap.get("T0AgentRate")))
+			if("".equals(UtilsConstant.ObjToStr(agentconfigmap.get("T0AgentRate")))
 					||"".equals(UtilsConstant.ObjToStr(agentconfigmap.get("T0MerchantRate")))){
 				log.info("用户：" + loginUser.getLoginID() + "对应代理商交易类型：" + payChannel + "配置 [ T0 ] 信息不完整 , 对应代理商ID：" +  loginUser.getAgentID());
 				repData.setRespCode(RespCode.AgentTradeConfigError[0]);
@@ -257,16 +261,6 @@ LoggerTool log  = new LoggerTool(this.getClass());
 		
 		log.info("获取SignKey:"+ signKey);
 		
-		/** 向数据库插入初始化数据 **/
-		int ret = TradeDB.tradeInit(new Object[]{UtilsConstant.getUUID(),reqData.getAmount() ,DateUtil.getNowTime(DateUtil.yyyyMMdd),DateUtil.getNowTime(DateUtil.HHmmss),
-				tradeDate,tradeTime , reqData.getSendSeqId(), Constant.TradeType[0] , encrypt, loginUser.getID(),payChannel, feeRate ,merchantID,orderNumber});
-		
-		if(ret < 1 ){
-			log.info("数据库保存信息失败");
-			repData.setRespCode(RespCode.ServerDBError[0]);
-			repData.setRespDesc(RespCode.ServerDBError[1]);
-			return ;
-		}
 		
 		String url = LoadPro.loadProperties("http", "KUAI_ScanCodeUrl");
 		String trxType = Constant.KUAI_ScanCode;
@@ -293,14 +287,67 @@ LoggerTool log  = new LoggerTool(this.getClass());
 			cardNo = DESUtil.encode(desKey,bankCardno);
 		} catch (Exception e) {
 			e.printStackTrace();
+			
+			log.error("卡号加密异常", e); 
+			
 			repData.setRespCode(RespCode.SYSTEMError[0]);
 			repData.setRespDesc(RespCode.SYSTEMError[1]);
 			return ;
 		}
 		
+		boolean isok = false;
+		StackTraceElement[] es = Thread.currentThread().getStackTrace();
+		for (StackTraceElement e : es) {
+			if("com.rhjf.appserver.service.creditcard.DynamicProxy".equals(e.getClassName())){
+				log.info("StackTraceElement 结合中 包含  【 com.rhjf.appserver.service.creditcard.DynamicProxy 】"); 
+				isok = true;
+				break;
+			}
+		}
+		
+		String callbackUrl = LoadPro.loadProperties("http" , "WX_ScanCodeCallbackUrl");
+		String TradeType = Constant.TradeType[0];
+		String creditCardNo = "";
+		if(isok){
+			log.info("用户执行信用卡还款交易");
+			TradeType = "信用卡还款";
+			callbackUrl = LoadPro.loadProperties("http" , "CreditCardNotiy");
+			
+			
+			try {
+				log.info("用户：" + loginUser.getLoginID() + "请求信用卡还款 , 银行卡卡号：(密文)" + reqData.getCreditCardNo());
+				String desckey = DESUtil.deskey(UtilsConstant.ObjToStr(termKey.get("MacKey")), initKey);
+				creditCardNo = DES3.decode(reqData.getCreditCardNo(), desckey);
+				log.info("用户：" + loginUser.getLoginID() + "请求信用卡还款收款卡号 , ：(原文)" + creditCardNo);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				
+				log.error("卡号加密异常", e); 
+				
+				repData.setRespCode(RespCode.SYSTEMError[0]);
+				repData.setRespDesc(RespCode.SYSTEMError[1]);
+				return ;
+			}
+			
+		}
+		
+		/** 向数据库插入初始化数据 **/
+		int ret = TradeDB.tradeInit(new Object[]{UtilsConstant.getUUID(),reqData.getAmount() ,
+				DateUtil.getNowTime(DateUtil.yyyyMMdd),DateUtil.getNowTime(DateUtil.HHmmss),
+				tradeDate,tradeTime , reqData.getSendSeqId(), TradeType , 
+				encrypt, loginUser.getID(),payChannel, feeRate ,merchantID,orderNumber , creditCardNo ,bankCardno , loginUser.getAgentID()});
+		
+		if(ret < 1 ){
+			log.info("数据库保存信息失败");
+			repData.setRespCode(RespCode.ServerDBError[0]);
+			repData.setRespDesc(RespCode.ServerDBError[1]);
+			return ;
+		}
+		
 	    payrequest.put("goodsName",loginUser.getMerchantName());
-	    payrequest.put("callbackUrl", LoadPro.loadProperties("http" , "WX_ScanCodeCallbackUrl"));
-	    payrequest.put("serverCallbackUrl", LoadPro.loadProperties("http" , "WX_ScanCodeCallbackUrl"));
+	    payrequest.put("callbackUrl",callbackUrl);
+	    payrequest.put("serverCallbackUrl", callbackUrl);
 		payrequest.put("orderIp", "10.10.20.187");
 		payrequest.put("cardNo", cardNo);
 		payrequest.put("payerPhone", reqData.getPayerPhone());
@@ -337,9 +384,9 @@ LoggerTool log  = new LoggerTool(this.getClass());
 				msg = json.getString("respMsg");
 			}else if(json.has("msg")){
 				msg = json.getString("msg");
+			}else if(json.has("retMsg")){
+				msg = json.getString("retMsg");
 			}
-			
-			
 			
 			//无卡快捷支付
 			if (encrypt.equals(Constant.T0)) {
@@ -364,14 +411,20 @@ LoggerTool log  = new LoggerTool(this.getClass());
 					repData.setRespDesc(msg);
 				}
 			}
+			
+			
+			if(retCode.equals("8221")){
+				log.info("银行：" + "" + "为开通快捷服务");
+				repData.setRespCode("01");
+				repData.setRespDesc("交易金额受限，需再次绑定银行卡信息。");
+			}
+			
 		} catch (Exception e) {
-			e.printStackTrace();
-			log.error("请求获取发生异常:"  + e.getMessage()); 
+			log.error("请求获取发生异常:"  + e.getMessage() , e); 
 			repData.setRespCode(RespCode.HttpClientError[0]);
 			repData.setRespDesc(RespCode.HttpClientError[1]);
 		}
 	}
-	
 	
 
 	public void confirm(TabLoginuser loginUser,RequestData reqData , ResponseData repData){

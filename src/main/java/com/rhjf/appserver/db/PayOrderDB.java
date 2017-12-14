@@ -143,7 +143,7 @@ public class PayOrderDB extends DBBase{
 	public static List<Map<String ,String>> DayTradeLineChart(Object[] obj){
 		
 		String sql = "select TradeDate as LocalDate , amount from tab_usertrade_statistical"
-				+ " where Userid=? and TradeDate BETWEEN ? and ?";
+				+ " where Userid=? and TradeDate BETWEEN ? and ? and Amount!=0 order by TradeDate";
 		
 		return queryForListString(sql, obj);
 	}
@@ -172,6 +172,19 @@ public class PayOrderDB extends DBBase{
 		String sql = "select TradeDate as LocalDate , amount ,  fee , TradeCount as  count , profit from tab_usertrade_statistical "
 				+ " where  Userid=? and TradeDate=?";
 		return queryForMapStr(sql, obj);
+	}
+	
+	
+	/**
+	 *   查询信用卡还款记录
+	 * @param obj
+	 * @return
+	 */
+	public static List<Map<String,Object>> creditCardRepayRecordList(Object[] obj){
+//		String sql = "select * from tab_pay_order where DFBankCardNo=? and UserID =? and PayRetCode='0000'";
+		String sql = "select  OrderAmount , fee , date(CreateDate) as CreateDate , LEFT(CreateDate,7) as createMonth , BankSymbol"
+				+ " from tab_df_order where AccountNo=? and ApplyUserID=? and DFType='CREDITCARDREPAY'";
+		return queryForList(sql, obj);
 	}
 	
 	

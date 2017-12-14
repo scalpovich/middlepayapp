@@ -24,14 +24,14 @@ public class QueryYMFService {
 		
 		logger.info("用户：" + user.getLoginID() + "查询到账类型" +  reqdata.getTradeCode() + "的固定码"); 
 		
-		List<Map<String,Object>> list = YMFTradeDB.getUserYMFlist(new Object[]{user.getID(),reqdata.getTradeCode()});
+		List<Map<String,String>> list = YMFTradeDB.getUserYMFlist(new Object[]{user.getID(),reqdata.getTradeCode()});
 		
 		String YMFUrl = LoadPro.loadProperties("config", "YMFUrl");
 		
 		JSONArray  jsonArray = new JSONArray();
 		for (int i = 0; i < list.size(); i++){
 			JSONObject json = new JSONObject();
-			Map<String,Object> map = list.get(i);
+			Map<String,String> map = list.get(i);
 			
 			// Code,UserID,Valid,PayChannel,Binded,AgentID,TradeCode,Rate ,PayChannelName"
 			json.put("Code", YMFUrl +  map.get("Code"));

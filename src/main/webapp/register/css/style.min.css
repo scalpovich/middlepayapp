@@ -1,0 +1,42 @@
+a,abbr,acronym,address,applet,article,aside,audio,b,big,blockquote,body,canvas,caption,center,cite,code,dd,del,details,dfn,div,dl,dt,em,embed,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,html,i,iframe,img,ins,kbd,label,legend,li,mark,menu,nav,object,ol,output,p,pre,q,ruby,s,samp,section,small,span,strike,strong,sub,summary,sup,table,tbody,td,tfoot,th,thead,time,tr,tt,u,ul,var,video{margin:0;padding:0;border:0}
+article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}
+a{text-decoration:none;color:#666}
+ol,ul{list-style:none}
+body{width:100%;font-family:"Microsoft YaHei",Arial;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}
+*{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}
+html{height:100%}
+.downLoad-body{height:100%}
+.downLoad-wrapper{width:100%;height:90%;margin:0 auto;background-image:url(../imgs/downLoadBg@2x.png);background-repeat:no-repeat;background-size:100% 100%;position:relative}
+@media (-webkit-min-device-pixel-ratio:3) and (min-device-pixel-ratio:3){
+.downLoad-wrapper{background-image:url(../imgs/downLoadBg@3x.png)}
+}
+.downLoad-wrapper .downLoad-footer{width:100%;position:absolute;left:0;bottom:0;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;height:3.9466666667rem}
+.downLoad-wrapper .downLoad-footer .download{display:block;margin:0 auto;margin-top:.64rem;width:4.9866666667rem;height:.9333333333rem;background-image:url(../imgs/down@2x.png);background-repeat:no-repeat;background-size:100% 100%}
+@media (-webkit-min-device-pixel-ratio:3) and (min-device-pixel-ratio:3){
+.downLoad-wrapper .downLoad-footer .download{background-image:url(../imgs/down@3x.png)}
+}
+.downLoad-wrapper .downLoad-footer .downLoad-version{margin:0 auto;margin-top:.4rem;margin-bottom:.4rem;width:4.9866666667rem;height:.3733333333rem;line-height:.3733333333rem;font-size:.3733333333rem;color:#fff}
+.downLoad-wrapper .weChat-wrap{position:fixed;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,.5);display:none}
+.downLoad-wrapper .weChat-wrap .title{font-size:.5333333333rem;margin-top:1.8666666667rem;font-size:.56rem;text-align:center;color:#fff;font-weight:500;position:relative}
+.downLoad-wrapper .weChat-wrap .title:after{display:block;content:"";width:.8533333333rem;height:.8533333333rem;background:url(../imgs/arrow.png) no-repeat;background-size:100% 100%;position:absolute;bottom:.1333333333rem;right:1.0666666667rem}
+.downLoad-wrapper .weChat-wrap .text{margin-top:.5333333333rem;font-size:.48rem;text-align:center;color:#fff}
+.downLoad-wrapper .android-wrap{position:fixed;left:0;bottom:0;width:100%;margin:0 auto;display:none}
+.downLoad-wrapper .android-wrap .android-bg{position:fixed;left:0;bottom:0;width:100%;height:100%;margin:0 auto;background-color:rgba(0,0,0,.5);z-index:-1}
+.downLoad-wrapper .android-wrap .detail{position:relative;z-index:20;background-color:#fff}
+.downLoad-wrapper .android-wrap .detail .info{padding-left:.4rem;padding-right:.4rem;padding-top:.1333333333rem;padding-bottom:.1333333333rem;color:#666;border-bottom:thin solid #ddd}
+.downLoad-wrapper .android-wrap .detail .info .name{padding-top:.2rem;padding-bottom:.2rem;font-size:.4533333333rem;color:#000}
+.downLoad-wrapper .android-wrap .detail .info .msg{padding-bottom:.2rem;font-size:.4rem}
+.downLoad-wrapper .android-wrap .detail .info .msg .status{margin-left:.4rem;color:#3cd50a;border:thin solid #3cd50a;padding-left:.1333333333rem;padding-right:.1333333333rem;border-radius:.1066666667rem}
+.downLoad-wrapper .android-wrap .detail .download-item{display:block;border-bottom:thin solid #ddd;text-align:center;font-size:.4533333333rem;padding-top:.2666666667rem;padding-bottom:.2666666667rem;color:#666}
+.downLoad-wrapper .android-wrap .detail .download-item:last-child{border:0}
+@media (-webkit-min-device-pixel-ratio:3) and (min-device-pixel-ratio:3){
+.downLoad-wrapper .downLoad-footer{height:4.88rem}
+.downLoad-wrapper .downLoad-footer .download{width:7.48rem;height:1.4rem}
+.downLoad-wrapper .downLoad-footer .downLoad-version{width:7.48rem;height:1.4rem;line-height:.3733333333rem}
+}
+@media (-webkit-min-device-pixel-ratio:3) and (min-device-pixel-ratio:3){
+.crumbs-wrap .more:before{background-image:url(../imgs/more@3x.png)}
+}
+@media (-webkit-min-device-pixel-ratio:3) and (min-device-pixel-ratio:3){
+.crumbs-wrap .more:before{width:.56rem;height:.12rem;margin-top:-.0533333333rem}
+}

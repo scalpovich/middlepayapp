@@ -11,8 +11,7 @@ public class OrderUtil {
 
 	
 	
-	public static String getRandomStr(int lenght)
-	{
+	public static String getRandomStr(int lenght){
 		String[] randomValues = new String[]{"0","1","2","3","4","5","6","7","8","9",
 				"a","b","c","d","e","f","g","h","i","j","k","l","m","n","u",
 				"t","s","o","x","v","p","q","r","w","y","z"};

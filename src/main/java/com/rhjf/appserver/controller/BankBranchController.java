@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.rhjf.appserver.db.BankCodeDB;
 import com.rhjf.appserver.db.LoginUserDB;
-import com.rhjf.appserver.db.PayUserBankCardDB;
+import com.rhjf.appserver.db.UserBankCardDB;
 import com.rhjf.appserver.model.TabLoginuser;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.auth.AuthUtil;
@@ -72,14 +72,14 @@ public class BankBranchController {
 
 		TabLoginuser user = LoginUserDB.LoginuserInfo(loginID);
 
-		Map<String, String> reqMap = AuthUtil.authentication(user.getName(), creditCard, user.getIDCardNo());
+		Map<String, String> reqMap = AuthUtil.authentication(user.getName(), creditCard, user.getIDCardNo() , "");
 
 		JSONObject json = new JSONObject();
 
 		log.info("鉴权三要素:" + user.getName() + " -- " + creditCard + " -- " + user.getIDCardNo());
 		if (reqMap.get("respCode").equals(Author.SUCESS_CODE)) {
 
-			PayUserBankCardDB.updateUserCreditCard(new Object[] { creditCard, user.getID() });
+			UserBankCardDB.addCreditCardNo(new Object[] { creditCard, user.getID() });
 
 			log.info("用户：" + loginID + " 信用卡账号 , " + creditCard + "鉴权卡号，并且保存成功");
 

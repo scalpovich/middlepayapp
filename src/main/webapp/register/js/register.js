@@ -71,11 +71,11 @@ $(function(){
 		var sendSeqId=$('#sendSeqId').val();
 		var reg=/^1[3|4|5|7|8]\d{9}$/;
 		var phone=$('#phone');
-		if(reg.test(phone.val())==false){
-			alert("请输入格式正确的手机号！");
-			phone.focus();
-			return;
-		}
+//		if(reg.test(phone.val())==false){
+//			alert("请输入格式正确的手机号！");
+//			phone.focus();
+//			return;
+//		}
 		
 		var reg=/^[A-Za-z0-9]{6,20}$/;
 		var pwd=$('#pwd');

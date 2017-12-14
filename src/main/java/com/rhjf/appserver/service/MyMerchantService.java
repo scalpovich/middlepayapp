@@ -6,6 +6,7 @@ import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
 import com.rhjf.appserver.model.TabLoginuser;
 import com.rhjf.appserver.util.LoggerTool;
+import com.rhjf.appserver.util.UtilsConstant;
 
 
 /**
@@ -20,11 +21,13 @@ public class MyMerchantService {
 	
 	public void MyMerchant(TabLoginuser user, RequestData reqdata, ResponseData respdata) {
 		
+		String merchantName = UtilsConstant.ObjToStr(reqdata.getMerchantName());
+		
 		
 		logger.info("用户" + user.getLoginID() + "查询发展商户"); 
 
 		// 查询交易
-		String returnString = LoginUserDB.getMyMerchant(user.getID());
+		String returnString = LoginUserDB.getMyMerchant(new Object[]{user.getID() , "%" + merchantName + "%"});
 
 		respdata.setLoginID(reqdata.getLoginID());
 		respdata.setTranslist(returnString);

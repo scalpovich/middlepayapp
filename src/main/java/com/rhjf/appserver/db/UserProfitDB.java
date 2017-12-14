@@ -48,10 +48,10 @@ public class UserProfitDB extends DBBase{
 		String sql = "select ifnull(sum(Amount),'0') as Amount from tab_user_profit where UserID=? and ProfitType=0 and ProfitStatus=0";
 		Map<String,String> map = queryForMapStr(sql, new Object[]{userID});
 		Map<String,String> profitMap = new HashMap<String,String>();
-		profitMap.put("toker", map.get("Amount"));
+		profitMap.put("anti", map.get("Amount"));
 		sql = "select ifnull(sum(Amount),'0') as Amount from tab_user_profit where UserID=? and ProfitType!=0 and ProfitStatus=0";
 		map = queryForMapStr(sql, new Object[]{userID});
-		profitMap.put("anti", map.get("Amount"));
+		profitMap.put("toker", map.get("Amount"));
 		return profitMap;
 	}
 	
@@ -85,9 +85,9 @@ public class UserProfitDB extends DBBase{
 		case "2":
 			// 查询拓客收益
 			sql = "select tl.MerchantName ,DATE_FORMAT(CONCAT(tpo.TradeDate,tpo.TradeTime),'%Y-%m-%d %H:%i') as Tradetime , tpo.Amount ,"
-					+ " tpo.MerchantProfit , tup.ProfitStatus , ProfitType "
+					+ " tup.Amount as MerchantProfit , tup.ProfitStatus , ProfitType "
 					+ " from tab_user_profit as tup INNER JOIN tab_pay_order as tpo on tup.TradeID=tpo.ID INNER JOIN tab_loginuser as tl on tpo.UserID=tl.ID"
-					+ " where tup.UserID=? and tup.ProfitType=1  order by tup.TradeTime desc limit ? , ?";
+					+ " where tup.UserID=? and tup.ProfitType!=0  order by tup.TradeTime desc limit ? , ?";
 			list = queryForListString(sql, new Object[]{userID , page , pageSize});
 			break;
 		case "3":
@@ -131,5 +131,42 @@ public class UserProfitDB extends DBBase{
 		}
 		return count;
 	}
+	
+	/**
+	 *    用户获取某一个月的总收益（三级分销或交易返利）
+	 * @param obj
+	 * @return
+	 */
+	public static String monthProfitTotalAmount(Object[] obj){
+		String sql = "select ifnull(sum(Amount) , 0) as amount from tab_user_profit where UserID = ? and left(TradeTime , 6) = ?";
+		Map<String,String> map = queryForMapStr(sql, obj);
+		return map.get("amount");
+	}
+	
+	
+	
+	
+	public static String merchantTokerProfit(String userID , String MerchantID){
+		String sql = "select ifnull(sum(Amount) , '0') as amount from tab_user_profit where TradeID in "
+				+ " (select ID from tab_pay_order where UserID in (select ID from tab_loginuser "
+				+ " where (ThreeLevel=? and TwoLevel=? ) or (TwoLevel=? and OneLevel=?) or ID=? )) and UserID = ?";
+		
+		Map<String,String> map = queryForMapStr(sql, new Object[]{MerchantID , userID , MerchantID , userID , MerchantID , userID});
+		
+		return map.get("amount");
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 }

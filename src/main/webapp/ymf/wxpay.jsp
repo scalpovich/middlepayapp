@@ -8,7 +8,10 @@
 <title>支付</title>
 <script src="/appserver/ymf/script/jquery.min.js" type="text/javascript"></script>
 <script src="/appserver/ymf/script/fastclick.js" type="text/javascript"></script>
+<script src="/appserver/ymf/script/index.js" type="text/javascript"></script>
 <link href="/appserver/ymf/css/checkstand.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="/appserver/ymf/css/pay.css">
+
 <script type="application/javascript">
 	
 	var num = 0;
@@ -103,10 +106,9 @@
 					dec = 0;
 					stp = 0;
 					pnt = false;
-					$(".message").text('');
 					break;
 				case '.':
-					pnt = true;
+					pnt=true;
 					break;
 				default:
 					$(".message").text('');
@@ -122,12 +124,14 @@
 						if(num.toString().length < 6){
 							num = num * 10 + Number(key);
 						}else{
-							$(".message").text('输入金额过大');
+							$(".message").text('');
 						}
 					}
 					break;
-			}
-			formatAmount();
+				}
+				formatAmount();
+        	
+			
 		})
 	})
 	
@@ -142,13 +146,12 @@
 		String merName = (String)request.getAttribute("merName");
 	%>
 
-	<div class="header"><%=merName %></div>
+<!-- 	<div class="header"><%=merName %></div>
 	<div class="amount"><span>￥</span> 0.00</div>
 	<div class="tip">请向商家询问价格后输入,勿向陌生人汇款</div>
-	<button class="enter" value="确认" onclick="getPayLink()">确认</button>
-	
+	<button class="enter" value="确认" onclick="getPayLink()">确认</button> -->
+	<!-- 
 	<div id="dialog" style="display: none">
-		<!--页面载入显示-->
 		<table style=" width:100% ;height:100% ;border:0 ; align:center; valign:middle">
 			<tr height=50%>
 				<td align=center>&nbsp;</td>
@@ -168,8 +171,28 @@
 				<td align=center>&nbsp;</td>
 			</tr>
 		</table>
-	</div>
+	</div> -->
+	
 
+		<div class="warp">
+			<div class="centent">
+				<div class="cententTop">
+					<div>
+						<img src="/appserver/ymf/images/1.png" alt="">
+						<p><%=merName %></p>
+					</div>
+				</div>
+				<div class="cententMain">
+					<span class="span">金额</span>
+					<div class="amount"><span>￥</span> 0.00</div>
+				</div>
+				<div class="cententBottom">
+					<button class="enter" value="确认" onclick="getPayLink()">确认</button>
+					<p>请向商家询问价格后支付</p>
+				</div>
+			</div>
+		</div>
+	<div class="keypadWarp"></div>
 	<div class="keypad">
 		<div class="message"></div>
 		<div class="col">
@@ -188,7 +211,7 @@
 			<div class="key digit">3</div>
 			<div class="key digit">6</div>
 			<div class="key digit">9</div>
-			<div class="key empty">清除</div>
+			<div class="key empty" id="remove">清除</div>
 		</div>
 	</div>
 </body>

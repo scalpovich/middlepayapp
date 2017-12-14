@@ -27,11 +27,11 @@ public class YMFTradeDB extends DBBase{
 	 * @param obj
 	 * @return
 	 */
-	public static List<Map<String,Object>> getUserYMFlist(Object[] obj){
+	public static List<Map<String,String>> getUserYMFlist(Object[] obj){
 		String sql = "select Code,UserID,Valid,PayChannel,Binded,AgentID,TradeCode,Rate ,PayChannelName"
 				+ " from tab_ymf_qrcode as qrcode left join  tab_pay_channel as tpc on qrcode.PayChannel=tpc.ID"
 				+ " where qrcode.Valid=1 and UserID=? and TradeCode=?";
-		return queryForList(sql, obj);
+		return queryForListString(sql, obj);
 	}
 	
 	

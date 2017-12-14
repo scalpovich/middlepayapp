@@ -1,0 +1,158 @@
+html, body{
+	padding: 0;
+	margin: 0;
+}
+
+body{
+	background: #eeeeee;
+	font-family: Arial, Helvetica, Verdana;
+	line-height: 22px;
+	color: #666;
+	position: relative;
+	-webkit-text-size-adjust: none;
+}
+
+body *{
+	text-shadow: none;
+}
+
+.clear{
+	clear:both;
+	display:block;
+	overflow:hidden;
+	visibility:hidden;
+	width:0;
+	height:0;
+}
+
+.header{
+	margin-top:40px;
+	font-size:150%;
+	text-align:center;
+}
+
+.mid{
+	margin:20px 0 10px 0;
+	font-size:100%;
+	color:#999;
+	text-align:center;
+}
+
+.amount{
+	height:60px;
+	line-height:60px;
+	padding:0 20px;
+	font-size:30px;
+	text-align:left;
+	background:#fff;
+	border-top:solid 1px #e5e5e5;
+	border-bottom:solid 1px #e5e5e5;
+	margin-top: 30px;
+}
+
+.footer{
+	height:30px;
+	line-height:30px;
+	font-size:80%;
+	color:#ccc;
+	text-align:center;
+}
+
+.tip{
+	height:30px;
+	line-height:30px;
+	font-size:80%;
+	color:#999;
+	text-align:right;
+	padding-right:21px;
+}
+
+
+.keypad{
+	position:fixed;
+	left:0;
+	right:0;
+	bottom:0;
+}
+
+.keypad .message{
+	padding:5px 10px;
+	color:#e35b5a;
+	font-size:80%;
+}
+
+.keypad .col{
+	float:left;
+	width:33.3%;
+}
+
+.keypad .col .key{
+	margin:1px 0 0 1px;
+	font-size:150%;
+	text-align:center;
+	background-color: #ffffff;
+}
+
+.keypad .col .digit{
+	height:50px;
+	line-height:50px;
+	font-size:150%;
+	color:#666;
+	background:#ffffff;
+}
+
+.keypad .col .point{
+	height:50px;
+	line-height:50px;
+	font-size:150%;
+	color:#666;
+	background:#ffffff;
+}
+
+/*.keypad .col .back{
+	height:60px;
+	line-height:60px;
+	font-size:120%;
+	color:#666;
+	background:#ccc;
+}*/
+
+.keypad .col .empty{
+	height:50px;
+	line-height:50px;
+	font-size:120%;
+	font-weight:bold;
+	color:#000;
+	background:#ffffff;
+}
+.enter{
+	display: block;
+	height: 40px;
+	line-height: 40px;
+	width: 90%;
+	margin: 0 auto;
+	text-align: center;
+	color: #ffffff;
+	background: #00c027;
+	border-radius: 50px;
+	font-size: 24px;
+	outline: none;
+	border: none;
+	margin-top: 60px;
+}
+/*.keypad .col .enter{
+	height:121px;
+	line-height:121px;
+	font-size:120%;
+	font-weight:bold;
+	color:#fff;
+	background:#4B77BE;
+}*/
+
+.keypad .col .active{
+	background:#ccc;
+}
+
+
+
+

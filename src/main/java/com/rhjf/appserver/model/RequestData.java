@@ -52,7 +52,6 @@ public class RequestData implements Serializable{
 	/** 终端信息 **/
 	private String terminalInfo;
 	
-
 	/**  注册推广人 **/
 	private String tgr;
 	
@@ -67,7 +66,6 @@ public class RequestData implements Serializable{
 	
 	/**  完善资料  真实姓名 **/
 	private String name;
-	
 	
 	/** 商户名称 **/
 	private String merchantName;
@@ -186,6 +184,16 @@ public class RequestData implements Serializable{
 	
 	/**  文本内容 (意见反馈) **/
 	private String message;
+	
+	/**  商户ID **/
+	private String merchantID;
+	
+	/** 信用卡cvn2号码 **/
+	private String cvn2;
+	
+	/** 卡片有效期 信用卡有效期 示例： 09/15 填1509 **/
+	private String expired;
+	
 	
 	public String getOrderNumber() {
 		return orderNumber;
@@ -648,4 +656,29 @@ public class RequestData implements Serializable{
 	public void setMessage(String message) {
 		this.message = message;
 	}
+
+	public String getMerchantID() {
+		return merchantID;
+	}
+
+	public void setMerchantID(String merchantID) {
+		this.merchantID = merchantID;
+	}
+
+	public String getCvn2() {
+		return cvn2;
+	}
+
+	public void setCvn2(String cvn2) {
+		this.cvn2 = cvn2;
+	}
+
+	public String getExpired() {
+		return expired;
+	}
+
+	public void setExpired(String expired) {
+		this.expired = expired;
+	}
+	
 }

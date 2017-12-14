@@ -35,8 +35,8 @@ public class AddCreditCardNoService {
         /**
          *  用户信用卡 卡号鉴权
          */
-        Map<String,String> map = AuthUtil.authentication(UtilsConstant.ObjToStr(userBankCard.get("AccountName")) , UtilsConstant.ObjToStr(user.getIDCardNo())
-        		,UtilsConstant.ObjToStr(settleCreditCard));
+        Map<String,String> map = AuthUtil.authentication(UtilsConstant.ObjToStr(userBankCard.get("AccountName")),UtilsConstant.ObjToStr(settleCreditCard)
+        		,UtilsConstant.ObjToStr(user.getIDCardNo()) , UtilsConstant.ObjToStr(userBankCard.get("PayerPhone")));
         
         if(!Author.SUCESS_CODE.equals(map.get("respCode").toString())){
             log.info("商户：" + user.getLoginID() + "信用鉴权没有通过 , 卡号:" + settleCreditCard);

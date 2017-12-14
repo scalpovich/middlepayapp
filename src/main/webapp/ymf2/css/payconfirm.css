@@ -1,0 +1,54 @@
+@CHARSET "UTF-8";
+
+.toptext{
+	padding:50px 0px 40px 0px;
+	font-size:75px;
+	color:#000000;
+	text-align: center;
+}
+
+body{
+	background:#eeeeee;
+}
+
+.amounttext{
+	font-size:500%;
+	color:#ff9224;
+	background:#ffffff;
+	height:270px;
+	border-top:solid 3px #dddddd;
+	border-bottom:solid 3px #dddddd;
+	line-height:270px;
+	padding-right:30px;
+	text-align: right; 
+}
+
+.wxtstext{
+	padding:60px 0px 0px 20px;
+	font-size:250%;
+	color:#555555;
+}
+
+.notetext{
+	font-size:200%;
+	color:#777777;
+	background:#ffffff;
+	height:150px;
+	border-top:solid 3px #cccccc;
+	border-bottom:solid 3px #cccccc;
+	padding:30px;
+	text-align: left; 
+}
+
+.confirmbtn {
+	background: #00c027;
+	color: #fff;
+	font-size:55px;
+	position: relative;
+	cursor: pointer;
+	width: 100%;
+	top: 100px;
+	padding-top:20px;
+	padding-bottom:20px;
+	border-radius: 50px;
+}

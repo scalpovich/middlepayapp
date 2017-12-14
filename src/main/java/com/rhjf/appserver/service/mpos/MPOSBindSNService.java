@@ -1,4 +1,4 @@
-package com.rhjf.appserver.service;
+package com.rhjf.appserver.service.mpos;
 
 import java.util.ArrayList;
 import java.util.HashMap;

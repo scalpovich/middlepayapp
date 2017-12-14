@@ -1,13 +1,17 @@
 package com.rhjf.appserver.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
+import com.rhjf.appserver.constant.StringEncoding;
 import com.rhjf.appserver.db.AppconfigDB;
 import com.rhjf.appserver.db.OpenKuaiDB;
 import com.rhjf.appserver.db.TermkeyDB;
+import com.rhjf.appserver.db.TradeDB;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
 import com.rhjf.appserver.model.TabLoginuser;
@@ -15,8 +19,10 @@ import com.rhjf.appserver.util.DES3;
 import com.rhjf.appserver.util.DESUtil;
 import com.rhjf.appserver.util.DateUtil;
 import com.rhjf.appserver.util.EhcacheUtil;
+import com.rhjf.appserver.util.HttpClient;
 import com.rhjf.appserver.util.LoadPro;
 import com.rhjf.appserver.util.LoggerTool;
+import com.rhjf.appserver.util.MD5;
 import com.rhjf.appserver.util.UtilsConstant;
 
 import net.sf.json.JSONArray;
@@ -67,10 +73,63 @@ public class KuaiCardListService {
 			t0Result = 0;
 		}
 		
-		
+		List<Map<String,Object>> noOpenList = OpenKuaiDB.kuaiCardlistNoOpen(new Object[]{user.getID()});
+		if(noOpenList!=null && noOpenList.size() > 0){
+			
+			/**  获取交易商户  **/
+			Map<String,Object> merchantMap = TradeDB.getMerchantInfo(new Object[]{user.getID() , "4"}); 
+
+//			Map<String, Object> termKey = TermkeyDB.selectTermKey(user.getID());
+//			String initKey = LoadPro.loadProperties("config", "DBINDEX");
+			
+			List<Object[]> objlist = new ArrayList<Object[]>();
+			
+			for (int i = 0; i < noOpenList.size() ; i++) {
+				
+				Map<String,Object> queryMap = new TreeMap<>();
+				
+				String bankCardno = "";
+				try {
+					bankCardno = UtilsConstant.ObjToStr(noOpenList.get(i).get("bankCardNo"));
+					logger.info("用户：" + user.getLoginID() + "请求查询无卡快捷支付请求 , 银行卡卡号：(原文)" + bankCardno);
+					queryMap.put("accNo",  DESUtil.encode(Constant.REPORT_DES3_KEY , bankCardno));
+				} catch (Exception e) {
+					e.printStackTrace();
+					repData.setRespCode(RespCode.SYSTEMError[0]);
+					repData.setRespDesc(RespCode.SYSTEMError[1]);
+					return ;
+				}
+				
+				queryMap.put("merchantNo" ,merchantMap.get("MerchantID"));
+				
+				String querysign = MD5.sign(JSONObject.fromObject(queryMap).toString() + Constant.REPORT_QUERY_KEY , StringEncoding.UTF_8);
+				queryMap.put("sign", querysign.toUpperCase());
+				
+				logger.info("银行卡卡号：" + bankCardno + "查询是否开通无卡快捷报文：" + queryMap.toString());
+				
+				logger.info("查询银行卡号:" + bankCardno + "是否开通无卡快捷");
+				String queryContent = HttpClient.post(LoadPro.loadProperties("http", "OPENKUAIQUERY_URL"), queryMap, null); 
+				
+				logger.info("查询银行卡号:" + bankCardno + "是否开通无卡快捷 响应报文：" + queryContent);
+	 			
+				JSONObject queryjson = JSONObject.fromObject(queryContent);
+				
+				String respCode = queryjson.getString("respCode");
+				
+				if(Constant.payRetCode.equals(respCode)){
+					String result = queryjson.getString("result");
+					if(!"0".equals(result)){
+						Object[] params = new Object[]{result , user.getID() , bankCardno};
+						objlist.add(params);
+					}
+				}
+			}
+			if(objlist.size() > 0){
+				OpenKuaiDB.updateBankCardResult(objlist);
+			}
+		}
 		
 		List<Map<String,Object>> list = OpenKuaiDB.kuaiCardlist(new Object[]{user.getID() });
-		
 		
 		Map<String, Object> termKey = TermkeyDB.selectTermKey(user.getID());
 		String initKey = LoadPro.loadProperties("config", "DBINDEX");
@@ -94,20 +153,28 @@ public class KuaiCardListService {
 				 * 
 				 */
 				String encrypt = UtilsConstant.ObjToStr(map.get("encrypt"));
-				String status = "1";
-				if(t0Result==1){
-					// t1 时间段
-					if("2".equals(encrypt)||"3".equals(encrypt)){
-						status = "0";
-					}
-				}else if(t0Result==0){
-					// t0 时间段
-					if("1".equals(encrypt)||"3".equals(encrypt)){
-						status = "0";
-					}
-				}
+				String status = "0";
+				
+//				if("0".equals(encrypt)){
+//					status = "0";
+//				}
+				
+//				if(t0Result==1){
+//					// t1 时间段
+//					if("2".equals(encrypt)||"3".equals(encrypt)){
+//						status = "0";
+//					}
+//				}else if(t0Result==0){
+//					// t0 时间段
+//					if("1".equals(encrypt)||"3".equals(encrypt)){
+//						status = "0";
+//					}
+//				}
 				logger.info("当前到账时间段： " +t0Result+ " , 卡号："+UtilsConstant.ObjToStr(map.get("bankCardNo")) + ",当前卡号交易状态：" + status);
 				
+				json.put("payerPhone", UtilsConstant.ObjToStr(map.get("payerPhone")));
+				json.put("cardName", map.get("cardName").toString());
+				json.put("bankCode", UtilsConstant.ObjToStr(map.get("bankCode")));
 				json.put("status", status);
 				json.put("bankName", UtilsConstant.ObjToStr( map.get("bankName")).substring(0, 4));
  				array.add(json); 

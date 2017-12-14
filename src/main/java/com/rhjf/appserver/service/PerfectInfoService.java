@@ -1,6 +1,6 @@
 package com.rhjf.appserver.service;
 
-import java.util.ArrayList;
+import java.util.ArrayList; 
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -74,6 +74,17 @@ public class PerfectInfoService {
 		String state = reqData.getState();
 		// 所在城市
 		String city = reqData.getCity();
+		
+		if(city.contains("北京")){
+			state = city;
+		}else if (city.contains("上海")){
+			state = city;
+		}else if (city.contains("重庆")){
+			state = city;
+		}else if (city.contains("天津")){
+			state = city;
+		}
+		
 		// 所在区
 		String county = reqData.getCounty();
 		// 详细地址
@@ -103,6 +114,7 @@ public class PerfectInfoService {
 		}
 		String bankName = UtilsConstant.ObjToStr( bankmap.get("bankName")); 
 		String bankCode = "";
+		String bankSymbol = "";
 		
 		int x = LoginUserDB.h5updateUserInfo(new Object[]{merchantType,name,IDcardNumber,merchantName,state,
 				city,county,businessLicense,address,email,merchantName,name,user.getLoginID()});
@@ -114,6 +126,7 @@ public class PerfectInfoService {
 			bankCode = bankinfomap.get("BankCode").toString();
 			bankSubbranch = bankinfomap.get("BankBranch").toString();
 			bankName = bankinfomap.get("BankName").toString();
+			bankSymbol = bankinfomap.get("BankSymbol").toString();
 		}else{
 			bankinfomap = BankCodeDB.bankInfo(new Object[]{bankName,"分行营业部",bankProv,bankCity});
 			if(bankinfomap!=null){
@@ -121,6 +134,7 @@ public class PerfectInfoService {
 				bankCode = bankinfomap.get("BankCode").toString();
 				bankSubbranch = bankinfomap.get("BankBranch").toString();
 				bankName = bankinfomap.get("BankName").toString();
+				bankSymbol = bankinfomap.get("BankSymbol").toString();
 			}else{
 				bankinfomap = BankCodeDB.bankInfo(new Object[]{bankName, bankCity + "分行",bankProv,bankCity});
 				if(bankinfomap!=null){
@@ -128,14 +142,16 @@ public class PerfectInfoService {
 					bankCode = bankinfomap.get("BankCode").toString();
 					bankSubbranch = bankinfomap.get("BankBranch").toString();
 					bankName = bankinfomap.get("BankName").toString();
+					bankSymbol = bankinfomap.get("BankSymbol").toString();
 				}else{
 					logger.info("没有查询到银行信息，或返回多条数据，将不进行匹配");
 				}
 			}
 		}
 		
-		LoginUserDB.saveOrUpBankInfo(new Object[]{UtilsConstant.getUUID(),user.getID(),name,bankCardNo,bankSubbranch,bankProv,bankCity,bankCode,bankName,creditCardNo,bankType
-				,name,bankCardNo,bankSubbranch,bankProv,bankCity,bankCode,bankName,creditCardNo,bankType});
+		LoginUserDB.saveOrUpBankInfo(new Object[]{UtilsConstant.getUUID(),user.getID(),name,bankCardNo,bankSubbranch,
+				bankProv,bankCity,bankCode,bankName, bankSymbol ,creditCardNo,bankType,reqData.getPayerPhone() ,name,
+				bankCardNo,bankSubbranch,bankProv,bankCity,bankCode,bankName,bankSymbol,creditCardNo,bankType,reqData.getPayerPhone()});
 		
 		List<Map<String,Object>> payChannelList = TradeDB.getPayChannel();
 		
@@ -160,20 +176,18 @@ public class PerfectInfoService {
 			return ;
 		}
 		
-		if(x > 0){
-			respData.setRespCode(RespCode.SUCCESS[0]);
-			respData.setRespDesc(RespCode.SUCCESS[1]);
-		}else{
+	
+		if(x < 1){
 			respData.setRespCode(RespCode.ServerDBError[0]);
 			respData.setRespDesc(RespCode.ServerDBError[1]);
 		}
 		
 		/**********  鉴权   *************************/
-		Map<String,String> reqMap = AuthUtil.authentication(name,bankCardNo,IDcardNumber);
-		logger.info("鉴权三要素:"+name+bankCardNo+IDcardNumber);
+		Map<String,String> reqMap = AuthUtil.authentication(name,bankCardNo,IDcardNumber , reqData.getPayerPhone());
+		logger.info("鉴权三要素:" + name + " , bankCardNo: " + bankCardNo + " , IDcardNumber : " + IDcardNumber + " , 手机号: " + reqData.getPayerPhone() + " 鉴权结果：" + reqMap.toString());
 		if(reqMap.get("respCode").equals(Author.SUCESS_CODE)){
 			//鉴权成功，向上游报商户
-			
+
 			int alipaylength = Constant.alipayMCCType.length;
 			Random random = new Random(alipaylength-1);
 			int index = random.nextInt(alipaylength-1);
@@ -198,7 +212,7 @@ public class PerfectInfoService {
 			map.put("legalPersonName", name);
 			map.put("legalPersonID", IDcardNumber);
 			map.put("merchantPersonName", name);
-			map.put("merchantPersonPhone",  user.getLoginID());
+			map.put("merchantPersonPhone",  reqData.getPayerPhone());
 			
 			map.put("wxType", wxmcccNumber);
 			map.put("wxT1Fee", Double.parseDouble(wxmap.get("T1SaleRate").toString())/10.0);
@@ -247,6 +261,8 @@ public class PerfectInfoService {
 					String AlipaydesKey = respJS.getString("AlipaydesKey");		// 支付des秘钥
 					//MerchantID,MerchantName,SignKey,DESKey,QueryKey,UserID,PayType
 					
+					LoginUserDB.delUserMerchant(user.getID());
+					
 					/*
 					 *  保存商户秘钥等信息 
 					 *
@@ -272,7 +288,7 @@ public class PerfectInfoService {
 					respData.setRespCode("00");
 					respData.setRespDesc("入网成功");
 				}else{
-					LoginUserDB.updateUserBankStatus(new Object[]{2 , 0 , user.getLoginID()});
+					LoginUserDB.updateUserBankStatus(new Object[]{0 , 0 , user.getLoginID()});
 					logger.info(user.getLoginID()+"入网异常：上游报备失败");
 					respData.setRespCode("01");
 					respData.setRespDesc(respJS.getString("respMsg"));
@@ -321,7 +337,7 @@ public class PerfectInfoService {
 	public String levelUp(String UserID) {
 		// 查询出审核用户的上一级用户商户类型和用户ID (topUser)
 		try {
-			TabLoginuser user = LoginUserDB.LoginuserInfo(UserID);
+			TabLoginuser user = LoginUserDB.getLoginuserInfo(UserID);
 			if (user != null) {
 				int MerchantLevel = user.getMerchantLeve();
 
@@ -333,7 +349,7 @@ public class PerfectInfoService {
 					
 					Map<String, Object> result = LoginUserDB.userLevelUpCount(MerchantLevel + 1);
 					
-					int levelUpCount = Integer.parseInt(result.get("MerchantLevel").toString());
+					int levelUpCount = Integer.parseInt(result.get("UserCount").toString());
 					
 					logger.info("上级商户：" + UserID + "如果升级需要扩展的人数：" + levelUpCount);
 					
@@ -359,6 +375,9 @@ public class PerfectInfoService {
 				}else{
 					logger.info("上级商户：" + UserID + "目前等级已经为2 是最高等级，无需升级");
 				}
+			}else{
+				logger.info("上级商户ID:" + UserID + "不存在");
+				return "fail";
 			}
 		} catch (Exception e) {
 			logger.info("商户升级失败,错误信息为" + e.getMessage());

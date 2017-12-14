@@ -29,6 +29,9 @@ public class PushUtils {
 	
 	
 	public static void main(String[] args) {
-		PushUtils.AndroidPush("123", "12312", "09d371afbdd350244dd0b7a3e038626974c2f932"); 
+//		PushUtils.AndroidPush("123", "12312", "ee64bb02eda1a29b5041770d3cf37db35ea58a746b6c40cb8c50dbcd7239946a"); 
+		
+		PushUtils.IOSPush("123123123", "ee64bb02eda1a29b5041770d3cf37db35ea58a746b6c40cb8c50dbcd7239946a");
+		
 	}
 }

@@ -32,6 +32,26 @@ public class TxDB extends DBBase {
 	}
 	
 	
+	public static int walletTX(String loginID,String ammount,String termSerno,String txType){
+		
+		int seqNo = 0;
+		ResultSet rs = null;
+		rs = executeProcedure("walletwithdraw",loginID,ammount,termSerno,txType);
+		try {
+			if(rs==null){
+				return 0;
+			}
+			while(rs.next()) {  
+				return rs.getInt("ret");
+			}  
+		} catch (SQLException e) {	
+			e.printStackTrace();
+			return 0;
+		}
+		return seqNo; 
+	}
+	
+	
 	
 	/**
 	 * 提现记录

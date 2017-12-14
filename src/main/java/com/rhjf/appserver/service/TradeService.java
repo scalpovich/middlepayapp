@@ -13,6 +13,7 @@ import com.rhjf.appserver.db.AppconfigDB;
 import com.rhjf.appserver.db.LoginUserDB;
 import com.rhjf.appserver.db.PayOrderDB;
 import com.rhjf.appserver.db.TradeDB;
+import com.rhjf.appserver.db.UserBankCardDB;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
 import com.rhjf.appserver.model.TabLoginuser;
@@ -34,20 +35,20 @@ public class TradeService {
 	LoggerTool log  = new LoggerTool(this.getClass());
 	
 	@SuppressWarnings("unchecked")
-	public void send(TabLoginuser loginUser,RequestData reqData , ResponseData repData){
+	public void send(TabLoginuser loginUser,RequestData reqData , ResponseData responseData){
 		
 		log.info("用户"+  loginUser.getLoginID() + "发起支付请求") ;
 		
 		if("AGENT".equals(loginUser.getUserType())){
-			repData.setRespCode(RespCode.SystemConfigError[0]);
-			repData.setRespDesc("该用户为代理商商户，无法进行交易操作"); 
+			responseData.setRespCode(RespCode.SystemConfigError[0]);
+			responseData.setRespDesc("该用户为代理商商户，无法进行交易操作"); 
 			return;
 		}
 		
 		
 		if(loginUser.getBankInfoStatus()!=1||loginUser.getPhotoStatus()!=1){
-			repData.setRespCode("F002");
-			repData.setRespDesc("该用户没有通过审核无法进行交易"); 
+			responseData.setRespCode("F002");
+			responseData.setRespDesc("该用户没有通过审核无法进行交易"); 
 			return ;
 		}
 		
@@ -71,14 +72,14 @@ public class TradeService {
 			if("".equals(UtilsConstant.ObjToStr(bankInfoMap.get("SettleCreditCard")))){
 				//  没有通过信用卡鉴权
 				if(totalAmount+Integer.parseInt(reqData.getAmount()) > 3000000 ){
-					repData.setRespCode("F003");
-					repData.setRespDesc("当前单日限额3万元，提供信用卡信息可提升至20万元，是否提供？"); 
+					responseData.setRespCode("F003");
+					responseData.setRespDesc("当前单日限额3万元，提供信用卡信息可提升至20万元，是否提供？"); 
 					return ;
 				}
 			}else{
 				if(totalAmount+Integer.parseInt(reqData.getAmount()) > 20000000 ){
-					repData.setRespCode("F003");
-					repData.setRespDesc("当前单日限额20万元"); 
+					responseData.setRespCode("F003");
+					responseData.setRespDesc("当前单日限额20万元"); 
 					return ;
 				}
 			}
@@ -95,8 +96,8 @@ public class TradeService {
 			agentconfigmap = AgentDB.agentConfig(new Object[]{loginUser.getAgentID() ,payChannel });
 			if(agentconfigmap == null || agentconfigmap.isEmpty()){
 				log.info("用户：" + loginUser.getLoginID() + "对应代理商交易类型：" + payChannel + "配置信息不完整, 对应代理商ID：" +  loginUser.getAgentID());
-				repData.setRespCode(RespCode.AgentTradeConfigError[0]);
-				repData.setRespDesc(RespCode.AgentTradeConfigError[1]); 
+				responseData.setRespCode(RespCode.AgentTradeConfigError[0]);
+				responseData.setRespDesc(RespCode.AgentTradeConfigError[1]); 
 				return ;
 			}
 			ehcache.put(Constant.cacheName, loginUser.getAgentID() + payChannel + "agentConfig", agentconfigmap);
@@ -125,8 +126,8 @@ public class TradeService {
 				int x = TradeDB.saveUserConfig(list)[0];
 				if(x < 0 ){
 					log.info("用户：" + loginUser.getID() + "支付类型：" + payChannel + " 支付配置信息复制失败,停止交易操作" );
-					repData.setRespCode(RespCode.TradeTypeConfigError[0]);
-					repData.setRespDesc(RespCode.TradeTypeConfigError[1]); 
+					responseData.setRespCode(RespCode.TradeTypeConfigError[0]);
+					responseData.setRespDesc(RespCode.TradeTypeConfigError[1]); 
 					return ;
 				}else{
 					map = TradeDB.getUserConfig(new Object[]{ loginUser.getID() , payChannel});
@@ -151,6 +152,8 @@ public class TradeService {
 				productType = "QQPAY";
 			}else if(payChannel.equals(Constant.payChannelunionQRCode)){
 				productType = "UnionPay";
+			}else if(payChannel.equals(Constant.payChannelJDScancode)){
+				productType = "JD";
 			}
 			
 			JSONObject openjson = OpenProductUtil.openProduct(productType, MerchantID , map.get("T0SaleRate").toString(), map.get("T1SaleRate").toString()); 
@@ -179,14 +182,14 @@ public class TradeService {
 				
 				if(merchantMap == null || merchantMap.isEmpty()){
 					log.info(loginUser.getLoginID() + "获取 " + payChannel + "商户信息失败");
-					repData.setRespCode(RespCode.MerchantNoConfig[0]);
-					repData.setRespDesc(RespCode.MerchantNoConfig[1]); 
+					responseData.setRespCode(RespCode.MerchantNoConfig[0]);
+					responseData.setRespDesc(RespCode.MerchantNoConfig[1]); 
 					return ;
 				}
 			}else{
 				log.info(loginUser.getLoginID() + "获取商户信息失败");
-				repData.setRespCode(RespCode.MerchantNoConfig[0]);
-				repData.setRespDesc(RespCode.MerchantNoConfig[1]); 
+				responseData.setRespCode(RespCode.MerchantNoConfig[0]);
+				responseData.setRespDesc(RespCode.MerchantNoConfig[1]); 
 				return ;
 			}
 		}
@@ -205,6 +208,14 @@ public class TradeService {
 		
 		
 		String encrypt = loginUser.getTradeCode();
+		
+		
+		log.info("用户：" + loginUser.getLoginID() + "发送[ " + reqData.getTradeCode() + " ]交易"); 
+		
+		if(!UtilsConstant.strIsEmpty(reqData.getTradeCode())){
+			encrypt = reqData.getTradeCode() ;
+		}
+		
 		
 		log.info("用户：" + loginUser.getLoginID() + "发送[ " + encrypt + " ]交易"); 
 		
@@ -246,22 +257,20 @@ public class TradeService {
 		/** 根据交易类型判断代理商费率的完整性，如果代理商只存在T0费率，商户发起T1交易将不通过 **/
 		if(Constant.T1.equals(loginUser.getTradeCode())){
 			// ChannelRate , AgentRate , MerchantRate , T0ChannelRate , T0AgentRate , T0MerchantRate
-			if("".equals(UtilsConstant.ObjToStr(agentconfigmap.get("ChannelRate")))||"".equals(UtilsConstant.ObjToStr(agentconfigmap.get("AgentRate")))
-					||"".equals(UtilsConstant.ObjToStr(agentconfigmap.get("AgentRate")))){
+			if("".equals(UtilsConstant.ObjToStr(agentconfigmap.get("AgentRate")))||"".equals(UtilsConstant.ObjToStr(agentconfigmap.get("AgentRate")))){
 				log.info("用户：" + loginUser.getLoginID() + "对应代理商交易类型：" + payChannel + "配置 [ T1 ] 信息不完整 , 对应代理商ID：" +  loginUser.getAgentID());
-				repData.setRespCode(RespCode.AgentTradeConfigError[0]);
-				repData.setRespDesc(RespCode.AgentTradeConfigError[1]); 
+				responseData.setRespCode(RespCode.AgentTradeConfigError[0]);
+				responseData.setRespDesc(RespCode.AgentTradeConfigError[1]); 
 				return ;
 			}
 		}else{
 			
 			feeRate = map.get("T0SettlementRate").toString();
 			
-			if("".equals(UtilsConstant.ObjToStr(agentconfigmap.get("T0ChannelRate")))||"".equals(UtilsConstant.ObjToStr(agentconfigmap.get("T0AgentRate")))
-					||"".equals(UtilsConstant.ObjToStr(agentconfigmap.get("T0MerchantRate")))){
+			if("".equals(UtilsConstant.ObjToStr(agentconfigmap.get("T0AgentRate")))||"".equals(UtilsConstant.ObjToStr(agentconfigmap.get("T0MerchantRate")))){
 				log.info("用户：" + loginUser.getLoginID() + "对应代理商交易类型：" + payChannel + "配置 [ T0 ] 信息不完整 , 对应代理商ID：" +  loginUser.getAgentID());
-				repData.setRespCode(RespCode.AgentTradeConfigError[0]);
-				repData.setRespDesc(RespCode.AgentTradeConfigError[1]); 
+				responseData.setRespCode(RespCode.AgentTradeConfigError[0]);
+				responseData.setRespDesc(RespCode.AgentTradeConfigError[1]); 
 				return ;
 			}
 		} 
@@ -309,13 +318,15 @@ public class TradeService {
 		
 		
 		/** 向数据库插入初始化数据 **/
-		int ret = TradeDB.tradeInit(new Object[]{UtilsConstant.getUUID(),reqData.getAmount() ,DateUtil.getNowTime(DateUtil.yyyyMMdd),DateUtil.getNowTime(DateUtil.HHmmss),
-				tradeDate,tradeTime , reqData.getSendSeqId(), Constant.TradeType[0] , encrypt, loginUser.getID(),payChannel, feeRate , merchantID,orderNumber});
+		int ret = TradeDB.tradeInit(new Object[]{UtilsConstant.getUUID(),reqData.getAmount() ,
+				DateUtil.getNowTime(DateUtil.yyyyMMdd),DateUtil.getNowTime(DateUtil.HHmmss),
+				tradeDate,tradeTime , reqData.getSendSeqId(), Constant.TradeType[0] ,
+				encrypt, loginUser.getID(),payChannel, feeRate , merchantID,orderNumber , "" , ""  , loginUser.getAgentID()});
 		
 		if(ret < 1 ){
 			log.info("数据库保存信息失败");
-			repData.setRespCode(RespCode.ServerDBError[0]);
-			repData.setRespDesc(RespCode.ServerDBError[1]);
+			responseData.setRespCode(RespCode.ServerDBError[0]);
+			responseData.setRespDesc(RespCode.ServerDBError[1]);
 			return ;
 		}
 		
@@ -332,9 +343,9 @@ public class TradeService {
 			String T0SaleRate = UtilsConstant.ObjToStr(map.get("T0SaleRate"));
 			
 			if(UtilsConstant.strIsEmpty(T0SaleRate)){
-				log.info("用户"+ loginUser.getLoginID() + "没有配置支付类型(编号)" + repData.getPayChannel() + "的T0费率.");
-				repData.setRespCode(RespCode.SystemConfigError[0]);
-				repData.setRespDesc(RespCode.SystemConfigError[1]);
+				log.info("用户"+ loginUser.getLoginID() + "没有配置支付类型(编号)" + responseData.getPayChannel() + "的T0费率.");
+				responseData.setRespCode(RespCode.SystemConfigError[0]);
+				responseData.setRespDesc(RespCode.SystemConfigError[1]);
 				return ;
 			}
 			// T0 附加费用
@@ -354,7 +365,7 @@ public class TradeService {
 		payrequest.put("orderIp","1.1.1.1");
 		
 		
-		Map<String,Object> bankMap = TradeDB.getBankInfo(loginUser.getID());
+		Map<String,Object> bankMap = UserBankCardDB.getBankInfo(loginUser.getID());
 		
 		
 		/**  上报结算信息  **/
@@ -373,8 +384,8 @@ public class TradeService {
 				
 			} catch (Exception e) {
 				e.printStackTrace();
-				repData.setRespCode(RespCode.SYSTEMError[0]);
-				repData.setRespDesc(RespCode.SYSTEMError[1]);
+				responseData.setRespCode(RespCode.SYSTEMError[0]);
+				responseData.setRespDesc(RespCode.SYSTEMError[1]);
 				return ;
 			}
 			payrequest.put("phoneNumber", loginUser.getLoginID());
@@ -409,25 +420,30 @@ public class TradeService {
 			
 			/** T0 交易如果成功将返回 10000  **/
 			if(retCode.equals(Constant.T0RetCode) || retCode.equals(Constant.payRetCode) ){
-				repData.setQrCodeUrl(json.getString("qrCode")); 
-				repData.setRespCode(RespCode.SUCCESS[0]);
-				repData.setRespDesc(RespCode.SUCCESS[1]);
-			}else if("0004".equals(retCode)){
-				repData.setRespCode(retCode);
-				repData.setRespDesc(json.getString("通道配置异常"));
+				responseData.setQrCodeUrl(json.getString("qrCode")); 
+				responseData.setRespCode(RespCode.SUCCESS[0]);
+				responseData.setRespDesc(RespCode.SUCCESS[1]);
+				responseData.setRate(feeRate);
+			}else if("000004".equals(retCode)){
+				responseData.setRespCode(retCode);
+				responseData.setRespDesc("通道配置异常");
+			}else if("7001".equals(retCode)){
+				responseData.setRespCode(retCode);
+				responseData.setRespDesc("创建订单失败");
 			}else{
-				repData.setRespCode(retCode);
+				responseData.setRespCode(retCode);
 				if(json.has("msg")){
-					repData.setRespDesc(json.getString("msg"));
+					responseData.setRespDesc(json.getString("msg"));
 				}else if(json.has("retMsg")){
-					repData.setRespDesc(json.getString("retMsg"));
+					responseData.setRespDesc(json.getString("retMsg"));
+				}else if(json.has("respMsg")){
+					responseData.setRespDesc(json.getString("respMsg"));
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
-			log.error("请求获取二维码发生异常:"  + e.getMessage()); 
-			repData.setRespCode(RespCode.HttpClientError[0]);
-			repData.setRespDesc(RespCode.HttpClientError[1]);
+			log.error("请求获取二维码发生异常:"  + e.getMessage() , e); 
+			responseData.setRespCode(RespCode.HttpClientError[0]);
+			responseData.setRespDesc(RespCode.HttpClientError[1]);
 			return ;
 		}
 	}

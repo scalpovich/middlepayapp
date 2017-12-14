@@ -10,6 +10,7 @@ import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.StringEncoding;
 import com.rhjf.appserver.db.LoginUserDB;
 import com.rhjf.appserver.db.TradeDB;
+import com.rhjf.appserver.db.UserBankCardDB;
 import com.rhjf.appserver.db.YMFTradeDB;
 import com.rhjf.appserver.model.TabLoginuser;
 import com.rhjf.appserver.util.AmountUtil;
@@ -80,7 +81,7 @@ public class YMFTradeService   {
 		/** 向数据库插入初始化数据 **/
 		int ret = TradeDB.YMFTradeInit(new Object[]{UtilsConstant.getUUID(),amount ,DateUtil.getNowTime(DateUtil.yyyyMMdd),DateUtil.getNowTime(DateUtil.HHmmss),
 				tradeDate,tradeTime , DateUtil.getNowTime(DateUtil.yyyyMMddHHmmssSSS), Constant.TradeType[1] ,encrypt, 
-				user.getID(),qrCodeMap.get("PayChannel"), merchantID,orderNumber , ymfCode});
+				user.getID(),qrCodeMap.get("PayChannel"), merchantID,orderNumber , ymfCode , user.getAgentID()});
 		if(ret < 1 ){
 			logger.info("数据库保存信息失败");
 			return ;
@@ -108,7 +109,7 @@ public class YMFTradeService   {
 		/** T0 交易上报结算信息  **/
 		if(encrypt.equals(Constant.T0)){
 			try {
-				Map<String,Object> bankMap = TradeDB.getBankInfo(user.getID());
+				Map<String,Object> bankMap = UserBankCardDB.getBankInfo(user.getID());
 				
 				
 //				String cardNo = DESUtil.encode(desKey,user.getBankCardNo());

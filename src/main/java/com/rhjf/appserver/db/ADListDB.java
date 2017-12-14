@@ -7,7 +7,7 @@ public class ADListDB extends DBBase{
 	
 	
 	public static List<Map<String,Object>> adlist(){
-		String sql = "select Content from tab_adlist";
+		String sql = "select * from tab_adlist";
 		return queryForList(sql, null);
 	}
 

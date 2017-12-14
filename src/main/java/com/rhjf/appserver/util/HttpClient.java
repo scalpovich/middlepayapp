@@ -77,7 +77,7 @@ public class HttpClient {
 		try {
 			rsp = httpClient.execute(httppost);
 			
-			System.out.println(rsp.getStatusLine().getStatusCode());
+			log.info( url + ":" + rsp.getStatusLine().getStatusCode());
 			if (rsp != null) {
 				HttpEntity entity = rsp.getEntity();
 				InputStream in = entity.getContent();
@@ -131,6 +131,10 @@ public class HttpClient {
 		HttpEntity rspentity = response.getEntity();
 		InputStream in = rspentity.getContent();
 
+		log.info( callURL + ":" + response.getStatusLine().getStatusCode());
+
+		
+		
 		String temp;
 		BufferedReader data = new BufferedReader(new InputStreamReader(in, "utf-8"));
 		StringBuffer result = new StringBuffer();

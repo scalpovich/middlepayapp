@@ -26,11 +26,15 @@ import com.rhjf.appserver.model.Fee;
 import com.rhjf.appserver.model.PayOrder;
 import com.rhjf.appserver.model.TabLoginuser;
 import com.rhjf.appserver.service.NotifyService;
+import com.rhjf.appserver.util.AmountUtil;
 import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.MD5;
-import com.rhjf.appserver.util.PushUtils;
+import com.rhjf.appserver.util.PushUtil;
+import com.rhjf.appserver.util.RabbitmqSend;
 import com.rhjf.appserver.util.UtilsConstant;
+
+import net.sf.json.JSONObject;
 
 
 /**
@@ -84,24 +88,16 @@ public class PayNotifyController {
 		}
 		/** 查询商户信息  **/
 		String merchantID = map2.get("r1_merchantNo");
-		
 		String paytype = "1";
-		String orderName = "微信订单";
-		
 		if("Alipay".equals(map2.get("r5_business").toString())){
 			paytype = "2";
-			orderName = "支付宝订单";
 		}else if("QQ".equals(map2.get("r5_business").toString())){
 			paytype = "3";
-			orderName = "QQ支付订单";
 		}else if("B2C".equals(map2.get("r5_business").toString())){
 			paytype = "4";
-			orderName = "快捷支付订单";
 		}else if("UnionPay".equals(map2.get("r5_business").toString())){
 			paytype = "5";
-			orderName = "银联二维码订单";
 		}
-		
 		
 		
 		Map<String,Object> map =  TradeDB.getMerchantInfo(merchantID,paytype);
@@ -170,12 +166,14 @@ public class PayNotifyController {
 			String tonken = DevicetokenDB.getDeviceToken(loginUser.getID());
 			logger.info("============================订单编号:" + order.getOrderNumber() + "支付成功，用户tonken:" + tonken + "开始发送push");
 			if(!UtilsConstant.strIsEmpty(tonken)){
-				String content = "您的" + orderName + "支付成功，请查看";
-				PushUtils.IOSPush(content, tonken);
-				PushUtils.AndroidPush("支付通知", content, tonken); 
+//				String content = "您的" + orderName + "支付成功，请查看";
+//				PushUtils.IOSPush(content, tonken);
+//				PushUtils.AndroidPush("支付通知", content, tonken); 
 				
-//				PushUtil.iosSend("分润通知" , content, tonken , "2");
-//				PushUtil.androidSend("分润通知", content, tonken, "2");
+				String content = "爱码付收款金额 " + AmountUtil.div(order.getAmount(), "100") + "元"; 
+				
+				PushUtil.iosSend("收款通知" , content, tonken , "1");
+				PushUtil.androidSend("收款通知", content, tonken, "1");
 			}
 			
 			
@@ -207,11 +205,8 @@ public class PayNotifyController {
 					// 如果三积分销中的用户包含业务员
 					if(fee.getSalemsManID()!= null){
 						if(objects[1].equals(fee.getSalemsManID())){
-							
 							logger.info("订单：" + orderNumber + "交易三级分销包含业务员 " + profit);
-							
 							fee.setSalemsDistrubuteProfit(profit); 
-							profit += fee.getSalemsGetAgentProfit();
 						}
 					} else {
 						logger.info("订单：" + orderNumber + " 交易三级分销没有业务员  " + profit);
@@ -219,6 +214,14 @@ public class PayNotifyController {
 					logger.info("交易单号：" + order.getOrderNumber() + "  ====用户分润list中的值：" + Arrays.toString(objects)); 
 					profitlist.add(new Object[]{ profit , profit , objects[1]});
 				}
+				
+				// 如果业务从代理商哪里获取利润
+				if(fee.getSalemsManID()!= null){
+					profitlist.add(new Object[]{ fee.getSalemsGetAgentProfit() , fee.getSalemsGetAgentProfit() , fee.getSalemsManID()});
+				} else {
+					logger.info("订单：" + order.getOrderNumber() +  "  ，没有业务员");
+				}
+				
 				LoginUserDB.merchantProfit(profitlist);
 			} else {
 				logger.info("订单号：" + orderNumber + ",没有产生分润");
@@ -228,6 +231,18 @@ public class PayNotifyController {
 				logger.info("订单号：" + orderNumber + " 交易商户 涉及业务员分润"); 
 				SalesManDB.saveSalesManProfit(new Object[]{UtilsConstant.getUUID(),fee.getSalemsManID(),order.getUserID(),order.getID()
 						,fee.getSalemsDistrubuteProfit(),fee.getSalemsGetAgentProfit()});
+			}
+			
+			
+			if("4".equals(paytype)){
+				try {
+					JSONObject mq = new JSONObject();
+					mq.put("orderNumber", orderNumber);
+					mq.put("dfType", "Trade");
+					RabbitmqSend.sendMessage(mq.toString());
+				} catch (Exception e) {
+					logger.error("执行mq发送队列消息异常：" + e.getMessage() ,  e); 
+				}
 			}
 			
 			

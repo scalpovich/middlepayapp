@@ -30,9 +30,15 @@ public class TradeDB extends DBBase{
 	 * @return
 	 */
 	public static List<Map<String,Object>> getUserFeeRate(Object[] obj){
-		String sql = "select tpc.ID,PayChannelName , T1SaleRate , T1SettlementRate , T0SaleRate , T0SettlementRate , SaleAmountMax , SaleAmountMaxDay "
+//		String sql = "select tpc.ID,PayChannelName , T1SaleRate , T1SaleRate-T1SettlementRate as T1SettlementRate ,"
+//				+ " T0SaleRate , T0SaleRate-T0SettlementRate as T0SettlementRate , SaleAmountMax , SaleAmountMaxDay "
+//				+ " from tab_user_config as tuc , tab_pay_channel as tpc"
+//				+ " where tuc.PayChannel=tpc.ID and tuc.UserID=?";
+		
+		String sql = "select tpc.ID,PayChannelName , T1SaleRate ,  T1SettlementRate , T1SaleRate-T1SettlementRate as T1rebate  , "
+				+ " T0SaleRate , T0SettlementRate , T0SaleRate-T0SettlementRate as T0rebate , SaleAmountMax , SaleAmountMaxDay "
 				+ " from tab_user_config as tuc , tab_pay_channel as tpc"
-				+ " where tuc.PayChannel=tpc.ID and tuc.UserID=?";
+				+ " where tuc.PayChannel=tpc.ID and tuc.UserID=? and tpc.Active=1";
 		return queryForList(sql, obj);
 	}
 	
@@ -100,15 +106,21 @@ public class TradeDB extends DBBase{
 	 * @return
 	 */
 	public static int tradeInit(Object[] obj){
-		String sql = "insert into tab_pay_order (ID,Amount,LocalDate,LocalTimes,TradeDate,TradeTime,TermSerno,TradeType,TradeCode,UserID,PayChannel,FeeRate,MerchantID,OrderNumber) values "
-				+ "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+		String sql = "insert into tab_pay_order (ID,Amount,LocalDate,LocalTimes,TradeDate,TradeTime,TermSerno,TradeType,"
+				+ "TradeCode,UserID,PayChannel,FeeRate,MerchantID,OrderNumber, DFBankCardNo ,TradeBankNo , AgentID) values "
+				+ "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 		return executeSql(sql, obj);
 	}
 	
-	
+	/**
+	 *   初始化固定码交易数据
+	 * @param obj
+	 * @return
+	 */
 	public static int YMFTradeInit(Object[] obj){
-		String sql = "insert into tab_pay_order (ID,Amount,LocalDate,LocalTimes,TradeDate,TradeTime,TermSerno,TradeType,TradeCode,UserID,PayChannel,MerchantID,OrderNumber,YMFCode) values "
-				+ "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+		String sql = "insert into tab_pay_order (ID,Amount,LocalDate,LocalTimes,TradeDate,TradeTime,TermSerno,"
+				+ "TradeType,TradeCode,UserID,PayChannel,MerchantID,OrderNumber,YMFCode , AgentID) values "
+				+ "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 		return executeSql(sql, obj);
 	}
 	
@@ -215,15 +227,5 @@ public class TradeDB extends DBBase{
 		
 	}
 	
-	
-	
-	/**
-	 *   查询结算信息
-	 * @param userID
-	 * @return
-	 */
-	public static Map<String,Object> getBankInfo(String userID){
-		String sql = "select * from tab_pay_userbankcard where UserID=?";
-		return queryForMap(sql, new Object[]{userID});
-	}
+
 }

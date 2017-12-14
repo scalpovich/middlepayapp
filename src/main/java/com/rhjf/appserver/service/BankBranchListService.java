@@ -29,13 +29,13 @@ public class BankBranchListService {
 		String bankCity = request.getBankCity();
 		String accountNo = request.getBankCardNo();
 
-		log.info("获取支行名称列表： 所在省份:" + bankCity + " , 城市:" + bankCity + ", 卡号：" + accountNo);
+		log.info("获取支行名称列表： 所在省份:" + bankProv + " , 城市:" + bankCity + ", 卡号：" + accountNo);
 
 		Map<String, Object> bankBinMap = BankCodeDB.bankBinMap(new Object[] { accountNo });
 
 		if (bankBinMap == null || bankBinMap.isEmpty()) {
 
-			log.info("获取支行列表失败: 所在省份:" + bankCity + " , 城市:" + bankCity + ", 卡号：" + accountNo);
+			log.info("获取支行列表失败: 所在省份:" + bankProv + " , 城市:" + bankCity + ", 卡号：" + accountNo);
 
 			response.setRespCode(RespCode.BankCardInfoErroe[0]);
 			response.setRespDesc(RespCode.BankCardInfoErroe[1]);

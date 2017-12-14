@@ -2,7 +2,7 @@ package com.rhjf.appserver.model;
 
 public class AuthenticationRecord {
 	
-	private String iD;
+	private String ID;
 	
 	private String userID;
 	
@@ -21,11 +21,11 @@ public class AuthenticationRecord {
 	private String respDesc;
 
 	public String getID() {
-		return iD;
+		return ID;
 	}
 
-	public void setID(String iD) {
-		this.iD = iD;
+	public void setID(String ID) {
+		this.ID = ID;
 	}
 
 	public String getIdNumber() {

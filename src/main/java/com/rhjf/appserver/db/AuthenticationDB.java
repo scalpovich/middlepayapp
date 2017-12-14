@@ -44,10 +44,9 @@ public class AuthenticationDB extends DBBase{
 	
 	
 	
-	
 	public static int addAuthencationInfo(Object[] obj){
-		String sql = "insert into tab_authentication (ID , IdNumber  , RealName , BankCardNo , RespCode , RespDesc) "
-				+ "values (?,?,?,?,?,?)";
+		String sql = "insert into tab_authentication (ID , IdNumber , PhoneNumber , RealName , BankCardNo , RespCode , RespDesc) "
+				+ "values (?,?,?,?,?,? ,?)";
 		return executeSql(sql, obj);
 	}
 	

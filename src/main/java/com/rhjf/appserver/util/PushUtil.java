@@ -13,20 +13,20 @@ public class PushUtil {
 	private static LoggerTool log = new LoggerTool(PushUtil.class);
 	
 	private static String url = "http://msg.umeng.com/api/send";
-	private static final String appkey = "59ad1251c62dca7ccb00071a";
-	private static final String appMasterSecret = "ezcfogsow6bysilnh0lssm1yixwhbijv";
+	private static final String appkey = "58cf47f23eae251a77000e75";
+	private static final String appMasterSecret = "ccejkhq1fozqt4xyoia0ct4ni11xhjwy";
 
 	
-	private static final String androidAppkey = "59ae7454310c93467d000288";
+	private static final String androidAppkey = "58d356c73eae252d80000d45";
 	
-	private static final String androidappMasterSecret = "psivnf3hwzzmgfivd1rfj2zktt5acay9";
+	private static final String androidappMasterSecret = "dt5voxjoruxbcjjkzlsf85kf7qqujlrp";
 	
 	public static void iosSend(String title ,String content , String deviceToken , String type){
 	
 		JSONObject json = new JSONObject();
 		
 		json.put("timestamp", System.currentTimeMillis());
-		json.put("production_mode" , "false");
+		json.put("production_mode" , "true");
 		json.put("appkey", appkey);
 		
 		JSONObject payload = new JSONObject();
@@ -34,16 +34,14 @@ public class PushUtil {
 		JSONObject aps = new JSONObject();
 
 		aps.put("sound", "default");
-		aps.put("content-available", 1);
-		aps.put("badge", 1);
-		
-		if("2".equals(type)){
-			aps.put("badge", 0);
-		}
+//		aps.put("content-available", 1);
+		aps.put("mutable-content" , 1);
+		aps.put("badge", 0);
+		aps.put("category", "audio");
 		
 		JSONObject alert = new JSONObject();
 		alert.put("title", title);
-		alert.put("subtitle", title);
+		alert.put("subtitle", "");
 		alert.put("body", content);
 		aps.put("alert", alert);
 		
@@ -58,9 +56,9 @@ public class PushUtil {
 		try {
 			System.out.println(("POST" + url + json.toString() + appMasterSecret)); 
 			sign = DigestUtils.md5Hex(("POST" + url + json.toString() + appMasterSecret).getBytes("utf8"));
-			url = url + "?sign=" + sign;
+			String newURL = url + "?sign=" + sign;
 			log.info(json.toString()); 
-			log.info(HttpClient.xml(url, json.toString()));
+			log.info(HttpClient.xml(newURL, json.toString()));
 		} catch (IOException e1) {
 			log.error("发送push通知异常："  , e1);
 		}
@@ -92,27 +90,39 @@ public class PushUtil {
 		
 		body.put("custom", content);
 		
+		if(!"2".equals(type)){
+			body.put("after_open", "go_app");
+		}
+		
+		
 		payload.put("body", body);
 		
 		json.put("payload", payload);
 		
-		json.put("production_mode", "false");
+		json.put("production_mode", "true");
 		json.put("description", "description");
 		
 		String sign = MD5.sign("POST" + url + json.toString() + androidappMasterSecret, "utf-8");
-		url = url + "?sign=" + sign;
+		String newURL = url + "?sign=" + sign;
 		
 		try {
-			log.info( HttpClient.xml(url, json.toString()));
+			log.info( HttpClient.xml(newURL, json.toString()));
 			
 		} catch (IOException e) {
 			log.error("发送通知异常", e); 
 		}
 	}
 	
-	public static void main(String[] args) {
-		PushUtil.androidSend("标题", "内容", "AlDXcAtK72x4-hV2v9Jf8oCGIKDB6QTVNhLS7aWvfNOd,"
-				+ "AkrHpP_B2hjw6_9QcHP6QQLWYFY6V9sBAjz_sSmdn8S6,AhfLFegDDOKxyRnQZOW6hdoLiR9-b6r9vAMgYC2ZnRWg", "2");
+	public static void main(String[] args) throws InterruptedException {
+//		PushUtil.androidSend("标题", "当前收款100元", "Ar1nyOIaQE-ScoWrCNPCQccSiaTx328z-gIlU2afn6Lt,AkrHpP_B2hjw6_9QcHP6QQIihPyg9asNEijeiD79kSZx,Au6sh5olI_LJRydfqQwxjsNHsM3MnISGy2_y25EzGj3B", "1");
+
+		for (int i = 0 ; i < 100 ; i ++ ) {
+			
+			PushUtil.iosSend("标题", "当前收款1000元", "345ad30874b2ad10af8b108951799176d31655bd4a7b20c2d086630bd318e20a", "1");
+
+			
+			Thread.sleep(30000);
+		}
 	}
 	
 }

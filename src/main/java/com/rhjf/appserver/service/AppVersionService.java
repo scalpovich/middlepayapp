@@ -71,16 +71,11 @@ public class AppVersionService {
 	
 	
 	public void adlist(RequestData reqdata, ResponseData repdata){
-		JSONArray adarray = new JSONArray();
 		
 		List<Map<String,Object>> list = ADListDB.adlist();
 		
 		
-		for (int i = 0; i < list.size(); i++) {
-			adarray.add(list.get(i).get("Content")); 
-		}
-		
-		repdata.setTranslist(adarray.toString());  
+		repdata.setList(JSONArray.fromObject(list).toString());  
 		
 		repdata.setRespCode(RespCode.SUCCESS[0]);
 		repdata.setRespDesc(RespCode.SUCCESS[1]);

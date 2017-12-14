@@ -1,6 +1,6 @@
 package com.rhjf.appserver.service;
 
-import java.util.ArrayList;
+import java.util.ArrayList; 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +54,6 @@ public class MonthlyReportService {
 		}
 		
 		JSONArray array = new JSONArray();
-		
 		for (String year : map.keySet()) {
 			List<Map<String,String>> data = map.get(year);
 			JSONObject json = new JSONObject();

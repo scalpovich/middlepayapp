@@ -152,7 +152,7 @@ public class H5PerfectInfoService {
 		}
 		
 		LoginUserDB.saveOrUpBankInfo(new Object[]{UtilsConstant.getUUID(),userID,accountName,accountNo,bankBranch,bankProv,bankCity,bankCode,bankName,creditCardNo,bankType
-				,accountName,accountNo,bankBranch,bankProv,bankCity,bankCode,bankName,creditCardNo,bankType});
+				, "",accountName,accountNo,bankBranch,bankProv,bankCity,bankCode,bankName,creditCardNo,bankType , ""});
 		
 //		/**********  鉴权   *************************/
 //		Map<String,String> authMap=new HashMap<String,String>();
@@ -162,7 +162,7 @@ public class H5PerfectInfoService {
 //		authMap.put("certificateNo", legalPersonID);
 //		Map<String,String> reqMap=authService.authKuai(authMap);
 		
-		Map<String,String> reqMap = AuthUtil.authentication(accountName,accountNo,legalPersonID);
+		Map<String,String> reqMap = AuthUtil.authentication(accountName,accountNo,legalPersonID,"");
 		
 		if(reqMap.get("respCode").equals(Author.SUCESS_CODE)){
 			//鉴权成功，向上游报商户
@@ -270,10 +270,10 @@ public class H5PerfectInfoService {
 					js.put("respCode", "00");
 					js.put("respMsg", "提交成功");
 				}else{
-					this.updateUserBankStatus(new Object[]{2 , 0 , loginID});
+					this.updateUserBankStatus(new Object[]{0 , 0 , loginID});
 					
 					js.put("respCode", "01");
-					js.put("respMsg", "信息已完善，等待进一步审核");
+					js.put("respMsg", respJS.get("respMsg"));
 				}
 			} catch (Exception e) {
 				log.error(loginID + "入网异常：" + e.getMessage());
@@ -326,7 +326,7 @@ public class H5PerfectInfoService {
 	public String levelUp(String UserID) {
 		// 查询出审核用户的上一级用户商户类型和用户ID (topUser)
 		try {
-			TabLoginuser user = LoginUserDB.LoginuserInfo(UserID);
+			TabLoginuser user = LoginUserDB.getLoginuserInfo(UserID);
 			if (user != null) {
 				int MerchantLevel = user.getMerchantLeve();
 
@@ -338,7 +338,7 @@ public class H5PerfectInfoService {
 					
 					Map<String, Object> result = LoginUserDB.userLevelUpCount(MerchantLevel + 1);
 					
-					int levelUpCount = Integer.parseInt(result.get("MerchantLevel").toString());
+					int levelUpCount = Integer.parseInt(result.get("UserCount").toString());
 					
 					log.info("上级商户：" + UserID + "如果升级需要扩展的人数：" + levelUpCount);
 					
@@ -364,6 +364,9 @@ public class H5PerfectInfoService {
 				}else{
 					log.info("上级商户：" + UserID + "目前等级已经为2 是最高等级，无需升级");
 				}
+			}else{
+				log.info("上级商户ID:" + UserID + "不存在");
+				return "fail";
 			}
 		} catch (Exception e) {
 			log.info("商户升级失败,错误信息为" + e.getMessage());

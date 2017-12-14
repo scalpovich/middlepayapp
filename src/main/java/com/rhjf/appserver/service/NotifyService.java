@@ -13,6 +13,7 @@ import com.rhjf.appserver.db.AgentDB;
 import com.rhjf.appserver.db.AppconfigDB;
 import com.rhjf.appserver.db.ChannelConfigDB;
 import com.rhjf.appserver.db.DevicetokenDB;
+import com.rhjf.appserver.db.DistributionRatioDB;
 import com.rhjf.appserver.db.SalesManDB;
 import com.rhjf.appserver.db.TradeDB;
 import com.rhjf.appserver.model.Fee;
@@ -21,7 +22,6 @@ import com.rhjf.appserver.model.TabLoginuser;
 import com.rhjf.appserver.util.AmountUtil;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.PushUtil;
-import com.rhjf.appserver.util.PushUtils;
 import com.rhjf.appserver.util.UtilsConstant;
 
 
@@ -222,7 +222,7 @@ public class NotifyService {
 		
 		logger.info("订单：" + order.getOrderNumber() + "，商户手续费：" + fee.getMerchantFee() + " , 商户分润:"
 		+ fee.getMerchantprofit() + ", 三级分销总金额:" + distributeProfit + "，平台收益:" + fee.getPlatformProfit() 
-		+ "，平台手续费:" + fee.getPlatCostFee()) ;
+		+ "，平台手续费:" + fee.getPlatCostFee() + " ， 业务员从代理商获取的收益：" + fee.getSalemsGetAgentProfit());
 		
 		return fee;
 	}
@@ -260,13 +260,13 @@ public class NotifyService {
 					String tonken = DevicetokenDB.getDeviceToken(three);
 					logger.info("============================订单编号:" + order.getOrderNumber() + "上级用户Token:" + tonken + "开始发送push");
 					if(!UtilsConstant.strIsEmpty(tonken)){
-						String content = "您的下级商户为您贡献" + new BigDecimal(threeProfit).divide(new BigDecimal(100),2,RoundingMode.DOWN) + "元分润，请查看";
+						String content = "爱码付为你赚了" + new BigDecimal(threeProfit).divide(new BigDecimal(100),2,RoundingMode.DOWN) + "元分润";
 						
-						PushUtils.IOSPush(content, tonken);
-						PushUtils.AndroidPush("分润通知", content, tonken);
-						
-//						PushUtil.iosSend("分润通知" , content, tonken , "2");
-//						PushUtil.androidSend("分润通知", content, tonken, "2");
+//						PushUtils.IOSPush(content, tonken);
+//						PushUtils.AndroidPush("分润通知", content, tonken);
+//						
+						PushUtil.iosSend("收益通知" , content, tonken , "1");
+						PushUtil.androidSend("收益通知", content, tonken, "1");
 					}
 					
 					obj = new Object[]{UtilsConstant.getUUID(),three,threeProfit ,order.getTradeDate() + order.getTradeTime(),order.getID() , "上级用户" , 3};
@@ -281,9 +281,9 @@ public class NotifyService {
 					String tonken = DevicetokenDB.getDeviceToken(two);
 					logger.info("============================订单编号:" + order.getOrderNumber() + "第二级用户Token:" + tonken + "开始发送push");
 					if(!UtilsConstant.strIsEmpty(tonken)){
-						String content = "您的下级商户为您贡献" + new BigDecimal(twoProfit).divide(new BigDecimal(100),2,RoundingMode.DOWN) + "元分润，请查看";
-						PushUtil.iosSend("分润通知" , content, tonken , "2");
-						PushUtil.androidSend("分润通知", content, tonken, "2");
+						String content = "爱码付为你赚了" + new BigDecimal(twoProfit).divide(new BigDecimal(100),2,RoundingMode.DOWN) + "元分润";
+						PushUtil.iosSend("收益通知" , content, tonken , "1");
+						PushUtil.androidSend("收益通知", content, tonken, "1");
 					}
 					
 					obj = new Object[]{UtilsConstant.getUUID(),two ,twoProfit ,order.getTradeDate() + order.getTradeTime(),order.getID() ,  "二级用户" , 2};
@@ -299,13 +299,13 @@ public class NotifyService {
 					String tonken = DevicetokenDB.getDeviceToken(one);
 					logger.info("============================订单编号:" + order.getOrderNumber() + "第三级用户Token:" + tonken + "开始发送push");
 					if(!UtilsConstant.strIsEmpty(tonken)){
-						String content = "您的下级商户为您贡献" + new BigDecimal(oneProfit).divide(new BigDecimal(100),2,RoundingMode.DOWN) + "元分润，请查看";
+						String content = "爱码付为你赚了" + new BigDecimal(oneProfit).divide(new BigDecimal(100),2,RoundingMode.DOWN) + "元分润";
 						
-						PushUtils.IOSPush(content, tonken);
-						PushUtils.AndroidPush("分润通知", content, tonken);
-						
-//						PushUtil.iosSend("分润通知" , content, tonken , "2");
-//						PushUtil.androidSend("分润通知", content, tonken, "2");
+//						PushUtils.IOSPush(content, tonken);
+//						PushUtils.AndroidPush("分润通知", content, tonken);
+//						
+						PushUtil.iosSend("收益通知" , content, tonken , "1");
+						PushUtil.androidSend("收益通知", content, tonken, "1");
 					}
 					
 					obj = new Object[]{UtilsConstant.getUUID(),one ,oneProfit , order.getTradeDate() + order.getTradeTime(),order.getID() , "一级用户" , 1};
@@ -320,13 +320,13 @@ public class NotifyService {
 			String tonken = DevicetokenDB.getDeviceToken(loginUser.getID());
 			logger.info("============================订单编号:" + order.getOrderNumber() + "商户自己的token" + tonken + "开始发送push"); 
 			if(!UtilsConstant.strIsEmpty(tonken)){
-				String content = "本次交易您自己获取的分润" + new BigDecimal(fee.getMerchantprofit()).divide(new BigDecimal(100),2,RoundingMode.DOWN)   + "元，请查看";
+				String content = "爱码付为你赚了" + new BigDecimal(fee.getMerchantprofit()).divide(new BigDecimal(100),2,RoundingMode.DOWN)   + "元";
 
-				PushUtils.IOSPush(content, tonken);
-				PushUtils.AndroidPush("分润通知", content, tonken);
-				
-//				PushUtil.iosSend("分润通知" , content, tonken , "2");
-//				PushUtil.androidSend("分润通知", content, tonken, "2");
+//				PushUtils.IOSPush(content, tonken);
+//				PushUtils.AndroidPush("分润通知", content, tonken);
+//				
+				PushUtil.iosSend("收益通知" , content, tonken , "1");
+				PushUtil.androidSend("收益通知", content, tonken, "1");
 			}
 			logger.info("订单编号:" + order.getOrderNumber() + " , 商户自己获得分润:" + fee.getMerchantprofit());
 			obj = new Object[]{UtilsConstant.getUUID(),loginUser.getID(),fee.getMerchantprofit(), order.getTradeDate() + order.getTradeTime(),order.getID() , "商户反润" , 0};
@@ -532,4 +532,58 @@ public class NotifyService {
 		
 		return fee;
 	} 
+	
+	
+	
+	/**
+	 *   计算手续费 (信用卡还款)
+	 *      不参与三级分销 ， 不参与代理商分润  只计算平台成本和平台收益
+	 * @param order
+	 * @param loginUser
+	 * @return
+	 */
+	public Fee calProfit(String orderNumber ,PayOrder  order , TabLoginuser loginUser ){
+		
+		logger.info("计算订单：" + orderNumber + "手续费");
+		
+		Fee fee = new Fee();
+		// 交易费率
+		String feeRate = "0";
+		
+		// t0 附加费用
+		int T0additional = 0;
+		
+		/** 用户费率配置信息 **/
+		Map<String,Object> userConfig = TradeDB.getUserConfig(new Object[]{loginUser.getID() ,  order.getPayChannel() }); 
+		
+		/**    渠道成本   **/
+		String channelRate ="0";
+		
+		/**  查询通道成本费率 **/
+		Map<String,Object> channelconfigMap = ChannelConfigDB.getChannelConfig(order.getPayChannel());
+		if(channelconfigMap==null||channelconfigMap.isEmpty()){
+			logger.info("通道成本费率查询异常：支付类型：" + order.getPayChannel()); 
+			return null;
+		}
+		
+		channelRate = UtilsConstant.ObjToStr(channelconfigMap.get("T0ChannelRate"));
+
+		// 交易费率
+		feeRate = UtilsConstant.ObjToStr(userConfig.get("T0SaleRate"));
+		
+		logger.info(orderNumber  + "交易费率为：" + feeRate  + ",T0渠道成本:" + channelRate + ",T0附加费用：" + T0additional);
+			
+		/** 商户手续费 **/
+		fee.setMerchantFee(AgentDB.makeFeeRounding(order.getAmount(), Double.valueOf(feeRate)  , 0) + T0additional);
+		
+		//计算平台手续费
+		fee.setPlatCostFee(AgentDB.makeFeeFurther(order.getAmount(), Double.valueOf(channelRate),0));
+		
+		// 平台收益
+		fee.setPlatformProfit(AgentDB.makeFeeFurther(order.getAmount() ,  AmountUtil.sub(feeRate, channelRate),0));
+		
+		logger.info("订单：" + orderNumber + "，商户手续费：" + fee.getMerchantFee()  + "，平台收益:" + fee.getPlatformProfit()  + "，平台手续费:" + fee.getPlatCostFee()) ;
+		
+		return fee;
+	}
 }
