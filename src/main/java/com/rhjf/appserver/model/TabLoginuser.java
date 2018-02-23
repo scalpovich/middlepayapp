@@ -42,6 +42,7 @@ public class TabLoginuser {
 	private String salesManID;
 	private String userType;
 	private String tradeCode;
+	private String needLogin;
 	
 	public void setID(String iD){
 		this.iD = iD;
@@ -295,5 +296,12 @@ public class TabLoginuser {
 	public void setUserType(String userType) {
 		this.userType = userType;
 	}
+	public String getNeedLogin() {
+		return needLogin;
+	}
+	public void setNeedLogin(String needLogin) {
+		this.needLogin = needLogin;
+	}
+	
 	
 }

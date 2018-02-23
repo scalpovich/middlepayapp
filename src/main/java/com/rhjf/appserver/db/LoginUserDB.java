@@ -307,12 +307,12 @@ public class LoginUserDB extends DBBase{
 		return executeSql(sql, new Object[]{mechantLev,userId});
 	}
 	
-	public static int updateUserRate(int mechantLev,String userId){
+	public static int updateUserRate(Object[] obj){
 		
 		String sql = "update tab_user_config c,tab_pay_channel_usertype_cfg u,tab_loginuser us set c.SaleAmountMax=u.SaleAmountMax,"
 				+ "c.T0SettlementRate=u.T0SaleRate,c.T1SettlementRate=u.T1SettlementRate where  us.ID=c.UserID "
 				+ "and us.ID=? and u.MerchantLevel=?";
-		return executeSql(sql, new Object[]{userId , mechantLev});
+		return executeSql(sql, obj);
 	}
 	
 	

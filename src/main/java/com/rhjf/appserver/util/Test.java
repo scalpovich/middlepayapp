@@ -56,16 +56,11 @@ public class Test extends DBBase{
 	public static void main(String[] args) throws Exception {
 
 		
-		LoginUserDB.saveOrUpBankInfo(new Object[]{UtilsConstant.getUUID(),"USERID","name","bankCardNo","bankSubbranch",
-				"bankProv","bankCity","bankCode","bankName", "bankSymbol" ,"creditCardNo","bankType","131" ,"name",
-				"bankCardNo","bankSubbranch","bankProv","bankCity","bankCode","bankName","bankSymbol","creditCardNo","bankType","131"});
 		
 		
-		
-		
-//		Map<String, String> content = AuthUtil.authentication("张国宁", "6258091669475621", "370724198708184343", "15266363211");
+		Map<String, String> content = AuthUtil.authentication("林惠娥", "6214850212903782", "350521197906116546", "13917828049");
 //				
-//		System.out.println(content.toString());
+		System.out.println(content.toString());
 		
 		
 		

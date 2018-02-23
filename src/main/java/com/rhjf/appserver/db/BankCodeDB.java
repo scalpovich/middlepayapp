@@ -15,7 +15,7 @@ public class BankCodeDB extends DBBase {
 	
 	
 	public static Map<String, Object> bankBinMap(Object[] obj) {
-		String sql = "select * from tab_pay_binverify where verifyCode = SUBSTRING(?,1,verifyLength)";
+		String sql = "select * from tab_pay_binverify where verifyCode = SUBSTRING(?,1,verifyLength) order by verifyLength desc";
 		return queryForMap(sql, obj);
 	}
 	

@@ -152,7 +152,7 @@ public class KuaiCardListService {
 				 * 	3 T1 与T0 都开通
 				 * 
 				 */
-				String encrypt = UtilsConstant.ObjToStr(map.get("encrypt"));
+//				String encrypt = UtilsConstant.ObjToStr(map.get("encrypt"));
 				String status = "0";
 				
 //				if("0".equals(encrypt)){

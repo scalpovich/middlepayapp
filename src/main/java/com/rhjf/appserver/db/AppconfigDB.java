@@ -25,7 +25,7 @@ public class AppconfigDB extends DBBase{
 	 * @return
 	 */
 	public static Map<String,Object> getTradeConfig(){
-		String sql = "select T0StartHour , T0StartMinute , T0EndHour , T0EndMinute , T0AttachFee , T0MinAmount , KuaiT0Time , LargeAmount from tab_appconfig";
+		String sql = "select T0StartHour , T0StartMinute , T0EndHour , T0EndMinute , T0AttachFee , T0MinAmount , KuaiT0Time , LargeAmount , KuaiDelayTime from tab_appconfig";
 		return queryForMap(sql, null);
 	}
 

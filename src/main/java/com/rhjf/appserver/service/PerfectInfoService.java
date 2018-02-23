@@ -275,6 +275,7 @@ public class PerfectInfoService {
 					LoginUserDB.saveMerchantInfo(list);
 					
 					LoginUserDB.updateUserBankStatus(new Object[] { 1, 0, user.getLoginID() });
+					
 					if (user.getThreeLevel() != null && !user.getThreeLevel().toString().equals("")) {
 						logger.info("判断商户上级商户是否需要升级 , 上级商户ID：" + user.getThreeLevel());
 						String levelUpResult = this.levelUp(user.getThreeLevel().toString());
@@ -365,11 +366,12 @@ public class PerfectInfoService {
 							return "fail";
 						}
 						// 同时查出升级之后费率（使用升级后商户类型查询费率）
-						int statusResult = LoginUserDB.updateUserRate(MerchantLevel + 1, UserID);
+						int statusResult = LoginUserDB.updateUserRate(new Object[]{UserID , MerchantLevel + 1});
 						if (statusResult == 0) {
-							
 							logger.info("上级商户：" + UserID + "更新商户费率失败");
 							return "fail";
+						}else{
+							logger.info("上级商户：" + UserID + "更新费率反悔收印象行数：" + statusResult);
 						}
 					}
 				}else{

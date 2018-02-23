@@ -74,7 +74,7 @@ public class EhcacheUtil {
     	cache.removeAll();
     }
     
-    public List getAllCacheObjects(String cacheName) {
+    public List<?> getAllCacheObjects(String cacheName) {
     	return manager.getCache(cacheName).getKeys();
     }
     

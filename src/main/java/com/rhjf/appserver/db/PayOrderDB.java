@@ -14,7 +14,7 @@ public class PayOrderDB extends DBBase{
 	 */
 	public static  List<Map<String,String>> monthlyReport(String userid){
 		String sql = "SELECT LEFT(LocalDate,4) as year , SUBSTRING(LocalDate FROM 5 FOR 2) as month , sum(amount) as amount , count(1) as count "
-				+ " from tab_pay_order where PayRetCode='0000' and UserID=? GROUP BY LEFT(LocalDate,4) , SUBSTRING(LocalDate FROM 5 FOR 2)  order by month  desc , year desc  ";
+				+ " from tab_pay_order where PayRetCode='0000' and UserID=? GROUP BY LEFT(LocalDate,4) , SUBSTRING(LocalDate FROM 5 FOR 2)  order by  year desc  , month  desc  ";
 		return queryForListString(sql, new Object[]{userid});
 	}
 	

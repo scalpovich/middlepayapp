@@ -19,9 +19,7 @@ public class UpdatePwdVerificationOldPwdService {
 	
 	public void UpdatePwdVerificationOldPwd(TabLoginuser user , RequestData reqdata , ResponseData respdata){
 		String loginpwd = reqdata.getLoginPwd();
-		
 //		String newLoginpwd = reqdata.getNewLoginPwd();
-		
 		String passwd = MakeCipherText.calLoginPwd(reqdata.getLoginID(),user.getLoginPwd(), reqdata.getSendTime());
 		
 		if(!passwd.equals(reqdata.getLoginPwd())){

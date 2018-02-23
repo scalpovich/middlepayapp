@@ -299,7 +299,7 @@ LoggerTool log  = new LoggerTool(this.getClass());
 		StackTraceElement[] es = Thread.currentThread().getStackTrace();
 		for (StackTraceElement e : es) {
 			if("com.rhjf.appserver.service.creditcard.DynamicProxy".equals(e.getClassName())){
-				log.info("StackTraceElement 结合中 包含  【 com.rhjf.appserver.service.creditcard.DynamicProxy 】"); 
+				log.info("StackTraceElement 集合中 包含  【 com.rhjf.appserver.service.creditcard.DynamicProxy 】"); 
 				isok = true;
 				break;
 			}

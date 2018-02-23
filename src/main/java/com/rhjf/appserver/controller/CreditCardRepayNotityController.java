@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
 import com.rhjf.appserver.constant.StringEncoding;
+import com.rhjf.appserver.db.AppconfigDB;
 import com.rhjf.appserver.db.LoginUserDB;
 import com.rhjf.appserver.db.TradeDB;
 import com.rhjf.appserver.model.Fee;
@@ -157,7 +158,28 @@ LoggerTool logger = new LoggerTool(this.getClass());
 				JSONObject mq = new JSONObject();
 				mq.put("orderNumber", orderNumber);
 				mq.put("dfType", "Trade");
-				RabbitmqSend.sendMessage(mq.toString());
+				
+				
+				String delayTime = "30000";
+				EhcacheUtil ehcache = EhcacheUtil.getInstance();
+
+				//  查询交易配置信息
+				Map<String,Object> tradeConfig = null;
+				Object obj = ehcache.get(Constant.cacheName, "tradeConfig");
+				if(obj == null){
+					logger.info("缓存中获取交易配置信息失败,从数据库中查询");
+					tradeConfig = AppconfigDB.getTradeConfig(); 
+					ehcache.put(Constant.cacheName, "tradeConfig", tradeConfig); 
+				}else{
+					logger.info("缓存查询交易配置信息");
+					tradeConfig = (Map<String,Object>) obj;
+				}
+				
+				if(tradeConfig.get("KuaiDelayTime")!=null){
+					delayTime = tradeConfig.get("KuaiDelayTime").toString();
+				}
+				
+				RabbitmqSend.sendMessage(mq.toString() , delayTime);
 			} catch (Exception e) {
 				logger.error("执行mq发送队列消息异常：" + e.getMessage() ,  e); 
 			}

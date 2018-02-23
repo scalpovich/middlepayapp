@@ -354,7 +354,7 @@ public class H5PerfectInfoService {
 							return "fail";
 						}
 						// 同时查出升级之后费率（使用升级后商户类型查询费率）
-						int statusResult = LoginUserDB.updateUserRate(MerchantLevel + 1, UserID);
+						int statusResult = LoginUserDB.updateUserRate(new Object[]{UserID , MerchantLevel + 1});
 						if (statusResult == 0) {
 							
 							log.info("上级商户：" + UserID + "更新商户费率失败");

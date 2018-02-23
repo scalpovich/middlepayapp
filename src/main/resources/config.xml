@@ -4,8 +4,8 @@
 	
 	<!-- 银商服务器IP以及端口 测试-->
 	<UnionPayServer>
-		<Ip>ip</Ip>
-		<Port>port</Port>
+		<Ip>111.161.76.58</Ip>
+		<Port>18081</Port>
 		<TermialId>6000040000</TermialId>
 		<MerchantId>603100311004</MerchantId>
 	</UnionPayServer>

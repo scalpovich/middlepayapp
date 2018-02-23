@@ -155,6 +155,14 @@ public class RequestEntryController {
 					loginuser = (TabLoginuser) obj;
 				}
 				
+				if("0".equals(loginuser.getNeedLogin())){
+					logger.info("账号：" + loginuser.getLoginID() + " needLogin 状态为0 不可登陆");
+					respData.setRespCode(RespCode.LOGINError[0]);
+					respData.setRespDesc("账号无法登陆，请联系客服人员");
+					return  paraFilterReturn(respData);
+				}
+				
+				
 				if("SALESMAN".equals(loginuser.getUserType())){
 					logger.info("账号：" + loginuser.getLoginID() + " , 身份为业务员"); 
 					respData.setRespCode(RespCode.LOGINError[0]);

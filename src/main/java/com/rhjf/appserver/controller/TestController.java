@@ -18,7 +18,7 @@ public class TestController {
 	@RequestMapping("")
 	@ResponseBody
 	public Object test(){
-		
+	
 		EhcacheUtil ehcache = EhcacheUtil.getInstance();
 		List<?> list = ehcache.getAllCacheObjects(Constant.cacheName);
 		JSONObject json = new JSONObject();

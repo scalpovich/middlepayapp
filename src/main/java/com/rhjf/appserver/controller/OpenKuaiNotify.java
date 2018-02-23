@@ -48,22 +48,15 @@ public class OpenKuaiNotify {
 			return  RespCode.notifyfail;
 		}
 		logger.info("接收上游回调, 回调内容:" + map2.toString());
-
 		JSONObject json = JSONObject.fromObject(map2);
-
 		String respCode = json.getString("respCode");
-
 		if (Constant.payRetCode.equals(respCode)) {
 			String orderNum = json.getString("orderNum");
-
 			int x = openKuaiNotifyService.updateOpenKuaiStatus(new Object[] { orderNum });
-
 			if (x < 1) {
 				return "fail";
 			}
 		}
-
 		return Constant.orderStatus;
 	}
-
 }

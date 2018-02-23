@@ -81,14 +81,29 @@ public class AuthUtil {
 				
 				JSONObject json = JSONObject.fromObject(content);
 				
-				if (json.getString("resCode").equals(Constant.payRetCode)) {
+				String resCode = "0001";
+				if(json.has("resCode")){
+					resCode = json.getString("resCode");
+				}else if(json.has("respCode")){
+					resCode = json.getString("respCode");
+				}
+				
+				String msg = "失败";
+				if(json.has("resMsg")){
+					msg = json.getString("resMsg");
+				}else if(json.has("respMsg")){
+					msg = json.getString("respMsg");
+				}
+				
+				
+				if (resCode.equals(Constant.payRetCode)) {
 					AuthenticationDB.addAuthencationInfo(new Object[] { UtilsConstant.getUUID(), IDcardNumber, payerPhone ,name,bankCardNo, "00", reqMap.get("respMsg") });
 					reqMap.put("respCode", Author.SUCESS_CODE);
 					reqMap.put("respMsg", "鉴权成功");
 					return reqMap;
 				}else{
 					reqMap.put("respCode", "001");
-					reqMap.put("respMsg", json.getString("resMsg"));
+					reqMap.put("respMsg", msg);
 					return reqMap;
 				}
 			} catch (Exception e) {

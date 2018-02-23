@@ -1,5 +1,6 @@
 package com.rhjf.appserver.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
 import com.rhjf.appserver.constant.StringEncoding;
+import com.rhjf.appserver.db.AppconfigDB;
 import com.rhjf.appserver.db.DevicetokenDB;
 import com.rhjf.appserver.db.LoginUserDB;
 import com.rhjf.appserver.db.SalesManDB;
@@ -53,6 +55,7 @@ public class PayNotifyController {
 	@Autowired
 	private NotifyService notifyService;
 	
+	@SuppressWarnings("unchecked")
 	@RequestMapping("")
 	public Object notify(HttpServletRequest request) { 
 		
@@ -166,9 +169,6 @@ public class PayNotifyController {
 			String tonken = DevicetokenDB.getDeviceToken(loginUser.getID());
 			logger.info("============================订单编号:" + order.getOrderNumber() + "支付成功，用户tonken:" + tonken + "开始发送push");
 			if(!UtilsConstant.strIsEmpty(tonken)){
-//				String content = "您的" + orderName + "支付成功，请查看";
-//				PushUtils.IOSPush(content, tonken);
-//				PushUtils.AndroidPush("支付通知", content, tonken); 
 				
 				String content = "爱码付收款金额 " + AmountUtil.div(order.getAmount(), "100") + "元"; 
 				
@@ -235,16 +235,53 @@ public class PayNotifyController {
 			
 			
 			if("4".equals(paytype)){
+				JSONObject mq = new JSONObject();
+				mq.put("orderNumber", orderNumber);
+				mq.put("dfType", "Trade");
+				
 				try {
-					JSONObject mq = new JSONObject();
-					mq.put("orderNumber", orderNumber);
-					mq.put("dfType", "Trade");
-					RabbitmqSend.sendMessage(mq.toString());
+					
+					String delayTime = "30000";
+					EhcacheUtil ehcache = EhcacheUtil.getInstance();
+
+					//  查询交易配置信息
+					Map<String,Object> tradeConfig = null;
+					Object obj = ehcache.get(Constant.cacheName, "tradeConfig");
+					if(obj == null){
+						logger.info("缓存中获取交易配置信息失败,从数据库中查询");
+						tradeConfig = AppconfigDB.getTradeConfig(); 
+						ehcache.put(Constant.cacheName, "tradeConfig", tradeConfig); 
+					}else{
+						logger.info("缓存查询交易配置信息");
+						tradeConfig = (Map<String,Object>) obj;
+					}
+					
+					if(tradeConfig.get("KuaiDelayTime")!=null){
+						delayTime = tradeConfig.get("KuaiDelayTime").toString();
+					}
+					
+					
+					RabbitmqSend.sendMessage(mq.toString() , delayTime);
+				
+//					JSONObject mq = new JSONObject();
+//					mq.put("orderNumber", orderNumber);
+//					mq.put("dfType", "Trade");
+//					Timer timer = new Timer();
+//					timer.schedule(new TimerSendRabbitMQ(mq.toString()), 50 * 1000);
 				} catch (Exception e) {
 					logger.error("执行mq发送队列消息异常：" + e.getMessage() ,  e); 
 				}
+			}else{
+				logger.info("交易订单号：" + orderNumber + "不是快捷交易");
+				if(Constant.T0.equals(order.getTradeCode())){
+					logger.info("不是快捷并且到账类型为T0调用查询到付状态脚本");
+					try {
+						Runtime.getRuntime().exec("/usr/local/middlepay/queryt0status.sh");
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
 			}
-			
 			
 			EhcacheUtil ehcache = EhcacheUtil.getInstance();
 			ehcache.clear(Constant.cacheName);
