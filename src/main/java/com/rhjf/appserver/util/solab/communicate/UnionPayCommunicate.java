@@ -36,15 +36,15 @@ public class UnionPayCommunicate {
 		byte[] bUnionPayReqMsg = bb.array();
 		this.log.info(BytesTool.logBytes("上送银联报文：\n", bUnionPayReqMsg, 0, bUnionPayReqMsg.length));
 
-//		byte[] bUnionPayRspMsg = new byte[2048];
-//
-//		TcpServer tcpserver = new TcpServer(this.config.getUnionPayServerIp(), this.config.getUnionPayServerPort());
-//		int iUnionPayRspMsgLen = tcpserver.sendAndRecive(bUnionPayReqMsg, bUnionPayRspMsg);
-//		this.log.info(BytesTool.logBytes("接受银联报文：\n", bUnionPayRspMsg, 0, iUnionPayRspMsgLen));
-//		msgFactory.setUseBinaryMessages(true);
-//		return msgFactory.parseMessage(bUnionPayRspMsg, 13);
+		byte[] bUnionPayRspMsg = new byte[2048];
+
+		TcpServer tcpserver = new TcpServer(this.config.getUnionPayServerIp(), this.config.getUnionPayServerPort());
+		int iUnionPayRspMsgLen = tcpserver.sendAndRecive(bUnionPayReqMsg, bUnionPayRspMsg);
+		this.log.info(BytesTool.logBytes("接受银联报文：\n", bUnionPayRspMsg, 0, iUnionPayRspMsgLen));
+		msgFactory.setUseBinaryMessages(true);
+		return msgFactory.parseMessage(bUnionPayRspMsg, 13);
 		
-		return null;
+//		return null;
 
 	}
 

@@ -11,6 +11,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ * @author hadoop
+ */
 public class LoadPro {
 	public final static String SYSTEM_PROPERTIES = "/system.properties";
 

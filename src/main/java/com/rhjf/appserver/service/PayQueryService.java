@@ -17,6 +17,9 @@ import com.rhjf.appserver.util.UtilsConstant;
 
 import net.sf.json.JSONObject;
 
+/**
+ * @author hadoop
+ */
 @Service
 public class PayQueryService {
 

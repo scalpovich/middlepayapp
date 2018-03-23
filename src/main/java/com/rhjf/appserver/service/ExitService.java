@@ -9,6 +9,9 @@ import com.rhjf.appserver.model.TabLoginuser;
 import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.LoggerTool;
 
+/**
+ * @author hadoop
+ */
 public class ExitService {
 
 	LoggerTool logger = new LoggerTool(this.getClass());

@@ -95,7 +95,7 @@ public class YMFTradeService2  extends HttpServlet {
 		/** 向数据库插入初始化数据 **/
 		int ret = TradeDB.YMFTradeInit(new Object[]{UtilsConstant.getUUID(),amount ,DateUtil.getNowTime(DateUtil.yyyyMMdd),DateUtil.getNowTime(DateUtil.HHmmss),
 				tradeDate,tradeTime , DateUtil.getNowTime(DateUtil.yyyyMMddHHmmssSSS), Constant.TradeType[1] ,encrypt, 
-				user.getID(),paychannel, merchantID,orderNumber , ymfCode , user.getAgentID()});
+				user.getID(),paychannel, merchantID,orderNumber , ymfCode , user.getAgentID(),"RONGHUI"});
 		if(ret < 1 ){
 			logger.info("数据库保存信息失败");
 			return ;
@@ -190,6 +190,7 @@ public class YMFTradeService2  extends HttpServlet {
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		doPost(request, response);
 	}

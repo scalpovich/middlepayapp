@@ -25,9 +25,13 @@ import com.rhjf.appserver.util.PushUtil;
 import com.rhjf.appserver.util.UtilsConstant;
 
 
+/**
+ *    计算手续费 service
+ */
+
 
 @Service
-public class NotifyService {
+public class FeeComputeService {
 	
 	LoggerTool logger = new LoggerTool(this.getClass());
 	
@@ -64,7 +68,7 @@ public class NotifyService {
 		}
 		
 		/**  查询通道成本费率 **/
-		Map<String,Object> channelconfigMap = ChannelConfigDB.getChannelConfig(order.getPayChannel());
+		Map<String,Object> channelconfigMap = ChannelConfigDB.getChannelConfig(order.getPayChannel() , order.getChannelID());
 		if(channelconfigMap==null||channelconfigMap.isEmpty()){
 			logger.info("通道成本费率查询异常：支付类型：" + order.getPayChannel()); 
 			return null;
@@ -108,7 +112,6 @@ public class NotifyService {
 			//  T0代理商成本
 			agentRate = UtilsConstant.ObjToStr(agentConfig.get("T0AgentRate"));
 			//  T0渠道成本
-//			channelRate = UtilsConstant.ObjToStr(agentConfig.get("T0ChannelRate"));
 			channelRate = UtilsConstant.ObjToStr(channelconfigMap.get("T0ChannelRate"));
 			
 			//  T0附加手续费
@@ -261,10 +264,7 @@ public class NotifyService {
 					logger.info("============================订单编号:" + order.getOrderNumber() + "上级用户Token:" + tonken + "开始发送push");
 					if(!UtilsConstant.strIsEmpty(tonken)){
 						String content = "爱码付为你赚了" + new BigDecimal(threeProfit).divide(new BigDecimal(100),2,RoundingMode.DOWN) + "元分润";
-						
-//						PushUtils.IOSPush(content, tonken);
-//						PushUtils.AndroidPush("分润通知", content, tonken);
-//						
+//
 						PushUtil.iosSend("收益通知" , content, tonken , "1");
 						PushUtil.androidSend("收益通知", content, tonken, "1");
 					}
@@ -340,8 +340,8 @@ public class NotifyService {
 	/**
 	 *   计算固定码手续费
 	 * @param order
-	 * @param loginUser
-	 * @param map
+	 * @param user
+	 * @param qrcode
 	 * @return
 	 */
 	public Fee YMFcalProfit(PayOrder order , TabLoginuser user , Map<String,Object> qrcode){
@@ -370,7 +370,7 @@ public class NotifyService {
 		
 		
 		/**  查询通道成本费率 **/
-		Map<String,Object> channelconfigMap = ChannelConfigDB.getChannelConfig(order.getPayChannel());
+		Map<String,Object> channelconfigMap = ChannelConfigDB.getChannelConfig(order.getPayChannel() , order.getChannelID());
 		if(channelconfigMap==null||channelconfigMap.isEmpty()){
 			logger.info("通道成本费率查询异常：支付类型：" + order.getPayChannel()); 
 			return null;
@@ -536,7 +536,7 @@ public class NotifyService {
 	
 	
 	/**
-	 *   计算手续费 (信用卡还款)
+	 *   计算手续费
 	 *      不参与三级分销 ， 不参与代理商分润  只计算平台成本和平台收益
 	 * @param order
 	 * @param loginUser
@@ -560,7 +560,7 @@ public class NotifyService {
 		String channelRate ="0";
 		
 		/**  查询通道成本费率 **/
-		Map<String,Object> channelconfigMap = ChannelConfigDB.getChannelConfig(order.getPayChannel());
+		Map<String,Object> channelconfigMap = ChannelConfigDB.getChannelConfig(order.getPayChannel() , order.getChannelID());
 		if(channelconfigMap==null||channelconfigMap.isEmpty()){
 			logger.info("通道成本费率查询异常：支付类型：" + order.getPayChannel()); 
 			return null;

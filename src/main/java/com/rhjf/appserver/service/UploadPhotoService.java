@@ -65,7 +65,7 @@ public class UploadPhotoService {
 			
 			
 			if(!UtilsConstant.strIsEmpty(handheldIDPhoto)){
-				Image64Bit.GenerateImage(handheldIDPhoto.replace("\n", "").replace("\t", ""), imgPath + user.getLoginID() + File.separator + imgName + postfix);
+				Image64Bit.geneRateImage(handheldIDPhoto.replace("\n", "").replace("\t", ""), imgPath + user.getLoginID() + File.separator + imgName + postfix);
 				handheldIDurl = imgUrl + user.getLoginID() + File.separator  + imgName + postfix;
 				logger.info(user.getLoginID() + "保存手持身份证照片成功");
 			}else{
@@ -75,7 +75,7 @@ public class UploadPhotoService {
 			 
 			if(!UtilsConstant.strIsEmpty(IDCardFrontPhoto)){
 				imgName =  UtilsConstant.getUUID();
-				Image64Bit.GenerateImage(IDCardFrontPhoto.replace("\n", "").replace("\t", ""), imgPath + user.getLoginID() + File.separator + imgName + postfix);
+				Image64Bit.geneRateImage(IDCardFrontPhoto.replace("\n", "").replace("\t", ""), imgPath + user.getLoginID() + File.separator + imgName + postfix);
 				iDCardFront = imgUrl + user.getLoginID() + File.separator  + imgName + postfix;
 				
 				logger.info(user.getLoginID() + "保存身份证正面照片成功");
@@ -86,7 +86,7 @@ public class UploadPhotoService {
 			
 			if(!UtilsConstant.strIsEmpty(IDCardReversePhoto)){
 				imgName =  UtilsConstant.getUUID();
-				Image64Bit.GenerateImage(IDCardReversePhoto.replace("\n", "").replace("\t", ""), imgPath + user.getLoginID() + File.separator + imgName + postfix);
+				Image64Bit.geneRateImage(IDCardReversePhoto.replace("\n", "").replace("\t", ""), imgPath + user.getLoginID() + File.separator + imgName + postfix);
 				iDCardReverse = imgUrl + user.getLoginID() + File.separator  + imgName + postfix;
 				
 				logger.info(user.getLoginID() + "保存身份证反面照片成功");
@@ -97,7 +97,7 @@ public class UploadPhotoService {
 			
 			if(!UtilsConstant.strIsEmpty(bankCardPhoto)){
 				imgName =  UtilsConstant.getUUID();
-				Image64Bit.GenerateImage(bankCardPhoto.replace("\n", "").replace("\t", ""), imgPath + user.getLoginID() + File.separator + imgName + postfix);
+				Image64Bit.geneRateImage(bankCardPhoto.replace("\n", "").replace("\t", ""), imgPath + user.getLoginID() + File.separator + imgName + postfix);
 				bankCard = imgUrl + user.getLoginID() + File.separator  + imgName + postfix;
 				
 				logger.info(user.getLoginID() + "保存银行卡照片成功");
@@ -108,7 +108,7 @@ public class UploadPhotoService {
 			
 			if(!UtilsConstant.strIsEmpty(businessPhoto)){
 				imgName =  UtilsConstant.getUUID();
-				Image64Bit.GenerateImage(businessPhoto.replace("\n", "").replace("\t", ""), imgPath + user.getLoginID() + File.separator + imgName + ".jpg");
+				Image64Bit.geneRateImage(businessPhoto.replace("\n", "").replace("\t", ""), imgPath + user.getLoginID() + File.separator + imgName + ".jpg");
 				business = imgUrl  + user.getLoginID() + File.separator  + imgName + postfix;
 				
 				logger.info(user.getLoginID() + "保存营业执照照片成功");

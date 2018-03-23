@@ -1,12 +1,5 @@
 package com.rhjf.appserver.service.mpos;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
-
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
 import com.rhjf.appserver.db.AgentDB;
@@ -22,10 +15,10 @@ import com.rhjf.appserver.model.TabLoginuser;
 import com.rhjf.appserver.util.AmountUtil;
 import com.rhjf.appserver.util.DESUtil;
 import com.rhjf.appserver.util.DateUtil;
+import com.rhjf.appserver.util.EncrptMerchine;
 import com.rhjf.appserver.util.LoadPro;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.UtilsConstant;
-import com.rhjf.appserver.util.EncrptMerchine;
 import com.rhjf.appserver.util.solab.EmvTLVInfo;
 import com.rhjf.appserver.util.solab.Sign;
 import com.rhjf.appserver.util.solab.communicate.Config;
@@ -33,8 +26,14 @@ import com.rhjf.appserver.util.solab.communicate.UnionPayCommunicate;
 import com.rhjf.appserver.util.solab.iso8583.IsoMessage;
 import com.rhjf.appserver.util.solab.iso8583.IsoType;
 import com.rhjf.appserver.util.solab.iso8583.MessageFactory;
-
 import net.sf.json.JSONObject;
+
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  *    终端mpos交易
@@ -44,11 +43,11 @@ import net.sf.json.JSONObject;
 
 public class MPOSTradeService {
 	
-	LoggerTool logger = new LoggerTool(this.getClass());
+	private LoggerTool logger = new LoggerTool(this.getClass());
 	
-	protected UnionPayCommunicate unionPayCommunicate = new UnionPayCommunicate();
+	private UnionPayCommunicate unionPayCommunicate = new UnionPayCommunicate();
 	
-	Config config = Config.getInstance();
+	private Config config = Config.getInstance();
 	
 	public void mposTrade(TabLoginuser user, RequestData request , ResponseData response){
 		
@@ -75,9 +74,9 @@ public class MPOSTradeService {
 		logger.info("icRelatedData :" + request.getIcRelatedData());
 		
 		
-		/** 查询代理商配置信息  **/
-		Map<String,Object> agentconfigmap = AgentDB.agentConfig(new Object[]{user.getAgentID() , Constant.payChannelMpos});
-		if(agentconfigmap == null || agentconfigmap.isEmpty()){
+		/* 查询代理商配置信息  **/
+		Map<String,Object> agentConfigMap = AgentDB.agentConfig(new Object[]{user.getAgentID() , Constant.payChannelMpos});
+		if(agentConfigMap == null || agentConfigMap.isEmpty()){
 			logger.info("用户：" + user.getLoginID() + "对应代理商交易类型：" + Constant.payChannelMpos + "配置信息不完整, 对应代理商ID：" +  user.getAgentID());
 			response.setRespCode(RespCode.AgentTradeConfigError[0]);
 			response.setRespDesc(RespCode.AgentTradeConfigError[1]); 
@@ -85,7 +84,7 @@ public class MPOSTradeService {
 		}
 		
 		
-		/** 查询用户交易配置信息  **/
+		/* 查询用户交易配置信息  **/
 		Map<String,Object> map = TradeDB.getUserConfig(new Object[]{ user.getID() , Constant.payChannelMpos});
 		if(map==null||map.isEmpty()){
 			
@@ -102,12 +101,10 @@ public class MPOSTradeService {
 				response.setRespCode(RespCode.TradeTypeConfigError[0]);
 				response.setRespDesc(RespCode.TradeTypeConfigError[1]); 
 				return ;
-			}else{
-				map = TradeDB.getUserConfig(new Object[]{ userid , Constant.payChannelMpos});
 			}
 		}
 		
-		/** 获取 mpos 商户信息 **/
+		/* 获取 mpos 商户信息 **/
 		BankInfo bankInfo = MposDB.getBankInfo(user.getID());
 		if(bankInfo == null){
 			logger.info("用户：" + user.getLoginID() + " mpos 商户信息不存在."); 
@@ -135,7 +132,7 @@ public class MPOSTradeService {
 			String sendDate = sendTime.substring(0, 8);
 			sendTime = sendTime.substring(8);
 			
-			IsoMessage m_UnionReqMessage = sendTrade(seqID , request , dbIndex , termkey , bankInfo , bankKey , dbIndex);
+			IsoMessage mUnionReqMessage = sendTrade(seqID , request , dbIndex , termkey , bankInfo , bankKey , dbIndex);
 			
 			int isCredit = MposDB.getCardType(request.getBankCardNo());
 			
@@ -155,31 +152,38 @@ public class MPOSTradeService {
 				return;
 			}
 				   
-			IsoMessage m_UnionRspMessage = this.unionPayCommunicate.UnionCommunicate(m_UnionReqMessage);
+			IsoMessage mUnionRspMessage = this.unionPayCommunicate.UnionCommunicate(mUnionReqMessage);
 
-			if (m_UnionRspMessage != null) {
-				String retCode = m_UnionRspMessage.getField(39).toString();
+			if (mUnionRspMessage != null) {
+				String retCode = mUnionRspMessage.getField(39).toString();
 				response.setRespCode(retCode);
-				if (retCode.equals("A0")) {
+
+				String a0 = "A0";
+				String success = "00";
+				if (retCode.equals(a0)) {
 					logger.info("mac错误，重新签到更新秘钥");
 					Sign sign = new Sign();
 					sign.send();
-				} else if (retCode.equals("00")) {
+				} else if (retCode.equals(success)) {
 					String ref = "";
-					if (m_UnionRspMessage.getField(37) != null) {
-						ref = m_UnionRspMessage.getField(37).toString();
+					if (mUnionRspMessage.getField(37) != null) {
+						ref = mUnionRspMessage.getField(37).toString();
 					}
-					MposDB.updateConsumeTrade(ref, DateUtil.getNowTime("yyyyMMdd"), DateUtil.getNowTime("HHmmss"), "",
-							0, retCode, 0, 0, 0, bankKey.getBatchNo(), "", "", merchantId, terminalId, sendDate,
-							request.getSendSeqId());
+
+					if(bankKey!=null){
+                        MposDB.updateConsumeTrade(ref, DateUtil.getNowTime(DateUtil.yyyyMMdd), DateUtil.getNowTime(DateUtil.HHmmss), "",
+                                0, retCode, 0, 0, 0, bankKey.getBatchNo(), "", "", merchantId, terminalId, sendDate,
+                                request.getSendSeqId());
+                    }
 					
 					Fee fee = calProfit(seqID, amount, user);
-					MposDB.saveMposFee(new Object[]{
-							UtilsConstant.getUUID(),user.getID(), supportID ,fee.getMerchantFee(),fee.getAgentID(),fee.getAgentProfit(),
-							fee.getTwoAgentID(),fee.getTwoAgentProfit(),
-							fee.getPlatformProfit(),fee.getPlatCostFee() });
-					
-					
+					if(fee!=null) {
+                        MposDB.saveMposFee(new Object[]{
+                                UtilsConstant.getUUID(),user.getID(), supportID ,fee.getMerchantFee(),fee.getAgentID(),fee.getAgentProfit(),
+                                fee.getTwoAgentID(),fee.getTwoAgentProfit(),
+                                fee.getPlatformProfit(),fee.getPlatCostFee() });
+                    }
+
 					JSONObject json = new JSONObject();
 					json.put("merchantName", user.getMerchantName());
 					json.put("bankCardNo", request.getBankCardNo());
@@ -193,163 +197,136 @@ public class MPOSTradeService {
 					
 				}
 			}
-			/** 测试代码块  上线必须删除 **/
-			else{
-				
-				MposDB.updateConsumeTrade("111111111111", DateUtil.getNowTime("yyyyMMdd"), DateUtil.getNowTime("HHmmss"), "",
-						0, "00", 0, 0, 0, bankKey.getBatchNo(), "", "", merchantId, terminalId, sendDate,
-						request.getSendSeqId());
-				
-				Fee fee = calProfit(seqID, amount, user);
-				MposDB.saveMposFee(new Object[]{
-						UtilsConstant.getUUID(),user.getID(), supportID ,fee.getMerchantFee(),fee.getAgentID(),fee.getAgentProfit(),
-						fee.getTwoAgentID(),fee.getTwoAgentProfit(),
-						fee.getPlatformProfit(),fee.getPlatCostFee() });
-				
-				
-				JSONObject json = new JSONObject();
-				json.put("merchantName", user.getMerchantName());
-				json.put("bankCardNo", request.getBankCardNo());
-				json.put("merchantNo", user.getLoginID());
-				json.put("terminalno", bankInfo.getPlatTermNo());
-				json.put("refetno", "111111111111");
-				json.put("date",  DateUtil.getNowTime("yyyy/MM/dd HH:mm:ss"));
-				json.put("batchno",  bankKey.getBatchNo());
-				json.put("amount", amount);
-				json.put("type", "消费");
-				response.setList(json.toString());
-				
-				response.setRespCode(RespCode.SUCCESS[0]);
-				response.setRespDesc(RespCode.SUCCESS[1]);
-				
-			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public IsoMessage sendTrade(String SeqId, RequestData request , String termKeyIndex , Map<String,Object> termkey , BankInfo bankInfo , BankKey bankKey , String BankkeyIndex) 
+	private IsoMessage sendTrade(String seqID, RequestData request , String termKeyIndex , Map<String,Object> termKey , BankInfo bankInfo , BankKey bankKey , String bankKeyIndex)
 			throws Exception{
 
-		MessageFactory mfact = config.getMessFact8583();
-		IsoMessage m_UnionReqMessage = mfact.newMessage(0x0200);
-		m_UnionReqMessage.setBinary(true);
-		m_UnionReqMessage.setValue(2, request.getBankCardNo(), IsoType.LLNUMERIC, request.getBankCardNo().length());
-		m_UnionReqMessage.setValue(3, "000000", IsoType.NUMERIC, 6);
-		m_UnionReqMessage.setValue(4, Long.parseLong(request.getAmount()), IsoType.NUMERIC, 12);
-		m_UnionReqMessage.setValue(11, SeqId, IsoType.NUMERIC, 6);
+		MessageFactory mFact = config.getMessFact8583();
+		IsoMessage mUnionReqMessage = mFact.newMessage(0x0200);
+        mUnionReqMessage.setBinary(true);
+		mUnionReqMessage.setValue(2, request.getBankCardNo(), IsoType.LLNUMERIC, request.getBankCardNo().length());
+		mUnionReqMessage.setValue(3, "000000", IsoType.NUMERIC, 6);
+		mUnionReqMessage.setValue(4, Long.parseLong(request.getAmount()), IsoType.NUMERIC, 12);
+		mUnionReqMessage.setValue(11, seqID, IsoType.NUMERIC, 6);
 
 		if (request.getPointOfserviceEntryModel() != null) {
-			m_UnionReqMessage.setValue(22, request.getPointOfserviceEntryModel() + "0", IsoType.NUMERIC, 4);
+			mUnionReqMessage.setValue(22, request.getPointOfserviceEntryModel() + "0", IsoType.NUMERIC, 4);
 		} else {
 			if (request.getPin() == null && request.getIcRelatedData() == null) {
-				m_UnionReqMessage.setValue(22, "0220", IsoType.NUMERIC, 4);
+				mUnionReqMessage.setValue(22, "0220", IsoType.NUMERIC, 4);
 			} else if (request.getPin() == null && request.getIcRelatedData() != null) {
-				m_UnionReqMessage.setValue(22, "0520", IsoType.NUMERIC, 4);
+				mUnionReqMessage.setValue(22, "0520", IsoType.NUMERIC, 4);
 			} else if (request.getPin() != null && request.getIcRelatedData() != null) {
-				m_UnionReqMessage.setValue(22, "0510", IsoType.NUMERIC, 4);
+				mUnionReqMessage.setValue(22, "0510", IsoType.NUMERIC, 4);
 			} else {
-				m_UnionReqMessage.setValue(22, "0210", IsoType.NUMERIC, 4);
+				mUnionReqMessage.setValue(22, "0210", IsoType.NUMERIC, 4);
 			}
 		}
 		
 		if (request.getCardSerno() != null) {
-			m_UnionReqMessage.setValue(23, request.getCardSerno(), IsoType.NUMERIC, 3);
+			mUnionReqMessage.setValue(23, request.getCardSerno(), IsoType.NUMERIC, 3);
 		} else {
 			if (request.getIcRelatedData() != null) {
 				EmvTLVInfo emu = new EmvTLVInfo();
 				emu.AppendData(request.getIcRelatedData());
 				String filed23 = emu.getCardSerno();
-				m_UnionReqMessage.setValue(23, filed23, IsoType.NUMERIC, 3);
+				mUnionReqMessage.setValue(23, filed23, IsoType.NUMERIC, 3);
 			}
 		}
 		
-		m_UnionReqMessage.setValue(25, "00", IsoType.NUMERIC,2);
+		mUnionReqMessage.setValue(25, "00", IsoType.NUMERIC,2);
 		if(request.getPin()!=null){
-			m_UnionReqMessage.setValue(26, "06", IsoType.NUMERIC,2);
+			mUnionReqMessage.setValue(26, "06", IsoType.NUMERIC,2);
 		}
 		
-		m_UnionReqMessage.setValue(33, bankKey.getChannelNo(), IsoType.LLVAR, 9);
+		mUnionReqMessage.setValue(33, bankKey.getChannelNo(), IsoType.LLVAR, 9);
 		
-		/**  磁道2数据  **/
-		String td2 = EncrptMerchine.DesTrack(UtilsConstant.ObjToStr(termkey.get("TDKey")) , termKeyIndex, request.getTrack2Data());
+		/* 磁道2数据  */
+		String td2 = EncrptMerchine.DesTrack(UtilsConstant.ObjToStr(termKey.get("TDKey")) , termKeyIndex, request.getTrack2Data());
 		
-		System.out.println("td2:" + td2);
-		
-		m_UnionReqMessage.setValue(35, td2 , IsoType.LLHEX , td2.length());
-		
-		/**  磁道3数据  **/
+        if(td2!=null) {
+            mUnionReqMessage.setValue(35, td2 , IsoType.LLHEX , td2.length());
+        }
+
+		/*  磁道3数据  */
 		if (request.getTrack3Data() != null && request.getTrack3Data().length() != 0) {
-			String td3 = EncrptMerchine.DesTrack(UtilsConstant.ObjToStr(termkey.get("TDKey")) , termKeyIndex, request.getTrack3Data());
-			m_UnionReqMessage.setValue(36, td3, IsoType.LLLHEX, td3.length());
+			String td3 = EncrptMerchine.DesTrack(UtilsConstant.ObjToStr(termKey.get("TDKey")) , termKeyIndex, request.getTrack3Data());
+			if(td3!=null){
+                mUnionReqMessage.setValue(36, td3, IsoType.LLLHEX, td3.length());
+            }
 		}
 
-		m_UnionReqMessage.setValue(41, bankInfo.getPlatTermNo() , IsoType.ALPHA, 8);
-		m_UnionReqMessage.setValue(42, bankInfo.getPlatMerchantID() , IsoType.ALPHA, 15);
-		m_UnionReqMessage.setValue(49, "156", IsoType.ALPHA, 3);
+		mUnionReqMessage.setValue(41, bankInfo.getPlatTermNo() , IsoType.ALPHA, 8);
+		mUnionReqMessage.setValue(42, bankInfo.getPlatMerchantID() , IsoType.ALPHA, 15);
+		mUnionReqMessage.setValue(49, "156", IsoType.ALPHA, 3);
 		
-		/** 转pin **/
+		/* 转pin */
 		if(request.getPin()!=null){
 			if(request.getPin()!=null && request.getPin().length()>0){
-				String pin = DESUtil.changePin(request.getPin(),request.getBankCardNo(),UtilsConstant.ObjToStr(termkey.get("PinKey")),
-						termKeyIndex , bankKey.getPinKey() , BankkeyIndex);
-				m_UnionReqMessage.setValue(52, pin, IsoType.ALPHAHEX,16);
+				String pin = DESUtil.changePin(request.getPin(),request.getBankCardNo(),UtilsConstant.ObjToStr(termKey.get("PinKey")),
+						termKeyIndex , bankKey.getPinKey() , bankKeyIndex);
+				mUnionReqMessage.setValue(52, pin, IsoType.ALPHAHEX,16);
 			}
 		}
-		m_UnionReqMessage.setValue(53, "2600000000000000", IsoType.ALPHAHEX, 16);
+		mUnionReqMessage.setValue(53, "2600000000000000", IsoType.ALPHAHEX, 16);
 		
-		/** IC卡数据域  **/
+		/* IC卡数据域  **/
 		if (request.getIcRelatedData() != null && request.getIcRelatedData().length() != 0) {
 			EmvTLVInfo emu = new EmvTLVInfo();
 			emu.AppendData(request.getIcRelatedData());
 			String filed55 = emu.get55YuStr();
-			m_UnionReqMessage.setValue(55, filed55, IsoType.LLLBINARY, filed55.length() / 2);
+			mUnionReqMessage.setValue(55, filed55, IsoType.LLLBINARY, filed55.length() / 2);
 		}
 		
-		String filed60 = "";
+		String filed60;
 		if (request.getIcRelatedData() == null) {
 			filed60 = "22" + bankKey.getBatchNo() + "000";
 		} else {
 			filed60 = "22" + bankKey.getBatchNo() + "000501";
 		}
 		
-		m_UnionReqMessage.setValue(60, filed60, IsoType.LLLHEX, filed60.length());
-		m_UnionReqMessage.setValue(64, "0000000000000000", IsoType.ALPHAHEX, 16);
+		mUnionReqMessage.setValue(60, filed60, IsoType.LLLHEX, filed60.length());
+		mUnionReqMessage.setValue(64, "0000000000000000", IsoType.ALPHAHEX, 16);
 
 		// 计算mac
-		ByteBuffer bb = m_UnionReqMessage.writeToBuffer(2);
+		ByteBuffer bb = mUnionReqMessage.writeToBuffer(2);
 		byte[] ba8583 = bb.array();
 		byte[] bData = Arrays.copyOfRange(ba8583, 13, ba8583.length);
-		String mac = EncrptMerchine.bankMac2(DESUtil.bcd2Str(bData), bankKey.getMacKey(), BankkeyIndex);
-		m_UnionReqMessage.setValue(64, mac, IsoType.ALPHAHEX, 16);
-		return m_UnionReqMessage;
+		String mac = EncrptMerchine.bankMac2(DESUtil.bcd2Str(bData), bankKey.getMacKey(), bankKeyIndex);
+		mUnionReqMessage.setValue(64, mac, IsoType.ALPHAHEX, 16);
+		return mUnionReqMessage;
 	}
 	
 	
 	/**
 	 *   计算手续费
-	 * @param order
-	 * @param loginUser
-	 * @return
+	 * @param seqID    流水号
+	 * @param amount   交易金额
+	 * @param loginUser  用户信息
+	 * @return   手续费实体类
 	 */
-	public Fee calProfit(String seqID ,String amount , TabLoginuser loginUser ){
+	private Fee calProfit(String seqID ,String amount , TabLoginuser loginUser ){
 		
 		logger.info("计算订单：" + seqID + "手续费");
 		
 		Fee fee = new Fee();
 		// 交易费率
-		String feeRate = "0";
+		String feeRate;
 		// 结算费率
-		String SettlementRate = "0";
+		String settlementRate;
 		// t0 附加费用
-		int T0additional = 0;
+		int t0additional = 0;
 		
-		/** 用户费率配置信息 **/
+		/* 用户费率配置信息 */
 		Map<String,Object> userConfig = TradeDB.getUserConfig(new Object[]{loginUser.getID() ,  Constant.payChannelMpos }); 
 		
-		/** 代理商信息  **/
+		/* 代理商信息  */
 		Map<String,Object> agentInfo = AgentDB.agentInfo(new Object[]{loginUser.getAgentID()});
-		/**  代理商配置信息  **/
+		/*  代理商配置信息  */
 		Map<String,Object> agentConfig = AgentDB.agentConfig(new Object[]{agentInfo.get("ID") , Constant.payChannelMpos}); 
 		
 		if(agentConfig==null||agentConfig.isEmpty()){
@@ -358,17 +335,17 @@ public class MPOSTradeService {
 		}
 		
 		
-		/**  商户下放费率   ,   代理商签约成本 ,  渠道成本  **/
-		String merchantRate = "0", agentRate = "0" ,  channelRate ="0";
+		/*  商户下放费率   ,   代理商签约成本 ,  渠道成本  **/
+		String merchantRate  , agentRate   ,  channelRate  ;
 		
 
 		logger.info("订单:" + seqID + "为T1交易"); 
 		
-		/** 交易类型为T1 **/
+		/* 交易类型为T1 **/
 		// 交易费率
 		feeRate = UtilsConstant.ObjToStr(userConfig.get("T1SaleRate"));
 		// 结算费率
-		SettlementRate = UtilsConstant.ObjToStr(userConfig.get("T1SettlementRate"));
+        settlementRate = UtilsConstant.ObjToStr(userConfig.get("T1SettlementRate"));
 		//  商户下放费率
 		merchantRate = UtilsConstant.ObjToStr(agentConfig.get("MerchantRate"));
 		// 代理商成本费率
@@ -376,34 +353,36 @@ public class MPOSTradeService {
 		//  渠道成本
 		channelRate = UtilsConstant.ObjToStr(agentConfig.get("ChannelRate"));
 		
-		logger.info(seqID  + "交易费率为：" + feeRate + ",结算费率为：" + SettlementRate + ",商户下放：" + merchantRate  + ",代理商成本：" + agentRate + ",T0渠道成本:" + channelRate + ",T0附加费用：" + T0additional);
+		logger.info(seqID  + "交易费率为：" + feeRate + ",结算费率为：" + settlementRate + ",商户下放：" + merchantRate  + ",代理商成本：" + agentRate + ",T0渠道成本:" + channelRate + ",T0附加费用：" + t0additional);
 			
-		/** 商户手续费 **/
-		fee.setMerchantFee(AgentDB.makeFeeRounding(amount, Double.valueOf(feeRate)  , 0) + T0additional);
+		/* 商户手续费 **/
+		fee.setMerchantFee(AgentDB.makeFeeRounding(amount, Double.valueOf(feeRate)  , 0) + t0additional);
 		
 		
-		/** 商户自己的分润  **/
-		int merchantprofit = AgentDB.makeFeeAbandon(amount,AmountUtil.sub(feeRate, SettlementRate), 0);
+		/* 商户自己的分润  **/
+		int merchantprofit = AgentDB.makeFeeAbandon(amount,AmountUtil.sub(feeRate, settlementRate), 0);
 		
-		/** 三级分销总金额  **/
-		int distributeProfit = AgentDB.makeFeeAbandon(amount,AmountUtil.sub(SettlementRate, merchantRate), 0);
+		/* 三级分销总金额  **/
+		int distributeProfit = AgentDB.makeFeeAbandon(amount,AmountUtil.sub(settlementRate, merchantRate), 0);
 		
 		
-		/** 二级代理商商户交易 **/
-		if(agentInfo.get("ParentAgentID")!=null&&!agentInfo.get("ParentAgentID").equals(agentInfo.get("ID"))){
+		/* 二级代理商商户交易 **/
+		String agentInfoField = "ParentAgentID";
+		String idField = "ID" ;
+		if(agentInfo.get(agentInfoField)!=null&&!agentInfo.get(agentInfoField).equals(agentInfo.get(idField))){
 			
 			logger.info(seqID + "订单的商户的代理商为二级代理商");
 			
 			//  获得父级代理商ID
-			Map<String,Object> agentParent = AgentDB.agentInfo(new Object[]{agentInfo.get("ParentAgentID")});
+			Map<String,Object> agentParent = AgentDB.agentInfo(new Object[]{agentInfo.get(agentInfoField)});
 			//  获取父类代理商配置信息
-			Map<String,Object> agentParentConfig = AgentDB.agentConfig(new Object[]{agentParent.get("ID") ,Constant.payChannelMpos });
+			Map<String,Object> agentParentConfig = AgentDB.agentConfig(new Object[]{agentParent.get(idField) ,Constant.payChannelMpos });
 			//  代理商ID
 			fee.setAgentID(agentParent.get("ID").toString());
 			//  二级代理商ID
 			fee.setTwoAgentID(agentInfo.get("ID").toString());
 			
-			String parentAgentRate = "0";
+			String parentAgentRate ;
 			
 			parentAgentRate = agentParentConfig.get("AgentRate").toString();
 			//  代理商分润

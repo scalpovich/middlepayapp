@@ -111,7 +111,6 @@ public class UtilsConstant {
                         + propertyName.substring(0, 1).toUpperCase()  
                         + propertyName.substring(1);    
                 
-                
                 Field field = getClassField(clazz , propertyName);    
                 if(field==null){
                 	continue;  

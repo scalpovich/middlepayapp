@@ -107,8 +107,8 @@ public class TradeDB extends DBBase{
 	 */
 	public static int tradeInit(Object[] obj){
 		String sql = "insert into tab_pay_order (ID,Amount,LocalDate,LocalTimes,TradeDate,TradeTime,TermSerno,TradeType,"
-				+ "TradeCode,UserID,PayChannel,FeeRate,MerchantID,OrderNumber, DFBankCardNo ,TradeBankNo , AgentID) values "
-				+ "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+				+ "TradeCode,UserID,PayChannel,FeeRate,MerchantID,OrderNumber, DFBankCardNo ,TradeBankNo , AgentID , ChannelID) values "
+				+ "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 		return executeSql(sql, obj);
 	}
 	
@@ -119,8 +119,8 @@ public class TradeDB extends DBBase{
 	 */
 	public static int YMFTradeInit(Object[] obj){
 		String sql = "insert into tab_pay_order (ID,Amount,LocalDate,LocalTimes,TradeDate,TradeTime,TermSerno,"
-				+ "TradeType,TradeCode,UserID,PayChannel,MerchantID,OrderNumber,YMFCode , AgentID) values "
-				+ "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+				+ "TradeType,TradeCode,UserID,PayChannel,MerchantID,OrderNumber,YMFCode , AgentID,ChannelID) values "
+				+ "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 		return executeSql(sql, obj);
 	}
 	
@@ -158,9 +158,19 @@ public class TradeDB extends DBBase{
 		String sql = "update tab_pay_order set PayRetCode=? , PayRetMsg=? , Fee=? , MerchantProfit=?  where ID=?";
 		return executeSql(sql, obj);
 	}
-	
-	
-	
+
+
+	/**
+	 *   更新订单支付状态， 默认出款成功
+	 * @param obj
+	 * @return
+	 */
+	public static int updatePayOrder(Object[] obj){
+		String sql = "update tab_pay_order set PayRetCode=? , PayRetMsg=? , Fee=? , MerchantProfit=?  , T0PayRetCode='0000'  where ID=?";
+		return executeSql(sql, obj);
+	}
+
+
 	/**
 	 *    更新订单代付结果
 	 * @param obj
@@ -226,6 +236,12 @@ public class TradeDB extends DBBase{
 		return json;
 		
 	}
-	
+
+
+
+	public static int updateOrderTransactionId(String orderNumber , String transactionID){
+		String sql = "update tab_pay_order set TransactionId = ? where OrderNumber=?";
+		return executeSql(sql , new Object[]{transactionID , orderNumber });
+	}
 
 }

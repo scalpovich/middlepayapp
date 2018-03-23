@@ -321,7 +321,7 @@ public class TradeService {
 		int ret = TradeDB.tradeInit(new Object[]{UtilsConstant.getUUID(),reqData.getAmount() ,
 				DateUtil.getNowTime(DateUtil.yyyyMMdd),DateUtil.getNowTime(DateUtil.HHmmss),
 				tradeDate,tradeTime , reqData.getSendSeqId(), Constant.TradeType[0] ,
-				encrypt, loginUser.getID(),payChannel, feeRate , merchantID,orderNumber , "" , ""  , loginUser.getAgentID()});
+				encrypt, loginUser.getID(),payChannel, feeRate , merchantID,orderNumber , "" , ""  , loginUser.getAgentID() , "RONGHUI"});
 		
 		if(ret < 1 ){
 			log.info("数据库保存信息失败");

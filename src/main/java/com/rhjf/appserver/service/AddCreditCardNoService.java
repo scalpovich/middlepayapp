@@ -26,7 +26,7 @@ public class AddCreditCardNoService {
 
 	private LoggerTool log = new LoggerTool(this.getClass());
 	
-	public void AddCreditCardNo(TabLoginuser user , RequestData request , ResponseData response){
+	public void addCreditCardNo(TabLoginuser user , RequestData request , ResponseData response){
         //  查询商户结算卡信息
 		Map<String,Object> userBankCard = LoginUserDB.getUserBankCard(user.getID());
 

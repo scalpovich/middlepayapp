@@ -6,5 +6,5 @@ import com.rhjf.appserver.model.TabLoginuser;
 
 public interface KuaiTradeInterfaceService {
 
-	public void send(TabLoginuser user ,RequestData reqData , ResponseData repData);
+	void send(TabLoginuser user ,RequestData reqData , ResponseData repData);
 }

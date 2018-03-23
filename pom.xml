@@ -251,7 +251,7 @@
 					<contextPath>/appserver</contextPath>
 					<connectors>
 						<connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
-							<port>9191</port>
+							<port>9090</port>
 						</connector>
 					</connectors>
 				</configuration>
@@ -264,4 +264,6 @@
 		<!-- mybatis版本号 -->
 		<!-- log4j日志文件管理包版本 -->
 	</properties>
+	
+
 </project>

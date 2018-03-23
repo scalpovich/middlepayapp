@@ -23,7 +23,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import com.rhjf.appserver.util.LoggerTool;
 import com.sun.rowset.CachedRowSetImpl;
 
-@SuppressWarnings("restriction")
 public class DBBase {
 	
 	static LoggerTool log = new LoggerTool(DBBase.class);

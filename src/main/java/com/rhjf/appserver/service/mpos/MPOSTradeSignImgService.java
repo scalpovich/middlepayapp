@@ -39,7 +39,7 @@ public class MPOSTradeSignImgService {
 		}
 		String postfix = ".jpg";
 		try {
-			Image64Bit.GenerateImage(signImg.replaceAll("\n", "").replace("\t", ""), imgPath  + request.getRefetno() + postfix);
+			Image64Bit.geneRateImage(signImg.replaceAll("\n", "").replace("\t", ""), imgPath  + request.getRefetno() + postfix);
 			
 			response.setRespCode(RespCode.SUCCESS[0]);
 			response.setRespDesc(RespCode.SUCCESS[1]);

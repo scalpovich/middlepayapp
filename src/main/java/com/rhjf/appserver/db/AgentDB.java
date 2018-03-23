@@ -86,10 +86,4 @@ public class AgentDB extends DBBase{
 			return poundage;
 		}
 	}
-	
-	
-	public static void main(String[] args) {
-		int x = makeFeeAbandon("1000",AmountUtil.sub("5", "3.8"), 0);
-		System.out.println(x);
-	}
 }

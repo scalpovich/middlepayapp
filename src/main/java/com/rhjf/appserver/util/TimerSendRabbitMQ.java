@@ -2,6 +2,9 @@ package com.rhjf.appserver.util;
 
 import java.util.TimerTask;
 
+/**
+ * @author hadoop
+ */
 public class TimerSendRabbitMQ extends TimerTask{
 	
 	private String message;

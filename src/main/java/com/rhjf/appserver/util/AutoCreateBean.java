@@ -13,6 +13,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author hadoop
+ */
 public class AutoCreateBean {
 
 	private static final String DRIVER = "com.mysql.jdbc.Driver";
@@ -23,9 +26,10 @@ public class AutoCreateBean {
 
 	private static final String URL = "jdbc:mysql://localhost:3306/middlepayapp?autoReconnect=true&autoReconnectForPools=true";
 
-	private static String tablename; 
+	private static String tablename;
 
-	private String[] colnames; // 列名数组
+	// 列名数组
+	private String[] colnames;
 
 	private String[] colTypes; // 列名类型数组
 

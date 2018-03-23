@@ -23,6 +23,9 @@ public class PayOrder {
 	private String transactionId;
 	private String yMFCode;
 	private String settleAccounts;
+	private String channelID;
+	
+	
 	public void setID(String iD){
 		this.iD = iD;
 	}
@@ -161,4 +164,11 @@ public class PayOrder {
 	public String getSettleAccounts(){
 		return settleAccounts;
 	}
+	public String getChannelID() {
+		return channelID;
+	}
+	public void setChannelID(String channelID) {
+		this.channelID = channelID;
+	}
+	
 }

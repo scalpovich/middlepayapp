@@ -244,8 +244,8 @@ public class H5PerfectInfoService {
 					String desKey = respJS.getString("desKey");			//  微信des秘钥
 					String queryKey = respJS.getString("queryKey");		//  查询秘钥
 					
-					String AlipaySignKey = respJS.getString("AlipaySignKey");	// 支付宝签名秘钥
-					String AlipaydesKey = respJS.getString("AlipaydesKey");		// 支付des秘钥
+//					String AlipaySignKey = respJS.getString("AlipaySignKey");	// 支付宝签名秘钥
+//					String AlipaydesKey = respJS.getString("AlipaydesKey");		// 支付des秘钥
 					//MerchantID,MerchantName,SignKey,DESKey,QueryKey,UserID,PayType
 					
 					/*
@@ -255,7 +255,7 @@ public class H5PerfectInfoService {
 					List<Object[]> list = new ArrayList<Object[]>();
 					Object[] objs = new Object[]{merchantNo,merchantName,signKey,desKey,queryKey,user.getID(),Constant.PayChannelWXScancode};
 					list.add(objs);
-					objs = new Object[]{merchantNo,merchantName,AlipaySignKey,AlipaydesKey,queryKey,user.getID(),Constant.payChannelAliScancode};
+					objs = new Object[]{merchantNo,merchantName,signKey,desKey,queryKey,user.getID(),Constant.payChannelAliScancode};
 					list.add(objs);
 					this.saveMerchantInfo(list);
 					

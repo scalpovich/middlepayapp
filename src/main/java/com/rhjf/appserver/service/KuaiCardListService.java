@@ -28,6 +28,9 @@ import com.rhjf.appserver.util.UtilsConstant;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+/**
+ * @author hadoop
+ */
 public class KuaiCardListService {
 
 	LoggerTool logger = new LoggerTool(this.getClass());

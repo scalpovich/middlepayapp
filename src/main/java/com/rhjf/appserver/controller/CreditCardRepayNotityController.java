@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.rhjf.appserver.service.FeeComputeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +21,6 @@ import com.rhjf.appserver.db.TradeDB;
 import com.rhjf.appserver.model.Fee;
 import com.rhjf.appserver.model.PayOrder;
 import com.rhjf.appserver.model.TabLoginuser;
-import com.rhjf.appserver.service.NotifyService;
 import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.MD5;
@@ -42,7 +42,7 @@ public class CreditCardRepayNotityController {
 LoggerTool logger = new LoggerTool(this.getClass());
 	
 	@Autowired
-	private NotifyService notifyService;
+	private FeeComputeService notifyService;
 	
 	@RequestMapping("")
 	public Object notify(HttpServletRequest request) { 

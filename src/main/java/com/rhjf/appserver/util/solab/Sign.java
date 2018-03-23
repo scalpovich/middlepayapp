@@ -17,14 +17,14 @@ import com.rhjf.appserver.util.solab.iso8583.MessageFactory;
 public class Sign {
 
 	
-	LoggerTool logger = new LoggerTool(this.getClass());
+	private LoggerTool logger = new LoggerTool(this.getClass());
 	
-	protected UnionPayCommunicate unionPayCommunicate = new UnionPayCommunicate();
+	private UnionPayCommunicate unionPayCommunicate = new UnionPayCommunicate();
 
-	Config config = Config.getInstance();
+	private Config config = Config.getInstance();
 	
 	
-	String organization = "284473885";
+	private String organization = "284473885";
 	
 	public int send() throws Exception{
 		Properties prop = new Properties();
@@ -47,15 +47,15 @@ public class Sign {
 //		String merchantId = bankInfo.getPlatMerchantID();
 //		String terminalId = bankInfo.getPlatTermNo();
 //		BankKey bankKey = DBOperation.selectBankKey(merchantId, terminalId);
-		IsoMessage m_UnionReqMessage = Sign_MakeBuf(seqID.toString(), "000001");
-		IsoMessage m_UnionRspMessage = unionPayCommunicate.UnionCommunicate(m_UnionReqMessage, 1);
+		IsoMessage mUnionReqMessage = Sign_MakeBuf(seqID.toString(), "000001");
+		IsoMessage mUnionrspmessage = unionPayCommunicate.UnionCommunicate(mUnionReqMessage, 1);
 
-		if (m_UnionRspMessage != null) {
-			retCode = m_UnionRspMessage.getField(39).toString();
+		if (mUnionrspmessage != null) {
+			retCode = mUnionrspmessage.getField(39).toString();
 			if (retCode.equals("00")) {
 				// 获取批次号
-				String batchNo = m_UnionRspMessage.getField(60).toString().substring(2, 8);
-				String filed62 = m_UnionRspMessage.getField(62).toString();
+				String batchNo = mUnionrspmessage.getField(60).toString().substring(2, 8);
+				String filed62 = mUnionrspmessage.getField(62).toString();
 				String pinKey = filed62.substring(0, 32);
 				String macKey = filed62.substring(32 + 8, 32 + 8 + 16);
 

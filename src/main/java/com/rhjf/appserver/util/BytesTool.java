@@ -6,6 +6,9 @@ import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * @author hadoop
+ */
 public class BytesTool {
 
 	public static int bcdBytes2Int(byte[] baBcd) {

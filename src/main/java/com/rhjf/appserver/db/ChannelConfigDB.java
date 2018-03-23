@@ -6,8 +6,8 @@ public class ChannelConfigDB extends DBBase{
 
 	
 	
-	public static Map<String,Object> getChannelConfig(int payChannelID){
-		String sql = "select * from tab_channel_config where PayChannel = ?";
-		return queryForMap(sql, new Object[]{payChannelID});
+	public static Map<String,Object> getChannelConfig(int payChannelID , String ChannelID){
+		String sql = "select * from tab_channel_config where PayChannel = ? and ChannelID=?";
+		return queryForMap(sql, new Object[]{payChannelID , ChannelID});
 	}
 }

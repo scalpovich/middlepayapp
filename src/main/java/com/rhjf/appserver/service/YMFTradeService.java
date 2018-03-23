@@ -81,7 +81,7 @@ public class YMFTradeService   {
 		/** 向数据库插入初始化数据 **/
 		int ret = TradeDB.YMFTradeInit(new Object[]{UtilsConstant.getUUID(),amount ,DateUtil.getNowTime(DateUtil.yyyyMMdd),DateUtil.getNowTime(DateUtil.HHmmss),
 				tradeDate,tradeTime , DateUtil.getNowTime(DateUtil.yyyyMMddHHmmssSSS), Constant.TradeType[1] ,encrypt, 
-				user.getID(),qrCodeMap.get("PayChannel"), merchantID,orderNumber , ymfCode , user.getAgentID()});
+				user.getID(),qrCodeMap.get("PayChannel"), merchantID,orderNumber , ymfCode , user.getAgentID(),"RONGHUI"});
 		if(ret < 1 ){
 			logger.info("数据库保存信息失败");
 			return ;

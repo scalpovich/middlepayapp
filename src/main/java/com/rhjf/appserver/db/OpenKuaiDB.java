@@ -15,9 +15,17 @@ public class OpenKuaiDB extends DBBase{
 	public static int save(Object[] obj){
 		String sql = "INSERT INTO tab_openkuai (ID,UserID,bankCardNo,createDate,payerPhone ,encrypt,statusCode,orderID , cvn2 , expired) VALUES (?,?,?,now(),?,?,?,? , ? , ?) "
 				+ " ON DUPLICATE KEY UPDATE encrypt=? , orderID=? , createDate=now() ";
-		return executeSql(sql, obj);
+
+		int x = executeSql(sql, obj);
+
+		String sql2 = "update tab_pay_binverify as a , tab_openkuai as b set b.bankSymbol=a.bankCode where left(b.bankCardNo,a.verifyLength)=a.verifyCode and b.bankSymbol is null";
+
+		executeSql(sql2, null);
+		return x;
 	}
-	
+
+
+
 	
 	public static List<Map<String,Object>> kuaiCardlist(Object[] obj){
 //		String sql = "select * from ( select a.*  , b.bankName , case b.cardName when 'DEBIT_CARD' then '储蓄卡'  when 'CREDIT_CARD' then '信用卡' end as cardName , b.bankCode "

@@ -3,71 +3,72 @@ package com.rhjf.appserver.util;
 import java.lang.reflect.Array;
 
 
+/**
+ * @author hadoop
+ */
 public class KeyBean {
-	 /*
+	 /**
      * 下面这些S11-S44实际上是一个4*4的矩阵，在原始的C实现中是用#define 实现的， 这里把它们实现成为static
      * final是表示了只读，切能在同一个进程空间内的多个 Instance间共享
      */
-    static final int S11 = 7;
+    private static final int S11 = 7;
 
-    static final int S12 = 12;
+    private static final int S12 = 12;
 
-    static final int S13 = 17;
+    private static final int S13 = 17;
 
-    static final int S14 = 22;
+    private static final int S14 = 22;
 
-    static final int S21 = 5;
+    private static final int S21 = 5;
 
-    static final int S22 = 9;
+    private static final int S22 = 9;
 
-    static final int S23 = 14;
+    private static final int S23 = 14;
 
-    static final int S24 = 20;
+    private static final int S24 = 20;
 
-    static final int S31 = 4;
+    private static final int S31 = 4;
 
-    static final int S32 = 11;
+    private static final int S32 = 11;
 
-    static final int S33 = 16;
+    private static final int S33 = 16;
 
-    static final int S34 = 23;
+    private static final int S34 = 23;
 
-    static final int S41 = 6;
+    private static final int S41 = 6;
 
-    static final int S42 = 10;
+    private static final int S42 = 10;
 
-    static final int S43 = 15;
+    private static final int S43 = 15;
 
-    static final int S44 = 21;
+    private static final int S44 = 21;
 
-    static final byte[] PADDING = { -128, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    private static final byte[] PADDING = { -128, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0 };
 
-    /*
+    /**
      * 下面的三个成员是keyBean计算过程中用到的3个核心数据，在原始的C实现中 被定义到keyBean_CTX结构中
      */
-    private long[] state = new long[4]; // state (ABCD)
+    private long[] state = new long[4];
 
-    private long[] count = new long[2]; // number of bits, modulo 2^64 (lsb
+    private long[] count = new long[2];
 
-    // first)
+    private byte[] buffer = new byte[64];
 
-    private byte[] buffer = new byte[64]; // input buffer
-
-    /*
+    /**
      * digestHexStr是keyBean的唯一一个公共成员，是最新一次计算结果的 16进制ASCII表示.
      */
 
-    public String digestHexStr;
+    private String digestHexStr;
 
-    /*
+    /**
      * digest,是最新一次计算结果的2进制内部表示，表示128bit的keyBean值.
      */
     private byte[] digest = new byte[16];
 
-    /*
+    /**
      * getkeyBeanofStr是类keyBean最主要的公共方法，入口参数是你想要进行keyBean变换的字符串
      * 返回的是变换完的结果，这个结果是从公共成员digestHexStr取得的．
      */
@@ -82,13 +83,17 @@ public class KeyBean {
         return digestHexStr;
     }
 
-    // 这是keyBean这个类的标准构造函数，JavaBean要求有一个public的并且没有参数的构造函数
+    /**
+     *   这是keyBean这个类的标准构造函数，JavaBean要求有一个public的并且没有参数的构造函数
+     */
     public KeyBean() {
         keyBeanInit();
-        return;
     }
 
-    /* keyBeanInit是一个初始化函数，初始化核心变量，装入标准的幻数 */
+    /**
+     *  keyBeanInit是一个初始化函数，初始化核心变量，装入标准的幻数
+     *
+     */
     private void keyBeanInit() {
         count[0] = 0L;
         count[1] = 0L;
@@ -100,7 +105,7 @@ public class KeyBean {
         return;
     }
 
-    /*
+    /**
      * F, G, H ,I 是4个基本的keyBean函数，在原始的keyBean的C实现中，由于它们是
      * 简单的位运算，可能出于效率的考虑把它们实现成了宏，在java中，我们把它们 实现成了private方法，名字保持了原来C中的。
      */
@@ -120,7 +125,7 @@ public class KeyBean {
         return y ^ (x | (~z));
     }
 
-    /*
+    /**
      * FF,GG,HH和II将调用F,G,H,I进行近一步变换 FF, GG, HH, and II transformations for
      * rounds 1, 2, 3, and 4. Rotation is separate from addition to prevent
      * recomputation.
@@ -153,7 +158,7 @@ public class KeyBean {
         return a;
     }
 
-    /*
+    /**
      * keyBeanUpdate是keyBean的主计算过程，inbuf是要变换的字节串，inputlen是长度，这个
      * 函数由getkeyBeanofStr调用，调用之前需要调用keyBeaninit，因此把它设计成private的
      */
@@ -162,8 +167,9 @@ public class KeyBean {
         byte[] block = new byte[64];
         index = (int) (count[0] >>> 3) & 0x3F;
         // /* Update number of bits */
-        if ((count[0] += (inputLen << 3)) < (inputLen << 3))
+        if ((count[0] += (inputLen << 3)) < (inputLen << 3)){
             count[1]++;
+        }
         count[1] += (inputLen >>> 29);
         partLen = 64 - index;
         // Transform as many times as possible.
@@ -175,13 +181,15 @@ public class KeyBean {
                 keyBeanTransform(block);
             }
             index = 0;
-        } else
+        } else {
             i = 0;
+        }
+
         // /* Buffer remaining input */
         keyBeanMemcpy(buffer, inbuf, index, i, inputLen - i);
     }
 
-    /*
+    /**
      * keyBeanFinal整理和填写输出结果
      */
     private void keyBeanFinal() {
@@ -199,18 +207,20 @@ public class KeyBean {
         Encode(digest, state, 16);
     }
 
-    /*
+    /**
      * keyBeanMemcpy是一个内部使用的byte数组的块拷贝函数，从input的inpos开始把len长度的
      * 字节拷贝到output的outpos位置开始
      */
     private void keyBeanMemcpy(byte[] output, byte[] input, int outpos,
             int inpos, int len) {
         int i;
-        for (i = 0; i < len; i++)
+        for (i = 0; i < len; i++){
             output[outpos + i] = input[inpos + i];
+        }
+
     }
 
-    /*
+    /**
      * keyBeanTransform是keyBean核心变换程序，有keyBeanUpdate调用，block是分块的原始字节
      */
     private void keyBeanTransform(byte block[]) {
@@ -291,7 +301,7 @@ public class KeyBean {
         state[3] += d;
     }
 
-    /*
+    /**
      * Encode把long数组按顺序拆成byte数组，因为java的long类型是64bit的， 只拆低32bit，以适应原始C实现的用途
      */
     private void Encode(byte[] output, long[] input, int len) {
@@ -304,27 +314,27 @@ public class KeyBean {
         }
     }
 
-    /*
+    /**
      * Decode把byte数组按顺序合成成long数组，因为java的long类型是64bit的，
      * 只合成低32bit，高32bit清零，以适应原始C实现的用途
      */
     private void Decode(long[] output, byte[] input, int len) {
         int i, j;
 
-        for (i = 0, j = 0; j < len; i++, j += 4)
+        for (i = 0, j = 0; j < len; i++, j += 4){
             output[i] = b2iu(input[j]) | (b2iu(input[j + 1]) << 8)
                     | (b2iu(input[j + 2]) << 16) | (b2iu(input[j + 3]) << 24);
-        return;
+        }
     }
 
-    /*
+    /**
      * b2iu是我写的一个把byte按照不考虑正负号的原则的”升位”程序，因为java没有unsigned运算
      */
     public static long b2iu(byte b) {
         return b < 0 ? b & 0x7F + 128 : b;
     }
 
-    /*
+    /**
      * byteHEX()，用来把一个byte类型的数转换成十六进制的ASCII表示，
      * 因为java中的byte的toString无法实现这一点，我们又没有C语言中的 sprintf(outbuf,"%02X",ib)
      */
@@ -345,9 +355,9 @@ public class KeyBean {
         KeyBean keyBean = new KeyBean();
 		String key = keyBean.getkeyBeanofStr("13968750118");
 		System.out.println(key);
-        
-        
-        if (Array.getLength(args) == 0) { // 如果没有参数，执行标准的Test Suite
+
+        // 如果没有参数，执行标准的Test Suite
+        if (Array.getLength(args) == 0) {
             System.out.println("keyBean Test suite:");
             System.out.println("keyBean(\"):" + m.getkeyBeanofStr(""));
             System.out.println("keyBean(\"a\"):" + m.getkeyBeanofStr("a"));
@@ -360,8 +370,10 @@ public class KeyBean {
                     .println("keyBean(\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789\"):"
                             + m
                                     .getkeyBeanofStr("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"));
-        } else
+        } else{
             System.out.println("keyBean(" + args[0] + ")="  + m.getkeyBeanofStr(args[0]));
+        }
+
 
     }
 }
