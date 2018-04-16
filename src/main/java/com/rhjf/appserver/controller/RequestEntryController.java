@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.rhjf.appserver.db.LoginUserDAO;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -16,11 +17,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.LoginUserDB;
-import com.rhjf.appserver.db.TermkeyDB;
+import com.rhjf.appserver.db.TermKeyDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.DESUtil;
 import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.LoadPro;
@@ -71,7 +71,7 @@ public class RequestEntryController {
 			logger.info("请求报文：" + reqContent.replace("\n", "").replace(" ", "")); 
 			Map<String,Object> map = UtilsConstant.jsonToMap(JSONObject.fromObject(reqContent)); 
 			RequestData requestData = UtilsConstant.mapToBean(map, RequestData.class);
-			TabLoginuser loginuser = null;
+			LoginUser loginuser = null;
 			/** 获取登录手机号 **/
 			loginID = requestData.getLoginID();
 			
@@ -142,7 +142,7 @@ public class RequestEntryController {
 				Object obj = ehcache.get(Constant.cacheName, loginID + "UserInfo" );
 				if(obj == null){
 					logger.info("查询数据库");
-					loginuser = LoginUserDB.LoginuserInfo(loginID);
+					loginuser = LoginUserDAO.LoginuserInfo(loginID);
 					if(loginuser == null){
 						logger.info("未查到用户 " + loginID +"信息");
 						respData.setRespCode(RespCode.userDoesNotExist[0]);
@@ -152,7 +152,7 @@ public class RequestEntryController {
 					ehcache.put(Constant.cacheName, loginID + "UserInfo" , loginuser);
 				}else{
 					logger.info("查询缓存");
-					loginuser = (TabLoginuser) obj;
+					loginuser = (LoginUser) obj;
 				}
 				
 				if("0".equals(loginuser.getNeedLogin())){
@@ -195,7 +195,7 @@ public class RequestEntryController {
 				
 				//获取 函数入口
 				Class<?> cls = Class.forName("com.rhjf.appserver.service." + className);
-				Method m = cls.getDeclaredMethod(funName,new Class[]{ TabLoginuser.class , RequestData.class , ResponseData.class});
+				Method m = cls.getDeclaredMethod(funName,new Class[]{ LoginUser.class , RequestData.class , ResponseData.class});
 	
 				m.invoke(cls.newInstance(), loginuser , requestData , respData);
 			}else{
@@ -249,7 +249,7 @@ public class RequestEntryController {
 	 * @param user
 	 * @return
 	 */
-    public String makeMac(JSONObject json,TabLoginuser user){
+    public String makeMac(JSONObject json,LoginUser user){
     	
     	Map<String, Object> contentData = UtilsConstant.jsonToMap(json);
     	
@@ -265,7 +265,7 @@ public class RequestEntryController {
 			}
 		}
 		logger.info("计算mac原文:" + macStr);
-		Map<String, Object> termKey = TermkeyDB.selectTermKey(user.getID());
+		Map<String, Object> termKey = TermKeyDAO.selectTermKey(user.getID());
 		String initKey = LoadPro.loadProperties("config", "DBINDEX");
 		String rMac = DESUtil.mac(macStr, UtilsConstant.ObjToStr(termKey.get("MacKey")), initKey);
 		return rMac;

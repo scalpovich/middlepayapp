@@ -3,16 +3,16 @@ package com.rhjf.appserver.service.mpos;
 import java.util.Map;
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.MposDB;
+import com.rhjf.appserver.db.MposDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 
 public class MPOSQuerySNService {
 
-	public void MPOSQuerySN(TabLoginuser user , RequestData request, ResponseData response){
+	public void MPOSQuerySN(LoginUser user , RequestData request, ResponseData response){
 
-		Map<String, Object> merchantInfo = MposDB.getMPOSMerchant(user.getID());
+		Map<String, Object> merchantInfo = MposDAO.getMPOSMerchant(user.getID());
 
 		response.setSn("");
 

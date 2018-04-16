@@ -2,7 +2,7 @@ package com.rhjf.appserver.db;
 
 import java.util.Map;
 
-public class TurnWalletDB extends DBBase{
+public class TurnWalletDAO extends DBBase{
 
 	
 	/**

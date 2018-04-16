@@ -2,16 +2,16 @@ package com.rhjf.appserver.service.mpos;
 
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.AgentDB;
-import com.rhjf.appserver.db.MposDB;
-import com.rhjf.appserver.db.TermkeyDB;
-import com.rhjf.appserver.db.TradeDB;
+import com.rhjf.appserver.db.AgentDAO;
+import com.rhjf.appserver.db.MposDAO;
+import com.rhjf.appserver.db.TermKeyDAO;
+import com.rhjf.appserver.db.TradeDAO;
 import com.rhjf.appserver.model.BankInfo;
 import com.rhjf.appserver.model.BankKey;
 import com.rhjf.appserver.model.Fee;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.AmountUtil;
 import com.rhjf.appserver.util.DESUtil;
 import com.rhjf.appserver.util.DateUtil;
@@ -49,7 +49,7 @@ public class MPOSTradeService {
 	
 	private Config config = Config.getInstance();
 	
-	public void mposTrade(TabLoginuser user, RequestData request , ResponseData response){
+	public void mposTrade(LoginUser user, RequestData request , ResponseData response){
 		
 		String sendTime = request.getSendTime();
 		String sendSeqId = request.getSendSeqId();
@@ -75,7 +75,7 @@ public class MPOSTradeService {
 		
 		
 		/* 查询代理商配置信息  **/
-		Map<String,Object> agentConfigMap = AgentDB.agentConfig(new Object[]{user.getAgentID() , Constant.payChannelMpos});
+		Map<String,Object> agentConfigMap = AgentDAO.agentConfig(new Object[]{user.getAgentID() , Constant.payChannelMpos});
 		if(agentConfigMap == null || agentConfigMap.isEmpty()){
 			logger.info("用户：" + user.getLoginID() + "对应代理商交易类型：" + Constant.payChannelMpos + "配置信息不完整, 对应代理商ID：" +  user.getAgentID());
 			response.setRespCode(RespCode.AgentTradeConfigError[0]);
@@ -85,7 +85,7 @@ public class MPOSTradeService {
 		
 		
 		/* 查询用户交易配置信息  **/
-		Map<String,Object> map = TradeDB.getUserConfig(new Object[]{ user.getID() , Constant.payChannelMpos});
+		Map<String,Object> map = TradeDAO.getUserConfig(new Object[]{ user.getID() , Constant.payChannelMpos});
 		if(map==null||map.isEmpty()){
 			
 			logger.info("支付类型" + Constant.payChannelMpos + "读取数据库失败 , 保存用户默认费率， 5‰ 的手续费 ");
@@ -95,7 +95,7 @@ public class MPOSTradeService {
 			List<Object[]> list = new ArrayList<Object[]>();
 			list.add(new Object[]{id,userid , Constant.payChannelMpos , 0 , 0 , Constant.FeeRate , Constant.FeeRate,
 					Constant.FeeRate , Constant.FeeRate });
-			int x = TradeDB.saveUserConfig(list)[0];
+			int x = TradeDAO.saveUserConfig(list)[0];
 			if(x < 0 ){
 				logger.info("用户：" + user.getID() + "支付类型：" + Constant.payChannelMpos + " 支付配置信息获取失败,停止交易操作" );
 				response.setRespCode(RespCode.TradeTypeConfigError[0]);
@@ -105,7 +105,7 @@ public class MPOSTradeService {
 		}
 		
 		/* 获取 mpos 商户信息 **/
-		BankInfo bankInfo = MposDB.getBankInfo(user.getID());
+		BankInfo bankInfo = MposDAO.getBankInfo(user.getID());
 		if(bankInfo == null){
 			logger.info("用户：" + user.getLoginID() + " mpos 商户信息不存在."); 
 			response.setRespCode(RespCode.TradeTypeConfigError[0]);
@@ -116,7 +116,7 @@ public class MPOSTradeService {
 		ThreadLocalRandom random = ThreadLocalRandom.current();
 		String seqID = Integer.toString(random.nextInt(100000, 999999));
 		
-		Map<String,Object> termkey = TermkeyDB.selectTermKey(user.getID());
+		Map<String,Object> termkey = TermKeyDAO.selectTermKey(user.getID());
 		
 		String dbIndex = LoadPro.loadProperties("config", "DBINDEX");	// 2
 		
@@ -127,19 +127,19 @@ public class MPOSTradeService {
 		System.runFinalization();
 		
 		try {
-			BankKey bankKey = MposDB.getBankey(merchantId, terminalId);
+			BankKey bankKey = MposDAO.getBankey(merchantId, terminalId);
 			
 			String sendDate = sendTime.substring(0, 8);
 			sendTime = sendTime.substring(8);
 			
 			IsoMessage mUnionReqMessage = sendTrade(seqID , request , dbIndex , termkey , bankInfo , bankKey , dbIndex);
 			
-			int isCredit = MposDB.getCardType(request.getBankCardNo());
+			int isCredit = MposDAO.getCardType(request.getBankCardNo());
 			
 			
 			String supportID = UtilsConstant.getUUID();
 			
-			int nRet = MposDB.insertConsumeTrade(supportID,user.getID() , merchantId, terminalId, "T1",  request.getAmount(), request.getBankCardNo() 
+			int nRet = MposDAO.insertConsumeTrade(supportID,user.getID() , merchantId, terminalId, "T1",  request.getAmount(), request.getBankCardNo()
 					 , request.getSendSeqId() , seqID , sendDate, sendTime, "", bankInfo.getNetCode(), bankInfo.getPlatMerchantID(),
 					 bankInfo.getPlatTermNo(), "", "", isCredit , "", "", "", "");
 			 
@@ -171,14 +171,14 @@ public class MPOSTradeService {
 					}
 
 					if(bankKey!=null){
-                        MposDB.updateConsumeTrade(ref, DateUtil.getNowTime(DateUtil.yyyyMMdd), DateUtil.getNowTime(DateUtil.HHmmss), "",
+                        MposDAO.updateConsumeTrade(ref, DateUtil.getNowTime(DateUtil.yyyyMMdd), DateUtil.getNowTime(DateUtil.HHmmss), "",
                                 0, retCode, 0, 0, 0, bankKey.getBatchNo(), "", "", merchantId, terminalId, sendDate,
                                 request.getSendSeqId());
                     }
 					
 					Fee fee = calProfit(seqID, amount, user);
 					if(fee!=null) {
-                        MposDB.saveMposFee(new Object[]{
+                        MposDAO.saveMposFee(new Object[]{
                                 UtilsConstant.getUUID(),user.getID(), supportID ,fee.getMerchantFee(),fee.getAgentID(),fee.getAgentProfit(),
                                 fee.getTwoAgentID(),fee.getTwoAgentProfit(),
                                 fee.getPlatformProfit(),fee.getPlatCostFee() });
@@ -309,7 +309,7 @@ public class MPOSTradeService {
 	 * @param loginUser  用户信息
 	 * @return   手续费实体类
 	 */
-	private Fee calProfit(String seqID ,String amount , TabLoginuser loginUser ){
+	private Fee calProfit(String seqID ,String amount , LoginUser loginUser ){
 		
 		logger.info("计算订单：" + seqID + "手续费");
 		
@@ -322,12 +322,12 @@ public class MPOSTradeService {
 		int t0additional = 0;
 		
 		/* 用户费率配置信息 */
-		Map<String,Object> userConfig = TradeDB.getUserConfig(new Object[]{loginUser.getID() ,  Constant.payChannelMpos }); 
+		Map<String,Object> userConfig = TradeDAO.getUserConfig(new Object[]{loginUser.getID() ,  Constant.payChannelMpos });
 		
 		/* 代理商信息  */
-		Map<String,Object> agentInfo = AgentDB.agentInfo(new Object[]{loginUser.getAgentID()});
+		Map<String,Object> agentInfo = AgentDAO.agentInfo(new Object[]{loginUser.getAgentID()});
 		/*  代理商配置信息  */
-		Map<String,Object> agentConfig = AgentDB.agentConfig(new Object[]{agentInfo.get("ID") , Constant.payChannelMpos}); 
+		Map<String,Object> agentConfig = AgentDAO.agentConfig(new Object[]{agentInfo.get("ID") , Constant.payChannelMpos});
 		
 		if(agentConfig==null||agentConfig.isEmpty()){
 			logger.info("代理商：" + agentInfo.get("ID") + "没有配置支付类型：" +  Constant.payChannelMpos ); 
@@ -356,14 +356,14 @@ public class MPOSTradeService {
 		logger.info(seqID  + "交易费率为：" + feeRate + ",结算费率为：" + settlementRate + ",商户下放：" + merchantRate  + ",代理商成本：" + agentRate + ",T0渠道成本:" + channelRate + ",T0附加费用：" + t0additional);
 			
 		/* 商户手续费 **/
-		fee.setMerchantFee(AgentDB.makeFeeRounding(amount, Double.valueOf(feeRate)  , 0) + t0additional);
+		fee.setMerchantFee(AgentDAO.makeFeeRounding(amount, Double.valueOf(feeRate)  , 0) + t0additional);
 		
 		
 		/* 商户自己的分润  **/
-		int merchantprofit = AgentDB.makeFeeAbandon(amount,AmountUtil.sub(feeRate, settlementRate), 0);
+		int merchantprofit = AgentDAO.makeFeeAbandon(amount,AmountUtil.sub(feeRate, settlementRate), 0);
 		
 		/* 三级分销总金额  **/
-		int distributeProfit = AgentDB.makeFeeAbandon(amount,AmountUtil.sub(settlementRate, merchantRate), 0);
+		int distributeProfit = AgentDAO.makeFeeAbandon(amount,AmountUtil.sub(settlementRate, merchantRate), 0);
 		
 		
 		/* 二级代理商商户交易 **/
@@ -374,9 +374,9 @@ public class MPOSTradeService {
 			logger.info(seqID + "订单的商户的代理商为二级代理商");
 			
 			//  获得父级代理商ID
-			Map<String,Object> agentParent = AgentDB.agentInfo(new Object[]{agentInfo.get(agentInfoField)});
+			Map<String,Object> agentParent = AgentDAO.agentInfo(new Object[]{agentInfo.get(agentInfoField)});
 			//  获取父类代理商配置信息
-			Map<String,Object> agentParentConfig = AgentDB.agentConfig(new Object[]{agentParent.get(idField) ,Constant.payChannelMpos });
+			Map<String,Object> agentParentConfig = AgentDAO.agentConfig(new Object[]{agentParent.get(idField) ,Constant.payChannelMpos });
 			//  代理商ID
 			fee.setAgentID(agentParent.get("ID").toString());
 			//  二级代理商ID
@@ -386,21 +386,21 @@ public class MPOSTradeService {
 			
 			parentAgentRate = agentParentConfig.get("AgentRate").toString();
 			//  代理商分润
-			fee.setAgentProfit(AgentDB.makeFeeAbandon(amount, AmountUtil.sub(agentRate ,parentAgentRate ) ,0));
+			fee.setAgentProfit(AgentDAO.makeFeeAbandon(amount, AmountUtil.sub(agentRate ,parentAgentRate ) ,0));
 			//  设置二级代理商分润
-			fee.setTwoAgentProfit(AgentDB.makeFeeAbandon(amount, AmountUtil.sub(merchantRate ,agentRate), 0));
+			fee.setTwoAgentProfit(AgentDAO.makeFeeAbandon(amount, AmountUtil.sub(merchantRate ,agentRate), 0));
 			agentRate = parentAgentRate;
 		}else{
 			logger.info(seqID + "订单商户的代理商为一级代理商");
 			// 代理商ID
 			fee.setAgentID(agentInfo.get("ID").toString());
 			//  代理商分润
-			fee.setAgentProfit(AgentDB.makeFeeAbandon(amount, AmountUtil.sub(merchantRate ,agentRate) ,0));
+			fee.setAgentProfit(AgentDAO.makeFeeAbandon(amount, AmountUtil.sub(merchantRate ,agentRate) ,0));
 		}
 		//计算平台手续费
-		fee.setPlatCostFee(AgentDB.makeFeeFurther(amount, Double.valueOf(channelRate),0));
+		fee.setPlatCostFee(AgentDAO.makeFeeFurther(amount, Double.valueOf(channelRate),0));
 		// 平台收益
-		fee.setPlatformProfit(AgentDB.makeFeeFurther(amount,  AmountUtil.sub(agentRate, channelRate),0) + distributeProfit + merchantprofit);
+		fee.setPlatformProfit(AgentDAO.makeFeeFurther(amount,  AmountUtil.sub(agentRate, channelRate),0) + distributeProfit + merchantprofit);
 		
 		logger.info("订单：" + seqID + "，商户手续费：" + fee.getMerchantFee()  + "，平台收益:" + fee.getPlatformProfit() 
 		+ "，平台手续费:" + fee.getPlatCostFee()) ;
@@ -411,7 +411,7 @@ public class MPOSTradeService {
 	
 	public static void main(String[] args) throws Exception { 
 		
-//		TabLoginuser user = LoginUserDB.LoginuserInfo("18510978159");
+//		LoginUser user = LoginUserDAO.LoginuserInfo("18510978159");
 //		
 //		RequestData request = new RequestData();
 //		ResponseData response = new ResponseData();

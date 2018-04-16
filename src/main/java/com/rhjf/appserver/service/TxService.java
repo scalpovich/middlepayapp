@@ -5,10 +5,10 @@ import java.util.Map;
 
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.TxDB;
+import com.rhjf.appserver.db.WithdrawDepositDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.LoggerTool;
 
@@ -18,7 +18,7 @@ public class TxService {
 	
 	LoggerTool logger = new LoggerTool(this.getClass());
 
-	public void send(TabLoginuser loginuser,RequestData reqData , ResponseData repData){
+	public void send(LoginUser loginuser,RequestData reqData , ResponseData repData){
 		if(reqData.getAmount()==null ){
 			logger.info("提现金额为空");
 			repData.setRespCode(RespCode.TXAMOUNTError[0]);
@@ -34,7 +34,7 @@ public class TxService {
 		
 		
 		//提现
-		int nRet=TxDB.tx(loginuser.getID(), reqData.getAmount(),reqData.getSendSeqId(),reqData.getTxType());
+		int nRet= WithdrawDepositDAO.tx(loginuser.getID(), reqData.getAmount(),reqData.getSendSeqId(),reqData.getTxType());
 		if(nRet==2){
 			logger.info("余额不足");
 			repData.setRespCode(RespCode.TXAMOUNTNOTENOUGH[0]);
@@ -59,7 +59,7 @@ public class TxService {
 		ehcache.remove(Constant.cacheName, loginuser.getLoginID() + "UserInfo");
 	}
 	
-	public void getTxRecord(TabLoginuser loginuser,RequestData reqData , ResponseData repData){
+	public void getTxRecord(LoginUser loginuser,RequestData reqData , ResponseData repData){
 		
 		// 当前页数
 		Integer page = reqData.getPage();
@@ -70,9 +70,9 @@ public class TxService {
 			page = 0;
 		}
 		
-		List<Map<String, Object>> list = TxDB.getTxRecordList(loginuser.getID(), reqData.getTxType(), page*pageSize , pageSize);
+		List<Map<String, Object>> list = WithdrawDepositDAO.getTxRecordList(loginuser.getID(), reqData.getTxType(), page*pageSize , pageSize);
 		
-		Integer count = TxDB.getTxRecordCount(loginuser.getID(), reqData.getTxType());
+		Integer count = WithdrawDepositDAO.getTxRecordCount(loginuser.getID(), reqData.getTxType());
 		
 		repData.setList(JSONArray.fromObject(list).toString());
 		repData.setPage(page + 1);

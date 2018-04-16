@@ -1,11 +1,11 @@
 package com.rhjf.appserver.service;
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.LoginUserDB;
-import com.rhjf.appserver.db.UserProfitDB;
+import com.rhjf.appserver.db.LoginUserDAO;
+import com.rhjf.appserver.db.UserProfitDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 
 
 /**
@@ -16,15 +16,15 @@ import com.rhjf.appserver.model.TabLoginuser;
 public class MyMerchantDetailedService {
 	
 	
-	public void MyMerchantDetailed(TabLoginuser user , RequestData request , ResponseData response){
+	public void MyMerchantDetailed(LoginUser user , RequestData request , ResponseData response){
 		
 		String merchantID = request.getMerchantID();
 		
-		Integer count = LoginUserDB.merchantTokerCount(user.getID(), merchantID);
+		Integer count = LoginUserDAO.merchantTokerCount(user.getID(), merchantID);
 		
 		response.setTotalCount(count);
 		
-		String total = UserProfitDB.merchantTokerProfit(user.getID(), merchantID);
+		String total = UserProfitDAO.merchantTokerProfit(user.getID(), merchantID);
 		
 		response.setTotal(total);
 		response.setRespCode(RespCode.SUCCESS[0]);

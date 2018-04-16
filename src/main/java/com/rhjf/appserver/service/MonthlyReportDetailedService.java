@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.PayOrderDB;
+import com.rhjf.appserver.db.PayOrderDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.LoggerTool;
 
 import net.sf.json.JSONArray;
@@ -22,7 +22,7 @@ public class MonthlyReportDetailedService {
 	LoggerTool logger = new LoggerTool(this.getClass());
 	
 	
-	public void MonthlyReportDetailed(TabLoginuser user,RequestData request , ResponseData response){
+	public void MonthlyReportDetailed(LoginUser user,RequestData request , ResponseData response){
 		
 		/**  支付类型  **/
 		String paychannel = request.getPayChannel();
@@ -43,10 +43,10 @@ public class MonthlyReportDetailedService {
 		}
 		
 		
-		List<Map<String,Object>> list = PayOrderDB.monthlyReportDetailed(user.getID(), stringBuffer.toString(), paychannel ,  page*pageSize , pageSize);
+		List<Map<String,Object>> list = PayOrderDAO.monthlyReportDetailed(user.getID(), stringBuffer.toString(), paychannel ,  page*pageSize , pageSize);
 		
 		
-		Integer count  = PayOrderDB.monthlyReportDetailedCount(user.getID(), stringBuffer.toString(), paychannel);
+		Integer count  = PayOrderDAO.monthlyReportDetailedCount(user.getID(), stringBuffer.toString(), paychannel);
 		
 		
 		response.setList(JSONArray.fromObject(list).toString());

@@ -4,10 +4,10 @@ package com.rhjf.appserver.service;
 import java.util.Map;
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.LoginUserDB;
+import com.rhjf.appserver.db.LoginUserDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.KeyBean;
 import com.rhjf.appserver.util.LoadPro;
 import com.rhjf.appserver.util.LoggerTool;
@@ -18,7 +18,7 @@ public class MerchantReportService {
 
 	LoggerTool logger = new LoggerTool(this.getClass());
 	
-	public void merchantReportURL(TabLoginuser user ,  RequestData reqData , ResponseData repdata){
+	public void merchantReportURL(LoginUser user ,  RequestData reqData , ResponseData repdata){
 		
 		logger.info("用户" + user.getLoginID() +  "请求访问入网资料填写页面"); 
 		
@@ -46,7 +46,7 @@ public class MerchantReportService {
 	}
 	
 	
-	public void getMerchantReportInfo(TabLoginuser user ,  RequestData reqData , ResponseData repdata){
+	public void getMerchantReportInfo(LoginUser user ,  RequestData reqData , ResponseData repdata){
 		logger.info("用户" + user.getLoginID() +  "查看入网资料"); 
 		
 		String url = LoadPro.loadProperties("config", "reportInfoURL");
@@ -60,10 +60,10 @@ public class MerchantReportService {
 	
 	
 	
-	public void MerchantReportInfo(TabLoginuser user ,  RequestData reqData , ResponseData repdata){
+	public void MerchantReportInfo(LoginUser user ,  RequestData reqData , ResponseData repdata){
 		logger.info("用户" + user.getLoginID() +  "查看入网资料"); 
 		
-		Map<String,Object> map = LoginUserDB.merchantInfo(new Object[]{user.getID()});
+		Map<String,Object> map = LoginUserDAO.merchantInfo(new Object[]{user.getID()});
 		//  BankInfoStatus , PhotoStatus 
 		repdata.setList(JSONObject.fromObject(map).toString());
 		

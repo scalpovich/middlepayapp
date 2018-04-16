@@ -6,7 +6,7 @@ import java.io.IOException;
 import com.rhjf.appserver.constant.RespCode;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.DateUtil;
 import com.rhjf.appserver.util.Image64Bit;
 import com.rhjf.appserver.util.LoadPro;
@@ -22,7 +22,7 @@ public class MPOSTradeSignImgService {
 	
 	LoggerTool logger = new LoggerTool(this.getClass());
 	
-	public void MPOSTradeSignImg(TabLoginuser user , RequestData request , ResponseData response){
+	public void MPOSTradeSignImg(LoginUser user , RequestData request , ResponseData response){
 		
 		logger.info("用户：" + user.getLoginID() + "上传交易签名图片");
 		

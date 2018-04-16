@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.ThreadLocalRandom;
 
-import com.rhjf.appserver.db.MposDB;
+import com.rhjf.appserver.db.MposDAO;
 import com.rhjf.appserver.util.EncrptMerchine;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.solab.communicate.Config;
@@ -68,7 +68,7 @@ public class Sign {
 				
 				System.out.println("macBD:" + macDB);
 				// 更新密钥
-				return MposDB.updateBankKey(pinKeyDB ,macDB , batchNo );
+				return MposDAO.updateBankKey(pinKeyDB ,macDB , batchNo );
 			}
 		}
 		return 3;

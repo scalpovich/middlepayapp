@@ -8,11 +8,11 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.CreaditCardDB;
+import com.rhjf.appserver.db.CreditCardDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
 import com.rhjf.appserver.model.TabBankConfig;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.LoggerTool;
 
 import net.sf.json.JSONArray;
@@ -28,7 +28,7 @@ public class CreaditCardService {
 	 * @param repData
 	 * @return
 	 */
-	public void applyForCard(TabLoginuser loginuser,RequestData reqData , ResponseData repData){
+	public void applyForCard(LoginUser loginuser,RequestData reqData , ResponseData repData){
 		try {
 			logger.info("进入申请信用卡方法-----------------阿里克里");
 			SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -36,18 +36,18 @@ public class CreaditCardService {
 			Calendar calendar = Calendar.getInstance(); 
 			calendar.add(Calendar.MONTH, -3);    //得到前3个月 
 			String time = sdf2.format(calendar.getTime());
-			boolean flag =CreaditCardDB.findCardApplyRecord(reqData.getBankId(), reqData.getIdNumber(), time);
+			boolean flag = CreditCardDAO.findCardApplyRecord(reqData.getBankId(), reqData.getIdNumber(), time);
 			if(flag){
 				repData.setRespCode("A3");
 				repData.setRespDesc("此身份证90天内已经申请过");
 			}
 			String ID = UUID.randomUUID().toString();
-			int rsNet = CreaditCardDB.insertCardApplyRecord(ID,reqData.getPhoneNumber(), reqData.getIdNumber(), reqData.getRealName(),"2222", sdf.format(new Date()),reqData.getAgencyNumber(),reqData.getBankId());
+			int rsNet = CreditCardDAO.insertCardApplyRecord(ID,reqData.getPhoneNumber(), reqData.getIdNumber(), reqData.getRealName(),"2222", sdf.format(new Date()),reqData.getAgencyNumber(),reqData.getBankId());
 			if(rsNet ==0){
 				repData.setRespCode("A2");
 			}else{
 				repData.setRespCode("00");
-				TabBankConfig tbc  = CreaditCardDB.getTabBanConfigInfo(reqData.getBankId());
+				TabBankConfig tbc  = CreditCardDAO.getTabBanConfigInfo(reqData.getBankId());
 				repData.setRespDesc("交易成功");
 				repData.setBankUrl(tbc.getBankUrl());
 			}
@@ -65,9 +65,9 @@ public class CreaditCardService {
 	 * @param reqData
 	 * @param repData
 	 */
-	public void GetBank(TabLoginuser loginuser,RequestData reqData , ResponseData repData){
+	public void GetBank(LoginUser loginuser,RequestData reqData , ResponseData repData){
 		try {
-			List<TabBankConfig> list = CreaditCardDB.getBankList();
+			List<TabBankConfig> list = CreditCardDAO.getBankList();
 			repData.setBankList(JSONArray.fromObject(list).toString()); 
 			repData.setRespCode(RespCode.SUCCESS[0]);
 			repData.setRespDesc(RespCode.SUCCESS[1]);
@@ -80,7 +80,7 @@ public class CreaditCardService {
 				
 	}	
 	
-	public void myCardShare(TabLoginuser loginuser,RequestData reqData , ResponseData repData){
+	public void myCardShare(LoginUser loginuser,RequestData reqData , ResponseData repData){
 		
 		try {
 			// 当前页数
@@ -92,9 +92,9 @@ public class CreaditCardService {
 				page = 0;
 			}
 			
-			List<Map<String, Object>> list = CreaditCardDB.myCardShare(loginuser.getID(), page*pageSize , pageSize);
+			List<Map<String, Object>> list = CreditCardDAO.myCardShare(loginuser.getID(), page*pageSize , pageSize);
 			
-			Integer count = CreaditCardDB.myCardShareCount(loginuser.getID());
+			Integer count = CreditCardDAO.myCardShareCount(loginuser.getID());
 			
 			repData.setList(JSONArray.fromObject(list).toString());
 			repData.setPage(page + 1);

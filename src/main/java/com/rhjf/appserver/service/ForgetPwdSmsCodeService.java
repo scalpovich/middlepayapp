@@ -1,10 +1,10 @@
 package com.rhjf.appserver.service;
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.SmsApplyDB;
+import com.rhjf.appserver.db.SmsApplyDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.LoggerTool;
 
 /**
@@ -17,14 +17,14 @@ public class ForgetPwdSmsCodeService {
 
 	LoggerTool logger = new LoggerTool(this.getClass());
 	
-	public void ForgetPwdSmsCode(TabLoginuser user , RequestData reqdata , ResponseData respdata){
+	public void ForgetPwdSmsCode(LoginUser user , RequestData reqdata , ResponseData respdata){
 		
 		logger.info("用户：" + user.getLoginID() + "忘记密码，开始找回操作");
 		
 		
 		String code = reqdata.getSmsCode();
 		
-		String smsCode = SmsApplyDB.getSmsCode(new Object[]{user.getLoginID()});
+		String smsCode = SmsApplyDAO.getSmsCode(new Object[]{user.getLoginID()});
 		
 		if(smsCode==null||!code.equals(smsCode)){
 			logger.info("短息验证码错误:" + reqdata.getLoginID() + "数据库验证码：" + smsCode + "上报验证码：" + code);
@@ -33,7 +33,7 @@ public class ForgetPwdSmsCodeService {
 			respdata.setRespDesc(RespCode.SMSCodeError[1]);
 			return ;
 		}else{
-			SmsApplyDB.delSmsCode(new Object[]{reqdata.getLoginID()});
+			SmsApplyDAO.delSmsCode(new Object[]{reqdata.getLoginID()});
 		}
 		
 		respdata.setRespCode(RespCode.SUCCESS[0]);

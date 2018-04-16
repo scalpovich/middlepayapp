@@ -9,9 +9,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.rhjf.appserver.db.LoginUserDB;
-import com.rhjf.appserver.db.YMFTradeDB;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.db.LoginUserDAO;
+import com.rhjf.appserver.db.YMFTradeDAO;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.UtilsConstant;
 
@@ -58,14 +58,14 @@ public class YMFPayServlet extends HttpServlet {
 		
 		if(!UtilsConstant.strIsEmpty(qrCode)){
 			/** 根据码数据查询固定码信息 **/
-			Map<String,Object> map = YMFTradeDB.getYMFCode(new Object[]{qrCode});
+			Map<String,Object> map = YMFTradeDAO.getYMFCode(new Object[]{qrCode});
 			if (map != null && !map.isEmpty()) {
 				if (map.get("Valid").equals("1")) {
 					//可用
 					if (map.get("Binded").equals("1")&&!UtilsConstant.strIsEmpty(UtilsConstant.ObjToStr(map.get("UserID")))){
 						//已绑定
 						try {
-							TabLoginuser user = LoginUserDB.getLoginuserInfo(UtilsConstant.ObjToStr(map.get("UserID")));
+							LoginUser user = LoginUserDAO.getLoginuserInfo(UtilsConstant.ObjToStr(map.get("UserID")));
 							
 							String user_agent = request.getHeader("user-agent");
 							

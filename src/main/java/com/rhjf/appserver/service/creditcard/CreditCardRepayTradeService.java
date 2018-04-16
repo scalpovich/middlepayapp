@@ -5,7 +5,7 @@ import java.lang.reflect.Proxy;
 
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.service.ronghui.KuaiTradeService;
 import com.rhjf.appserver.util.LoggerTool;
 
@@ -13,7 +13,7 @@ public class CreditCardRepayTradeService{
 	
 	private LoggerTool log  = new LoggerTool(this.getClass());
 	
-	public void creditCardRepayTrade(TabLoginuser user,RequestData reqData , ResponseData repData){
+	public void creditCardRepayTrade(LoginUser user,RequestData reqData , ResponseData repData){
 		
 		log.info("用户："+ user.getLoginID() + "执行信用卡还款交易");
 		
@@ -32,7 +32,7 @@ public class CreditCardRepayTradeService{
 		subject.send(user, reqData, repData);
 	}
 	
-//	public void send(TabLoginuser loginUser,RequestData reqData , ResponseData repData){
+//	public void send(LoginUser loginUser,RequestData reqData , ResponseData repData){
 //		log.info("用户"+  loginUser.getLoginID() + "发起支付请求") ;
 //		
 //		/**  获取支付类型 **/
@@ -50,7 +50,7 @@ public class CreditCardRepayTradeService{
 //		Map<String,Object> bankInfoMap =  null;
 //		Object bankInfoObj = ehcache.get(Constant.cacheName, loginUser.getID()  + "userbankinfo");
 //		if(bankInfoObj == null){
-//			bankInfoMap = LoginUserDB.getUserBankCard(loginUser.getID());
+//			bankInfoMap = LoginUserDAO.getUserBankCard(loginUser.getID());
 //			if(bankInfoMap!=null && !bankInfoMap.isEmpty()){
 //				ehcache.put(Constant.cacheName,  loginUser.getID()  + "userbankinfo", bankInfoMap);
 //			}
@@ -59,7 +59,7 @@ public class CreditCardRepayTradeService{
 //		}
 //		
 //		if(bankInfoMap!=null&&!bankInfoMap.isEmpty()){
-//			Integer totalAmount =  PayOrderDB.dayTradeAmount(new Object[]{loginUser.getLoginID() , DateUtil.getNowTime(DateUtil.yyyyMMdd)});
+//			Integer totalAmount =  PayOrderDAO.dayTradeAmount(new Object[]{loginUser.getLoginID() , DateUtil.getNowTime(DateUtil.yyyyMMdd)});
 //			if("".equals(UtilsConstant.ObjToStr(bankInfoMap.get("SettleCreditCard")))){
 //				//  没有通过信用卡鉴权
 //				if(totalAmount+Integer.parseInt(reqData.getAmount()) > 3000000 ){
@@ -82,7 +82,7 @@ public class CreditCardRepayTradeService{
 //		
 //		if(agentConfigobj == null){
 //			log.info("缓存读取代理商交易信息失败，将从数据库中读取: 交易类型：" + payChannel + "代理商ID：" + loginUser.getAgentID()); 
-//			agentconfigmap = AgentDB.agentConfig(new Object[]{loginUser.getAgentID() ,payChannel });
+//			agentconfigmap = AgentDAO.agentConfig(new Object[]{loginUser.getAgentID() ,payChannel });
 //			if(agentconfigmap == null || agentconfigmap.isEmpty()){
 //				log.info("用户：" + loginUser.getLoginID() + "对应代理商交易类型：" + payChannel + "配置信息不完整, 对应代理商ID：" +  loginUser.getAgentID());
 //				repData.setRespCode(RespCode.AgentTradeConfigError[0]);
@@ -100,23 +100,23 @@ public class CreditCardRepayTradeService{
 //		Object obj = ehcache.get(Constant.cacheName, loginUser.getID() + payChannel + "userConfig");
 //		if(obj == null){
 //			log.info("缓存读取用户支付配置信息失败，从数据中读取， 用户：" + loginUser.getID() + " , 支付类型:" + payChannel);
-//			map = TradeDB.getUserConfig(new Object[]{ loginUser.getID() , payChannel});
+//			map = TradeDAO.getUserConfig(new Object[]{ loginUser.getID() , payChannel});
 //			if(map==null||map.isEmpty()){
 //				// ID,UserID,PayChannel,SaleAmountMax,SaleAmountMaxDay,T1SaleRate,T0SaleRate,T1SettlementRate,T0SettlementRate
 //				String id = UtilsConstant.getUUID();
 //				String userid = loginUser.getID();
-//				map = TradeDB.getUserConfig(new Object[]{ loginUser.getID() , "1"});
+//				map = TradeDAO.getUserConfig(new Object[]{ loginUser.getID() , "1"});
 //				
 //				List<Object[]> list = new ArrayList<Object[]>();
 //				list.add(new Object[]{id,userid,payChannel,0,0,map.get("T1SaleRate"),map.get("T0SaleRate"),map.get("T1SettlementRate"),map.get("T0SettlementRate")});
-//				int x = TradeDB.saveUserConfig(list)[0];
+//				int x = TradeDAO.saveUserConfig(list)[0];
 //				if(x < 0 ){
 //					log.info("用户：" + loginUser.getID() + "支付类型：" + payChannel + "系统为查到该类型配置信息" );
 //					repData.setRespCode(RespCode.TradeTypeConfigError[0]);
 //					repData.setRespDesc(RespCode.TradeTypeConfigError[1]); 
 //					return ;
 //				}else{
-//					map = TradeDB.getUserConfig(new Object[]{ loginUser.getID() , payChannel});
+//					map = TradeDAO.getUserConfig(new Object[]{ loginUser.getID() , payChannel});
 //				}
 //			}
 //			ehcache.put(Constant.cacheName, loginUser.getID() + payChannel + "userConfig" , map);
@@ -128,10 +128,10 @@ public class CreditCardRepayTradeService{
 //		
 //		
 //		/**  获取交易商户  **/
-//		Map<String,Object> merchantMap = TradeDB.getMerchantInfo(new Object[]{loginUser.getID() , payChannel}); 
+//		Map<String,Object> merchantMap = TradeDAO.getMerchantInfo(new Object[]{loginUser.getID() , payChannel});
 //		if(merchantMap==null||merchantMap.isEmpty()){
 //			
-//			merchantMap = TradeDB.getMerchantInfo(new Object[]{loginUser.getID() , "1"}); 
+//			merchantMap = TradeDAO.getMerchantInfo(new Object[]{loginUser.getID() , "1"});
 //			
 //			String MerchantID = UtilsConstant.ObjToStr(merchantMap.get("MerchantID"));
 //			
@@ -151,7 +151,7 @@ public class CreditCardRepayTradeService{
 //				String QueryKey = UtilsConstant.ObjToStr(merchantMap.get("QueryKey"));
 //				String MerchantName = UtilsConstant.ObjToStr(merchantMap.get("MerchantName"));
 //				
-//				TradeDB.saveMerchant(new Object[]{MerchantID,MerchantName,signKey,desKey,QueryKey,loginUser.getID(),payChannel});
+//				TradeDAO.saveMerchant(new Object[]{MerchantID,MerchantName,signKey,desKey,QueryKey,loginUser.getID(),payChannel});
 //				
 //				merchantMap.put("MerchantID",MerchantID);
 //				merchantMap.put("SignKey",signKey);
@@ -170,7 +170,7 @@ public class CreditCardRepayTradeService{
 //		obj = ehcache.get(Constant.cacheName, "tradeConfig");
 //		if(obj == null){
 //			log.info("缓存中获取交易配置信息失败,从数据库中查询");
-//			tradeConfig = AppconfigDB.getTradeConfig(); 
+//			tradeConfig = AppConfigDAO.getTradeConfig();
 //			ehcache.put(Constant.cacheName, "tradeConfig", tradeConfig); 
 //		}else{
 //			log.info("缓存查询交易配置信息");
@@ -264,7 +264,7 @@ public class CreditCardRepayTradeService{
 //		payrequest.put("amount",amount);
 //		
 //		
-//		Map<String, Object> termKey = TermkeyDB.selectTermKey(loginUser.getID());
+//		Map<String, Object> termKey = TermKeyDAO.selectTermKey(loginUser.getID());
 //		String initKey = LoadPro.loadProperties("config", "DBINDEX");
 //		
 //		String bankCardno = "";
@@ -286,7 +286,7 @@ public class CreditCardRepayTradeService{
 //		String creditCard = reqData.getCreditCardNo();
 //		
 //		/** 向数据库插入初始化数据 **/
-//		int ret = TradeDB.tradeInit(new Object[]{UtilsConstant.getUUID(),reqData.getAmount() ,
+//		int ret = TradeDAO.tradeInit(new Object[]{UtilsConstant.getUUID(),reqData.getAmount() ,
 //				DateUtil.getNowTime(DateUtil.yyyyMMdd),DateUtil.getNowTime(DateUtil.HHmmss),
 //				tradeDate,tradeTime , reqData.getSendSeqId(), "信用卡还款" , 
 //				encrypt, loginUser.getID(),payChannel, feeRate ,merchantID,orderNumber , creditCard , bankCardno , loginUser.getAgentID()});
@@ -299,7 +299,7 @@ public class CreditCardRepayTradeService{
 //		}
 //		
 //		// 更新快捷交易银行卡预留手机号
-//		OpenKuaiDB.updatePayerPhone(new Object[]{reqData.getPayerPhone() , loginUser.getID() ,bankCardno });
+//		OpenKuaiDAO.updatePayerPhone(new Object[]{reqData.getPayerPhone() , loginUser.getID() ,bankCardno });
 //		
 //	    payrequest.put("goodsName",loginUser.getMerchantName());
 //	    payrequest.put("callbackUrl", LoadPro.loadProperties("http" , "WX_ScanCodeCallbackUrl"));
@@ -358,11 +358,11 @@ public class CreditCardRepayTradeService{
 //			 */
 //			if(repData.getRespCode().equals(RespCode.SUCCESS[0])){
 //				
-//				PayOrder order = TradeDB.getPayOrderInfo(orderNumber);
+//				PayOrder order = TradeDAO.getPayOrderInfo(orderNumber);
 //				Fee fee = calProfit(orderNumber, order , loginUser);
-//				TradeDB.updatePayOrderPayRetCode(new Object[]{retCode ,msg , fee.getMerchantFee() , 0 , order.getID()});
+//				TradeDAO.updatePayOrderPayRetCode(new Object[]{retCode ,msg , fee.getMerchantFee() , 0 , order.getID()});
 //				
-//				TradeDB.saveProfit(new Object[]{
+//				TradeDAO.saveProfit(new Object[]{
 //						UtilsConstant.getUUID(),loginUser.getID(), order.getID() ,fee.getMerchantFee(),null , null,
 //						null , null, null,fee.getPlatformProfit(),fee.getPlatCostFee()});
 //				

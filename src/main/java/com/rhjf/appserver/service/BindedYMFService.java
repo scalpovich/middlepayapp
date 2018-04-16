@@ -3,10 +3,10 @@ package com.rhjf.appserver.service;
 import java.util.Map;
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.YMFTradeDB;
+import com.rhjf.appserver.db.YMFTradeDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.DateUtil;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.UtilsConstant;
@@ -21,7 +21,7 @@ public class BindedYMFService {
 
 	LoggerTool logger = new LoggerTool(this.getClass());
 	
-	public void BindedYMF(TabLoginuser user , RequestData reqdata, ResponseData respdata){
+	public void BindedYMF(LoginUser user , RequestData reqdata, ResponseData respdata){
 		
 		logger.info("用户" + user.getLoginID() +"绑定固定码 , 固定码地址为：" + reqdata.getQrcodeurl()); 
 		
@@ -29,7 +29,7 @@ public class BindedYMFService {
 		
 		String code = qrcodeurl.substring(qrcodeurl.indexOf("=") +1 );
 		
-		Map<String,Object> map = YMFTradeDB.getYMFCode(new Object[]{code});		
+		Map<String,Object> map = YMFTradeDAO.getYMFCode(new Object[]{code});
 		
 		if(map!=null&&!map.isEmpty()){
 			
@@ -44,7 +44,7 @@ public class BindedYMFService {
 			String qrcodeAgentID = UtilsConstant.ObjToStr(map.get("AgentID")); 
 			
 			if(agentID.equals(qrcodeAgentID)){
-				int ret = YMFTradeDB.updateBindedInfo(new Object[]{user.getID(),DateUtil.getNowTime(DateUtil.yyyyMMdd) , code});
+				int ret = YMFTradeDAO.updateBindedInfo(new Object[]{user.getID(),DateUtil.getNowTime(DateUtil.yyyyMMdd) , code});
 				
 				if(ret > 0){
 					logger.info("码数据" + code + "更新绑定信息成功");

@@ -1,4 +1,7 @@
 package	com.rhjf.appserver.model;
+/**
+ * @author hadoop
+ */
 public class PayOrder {
 	private String iD;
 	private String amount;

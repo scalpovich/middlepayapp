@@ -7,7 +7,7 @@ import java.util.Map;
  * @author hadoop
  *
  */
-public class CapitalDB extends DBBase{
+public class CapitalDAO extends DBBase{
 
 	
 	/**

@@ -5,10 +5,10 @@ import java.util.Map;
 
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.TradeDB;
+import com.rhjf.appserver.db.TradeDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.LoggerTool;
 
@@ -24,7 +24,7 @@ public class QueryUserFeeRateService {
 	LoggerTool logger = new LoggerTool(this.getClass());
 	
 	@SuppressWarnings("unchecked")
-	public void QueryUserFeeRate(TabLoginuser user, RequestData reqdata,ResponseData respdata){
+	public void QueryUserFeeRate(LoginUser user, RequestData reqdata,ResponseData respdata){
 		
 		logger.info("用户" + user.getLoginID() + "查询费率信息");
 		
@@ -35,7 +35,7 @@ public class QueryUserFeeRateService {
 		Object obj = ehcache.get(Constant.cacheName, user.getLoginID() + "FeeRate" );
 		if(obj == null){
 			logger.info(user.getLoginID() + "从数据库查询费率信息");
-			list = TradeDB.getUserFeeRate(new Object[]{user.getID()});
+			list = TradeDAO.getUserFeeRate(new Object[]{user.getID()});
 			ehcache.put(Constant.cacheName, user.getLoginID() + "FeeRate" , list);
 		}else{
 			logger.info("================== " + user.getLoginID() +"费率从缓存中查询");

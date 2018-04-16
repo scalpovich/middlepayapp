@@ -7,14 +7,17 @@ import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.LoggerTool;
 
+/**
+ * @author hadoop
+ */
 @RestController
 @RequestMapping("/clearcache")
 public class ClearCacheController{
 
-	LoggerTool logger = new LoggerTool(this.getClass());
+	private LoggerTool logger = new LoggerTool(this.getClass());
 	
 	@RequestMapping("")
-	public Object ClearCache(){
+	public Object clearCache(){
 		logger.info("清除缓存中所有内容");
 		EhcacheUtil ehcache = EhcacheUtil.getInstance();
 		ehcache.clear(Constant.cacheName);

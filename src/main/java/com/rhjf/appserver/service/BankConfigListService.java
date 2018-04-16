@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.BankConfigDB;
+import com.rhjf.appserver.db.BankConfigDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
 
@@ -15,7 +15,7 @@ public class BankConfigListService {
 	
 	public void BankConfigList(RequestData request ,  ResponseData response){
 		
-		List<Map<String,String>> list = BankConfigDB.getBankList();
+		List<Map<String,String>> list = BankConfigDAO.getBankList();
 		
 		response.setList(JSONArray.fromObject(list).toString());
 

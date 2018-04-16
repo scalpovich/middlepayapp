@@ -2,7 +2,7 @@ package com.rhjf.appserver.service;
 
 import java.util.Random;
 
-import com.rhjf.appserver.db.SmsApplyDB;
+import com.rhjf.appserver.db.SmsApplyDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
 import com.rhjf.appserver.util.LoadPro;
@@ -18,7 +18,7 @@ public class SmsApplyService {
 		
 		//生成验证码
 		String smsCode = GetSmsCode();
-		int nRet = SmsApplyDB.insertSmsCode(reqData.getLoginID(), smsCode);
+		int nRet = SmsApplyDAO.insertSmsCode(reqData.getLoginID(), smsCode);
 		if(nRet==-1){
 			logger.info("记录手机号校验码失败，手机号=【"+reqData.getLoginID()+"】");
 			repData.setRespCode("96");
@@ -41,7 +41,7 @@ public class SmsApplyService {
 		
 		//生成验证码
 		String smsCode = GetSmsCode();
-		int nRet = SmsApplyDB.insertSmsCode(reqData.getLoginID(), smsCode);
+		int nRet = SmsApplyDAO.insertSmsCode(reqData.getLoginID(), smsCode);
 		if(nRet==-1){
 			logger.info("记录手机号校验码失败，手机号=【"+reqData.getLoginID()+"】");
 			repData.setRespCode("96");

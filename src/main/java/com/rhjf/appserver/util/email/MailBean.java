@@ -2,6 +2,9 @@ package com.rhjf.appserver.util.email;
 
 import java.util.Vector;
 
+/**
+ * @author hadoop
+ */
 public class MailBean {
 	Vector<String> to; // 收件人
 	private String from; // 发件人

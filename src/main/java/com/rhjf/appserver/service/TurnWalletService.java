@@ -4,12 +4,12 @@ import java.util.Map;
 
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.CapitalDB;
-import com.rhjf.appserver.db.TurnWalletDB;
-import com.rhjf.appserver.db.UserWalletDB;
+import com.rhjf.appserver.db.CapitalDAO;
+import com.rhjf.appserver.db.TurnWalletDAO;
+import com.rhjf.appserver.db.UserWalletDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.DateUtil;
 import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.LoggerTool;
@@ -26,11 +26,11 @@ public class TurnWalletService {
 	
 	private LoggerTool log = new LoggerTool(this.getClass());
 	
-	public void TurnWallet(TabLoginuser user , RequestData request , ResponseData response){
+	public void TurnWallet(LoginUser user , RequestData request , ResponseData response){
 		log.info("用户将受益余额转入钱包:"  + user.getLoginID() + "账户余额:" + user.getFeeBalance());
 		log.info("查询用户" + user.getLoginID() + "钱包信息");
 		
-		Map<String,String> capitalMap = CapitalDB.getCapitalByUserID(new Object[]{user.getID()});
+		Map<String,String> capitalMap = CapitalDAO.getCapitalByUserID(new Object[]{user.getID()});
 		
 		String available_amount = "0";
 		String aggregate_amount = "0";
@@ -49,11 +49,11 @@ public class TurnWalletService {
 		}
 		int feeBalance = 0;
 		int ContinuedDays = 1;
-		Map<String , String> walletMap = UserWalletDB.UserWalletByUserID(new Object[]{user.getID()});
+		Map<String , String> walletMap = UserWalletDAO.UserWalletByUserID(new Object[]{user.getID()});
 		if(walletMap == null || walletMap.isEmpty()){
 			log.info("用户：" + user.getLoginID() + "钱包数据为空， 初始化一条记录 ，所有数据都为0"); 
-			UserWalletDB.saveUserWallet(new Object[]{UtilsConstant.getUUID() , user.getID()});
-			walletMap = UserWalletDB.UserWalletByUserID(new Object[]{user.getID()});
+			UserWalletDAO.saveUserWallet(new Object[]{UtilsConstant.getUUID() , user.getID()});
+			walletMap = UserWalletDAO.UserWalletByUserID(new Object[]{user.getID()});
 		}else{
 			String toDay = DateUtil.getNowTime(DateUtil.yyyy_MM_dd);
 //			if(toDay.equals(walletMap.get("LastWithdrawDate"))){
@@ -79,7 +79,7 @@ public class TurnWalletService {
 		feeBalance = Integer.parseInt(walletMap.get("WalletBalance"));
 		feeBalance = feeBalance + Integer.parseInt(user.getFeeBalance()) + Integer.parseInt(available_amount);
 		
-		Integer turnwallTotalAmount = TurnWalletDB.turnWalletTotalAmount(user.getID());
+		Integer turnwallTotalAmount = TurnWalletDAO.turnWalletTotalAmount(user.getID());
 		
 		log.info("用户：" + user.getLoginID() + " 当前可转入钱包的收益金额 user.getFeeBalance():" + user.getFeeBalance());
 		log.info("用户：" + user.getLoginID() + " 当前可转入钱包的信用卡收益  available_amount:" + available_amount);
@@ -94,7 +94,7 @@ public class TurnWalletService {
 			return;
 		}
 		
-		int[] ret = UserWalletDB.trunwallet(user , available_amount , ContinuedDays);
+		int[] ret = UserWalletDAO.trunwallet(user , available_amount , ContinuedDays);
 		
 		EhcacheUtil ehcache = EhcacheUtil.getInstance();
 		ehcache.clear(Constant.cacheName);

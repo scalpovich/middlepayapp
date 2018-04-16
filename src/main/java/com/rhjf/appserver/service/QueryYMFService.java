@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.YMFTradeDB;
+import com.rhjf.appserver.db.YMFTradeDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.LoadPro;
 import com.rhjf.appserver.util.LoggerTool;
 
@@ -18,13 +18,13 @@ public class QueryYMFService {
 
 	LoggerTool logger = new LoggerTool(this.getClass());
 	
-	public void QueryYMF(TabLoginuser user , RequestData reqdata , ResponseData respdata){
+	public void QueryYMF(LoginUser user , RequestData reqdata , ResponseData respdata){
 		
 		
 		
 		logger.info("用户：" + user.getLoginID() + "查询到账类型" +  reqdata.getTradeCode() + "的固定码"); 
 		
-		List<Map<String,String>> list = YMFTradeDB.getUserYMFlist(new Object[]{user.getID(),reqdata.getTradeCode()});
+		List<Map<String,String>> list = YMFTradeDAO.getUserYMFlist(new Object[]{user.getID(),reqdata.getTradeCode()});
 		
 		String YMFUrl = LoadPro.loadProperties("config", "YMFUrl");
 		

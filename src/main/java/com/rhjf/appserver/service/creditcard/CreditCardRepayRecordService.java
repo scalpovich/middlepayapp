@@ -8,11 +8,11 @@ import java.util.Map;
 import org.json.JSONObject;
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.PayOrderDB;
-import com.rhjf.appserver.db.TermkeyDB;
+import com.rhjf.appserver.db.PayOrderDAO;
+import com.rhjf.appserver.db.TermKeyDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.AmountUtil;
 import com.rhjf.appserver.util.DES3;
 import com.rhjf.appserver.util.DESUtil;
@@ -33,10 +33,10 @@ public class CreditCardRepayRecordService {
 	
 	private LoggerTool log = new LoggerTool(this.getClass());
 	
-	public void creditCardRepayRecord(TabLoginuser user , RequestData request , ResponseData response){
+	public void creditCardRepayRecord(LoginUser user , RequestData request , ResponseData response){
 		
 		
-		Map<String, Object> termKey = TermkeyDB.selectTermKey(user.getID());
+		Map<String, Object> termKey = TermKeyDAO.selectTermKey(user.getID());
 		String initKey = LoadPro.loadProperties("config", "DBINDEX");
 		
 		String bankCardno = "";
@@ -51,7 +51,7 @@ public class CreditCardRepayRecordService {
 			return ;
 		}
 		
-		List<Map<String,Object>> recordList = PayOrderDB.creditCardRepayRecordList(new Object[]{bankCardno  , user.getID()});
+		List<Map<String,Object>> recordList = PayOrderDAO.creditCardRepayRecordList(new Object[]{bankCardno  , user.getID()});
 		JSONArray array = new JSONArray();
 		
 		Map<String,List<Map<String,Object>>> map = new HashMap<>();

@@ -4,7 +4,10 @@ import java.util.Map;
 
 import com.rhjf.appserver.util.UtilsConstant;
 
-public class AppconfigDB extends DBBase{
+/**
+ * @author hadoop
+ */
+public class AppConfigDAO extends DBBase{
 	
 	
 	
@@ -12,7 +15,7 @@ public class AppconfigDB extends DBBase{
 	 *   获取T0附加手续费
 	 * @return
 	 */
-	public static int T0additional(){
+	public static int t0Additional(){
 		String sql = "select * from tab_appconfig";
 		Map<String,Object> map = queryForMap(sql, null);
 		return Integer.parseInt(UtilsConstant.ObjToStr(map.get("T0AttachFee")));
@@ -21,7 +24,6 @@ public class AppconfigDB extends DBBase{
 	
 	/**
 	 *    查询交易配置信息
-	 * @param obj
 	 * @return
 	 */
 	public static Map<String,Object> getTradeConfig(){

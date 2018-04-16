@@ -2,12 +2,12 @@ package com.rhjf.appserver.service;
 
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.AgentDB;
-import com.rhjf.appserver.db.OpenKuaiDB;
-import com.rhjf.appserver.db.TermkeyDB;
+import com.rhjf.appserver.db.AgentDAO;
+import com.rhjf.appserver.db.OpenKuaiDAO;
+import com.rhjf.appserver.db.TermKeyDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.DES3;
 import com.rhjf.appserver.util.DESUtil;
 import com.rhjf.appserver.util.EhcacheUtil;
@@ -31,7 +31,7 @@ public class OpenKuaiService {
 	
 	
 	@SuppressWarnings("unchecked")
-	public void openKuai(TabLoginuser user ,RequestData reqData , ResponseData repData){
+	public void openKuai(LoginUser user ,RequestData reqData , ResponseData repData){
 		
 		logger.info("用户：" + user.getLoginID() + "请求开通无卡快捷支付请求 , 开通银行卡卡号：(密文)" + reqData.getBankCardNo());
 		
@@ -44,7 +44,7 @@ public class OpenKuaiService {
 		
 		if(agentConfigobj == null){
 			logger.info("缓存读取代理商交易信息失败，将从数据库中读取: 交易类型："+payChannel+" , 代理商ID：" + user.getAgentID()); 
-			agentconfigmap = AgentDB.agentConfig(new Object[]{user.getAgentID() ,payChannel });
+			agentconfigmap = AgentDAO.agentConfig(new Object[]{user.getAgentID() ,payChannel });
 			if(agentconfigmap == null || agentconfigmap.isEmpty()){
 				logger.info("用户：" + user.getLoginID() + "对应代理商交易类型： "+payChannel+" 配置信息不完整, 对应代理商ID：" +  user.getAgentID());
 				repData.setRespCode(RespCode.AgentTradeConfigError[0]);
@@ -53,7 +53,7 @@ public class OpenKuaiService {
 			}
 		}
 
-		Map<String, Object> termKey = TermkeyDB.selectTermKey(user.getID());
+		Map<String, Object> termKey = TermKeyDAO.selectTermKey(user.getID());
 		String initKey = LoadPro.loadProperties("config", "DBINDEX");
 
 		String bankCardNo ;
@@ -71,7 +71,7 @@ public class OpenKuaiService {
 		Map<String,String> reqMap = AuthUtil.authentication(user.getName(),bankCardNo,user.getIDCardNo() , reqData.getPayerPhone());
 		logger.info("鉴权三要素:" + user.getName() + " , bankCardNo: " + bankCardNo + " , IDcardNumber : " + user.getIDCardNo() + " , 手机号: " + reqData.getPayerPhone() + " 鉴权结果：" + reqMap.toString());
 		if(reqMap.get("respCode").equals(Author.SUCESS_CODE)){
-			int ret = OpenKuaiDB.save(new Object[]{UtilsConstant.getUUID(),user.getID(),bankCardNo,reqData.getPayerPhone()
+			int ret = OpenKuaiDAO.save(new Object[]{UtilsConstant.getUUID(),user.getID(),bankCardNo,reqData.getPayerPhone()
 					, "3" , "00" , "" , reqData.getCvn2() ,reqData.getExpired() ,"3" , "",});
 
 			if(ret > 0 ){

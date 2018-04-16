@@ -3,7 +3,10 @@ package com.rhjf.appserver.db;
 import java.util.List;
 import java.util.Map;
 
-public class ADListDB extends DBBase{
+/**
+ * @author hadoop
+ */
+public class AdvertisementListDAO extends DBBase{
 	
 	
 	public static List<Map<String,Object>> adlist(){

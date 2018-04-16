@@ -2,7 +2,7 @@ package com.rhjf.appserver.db;
 
 import java.util.Map;
 
-public class SalesManDB extends DBBase{
+public class SalesManDAO extends DBBase{
 
 	
 	

@@ -3,7 +3,7 @@ package com.rhjf.appserver.db;
 import java.util.List;
 import java.util.Map;
 
-public class WithdrawDB extends DBBase{
+public class WithdrawDAO extends DBBase{
 
 	
 	

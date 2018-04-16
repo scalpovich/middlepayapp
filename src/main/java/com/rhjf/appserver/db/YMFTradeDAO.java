@@ -8,7 +8,7 @@ import java.util.Map;
  * @author a
  *
  */
-public class YMFTradeDB extends DBBase{
+public class YMFTradeDAO extends DBBase{
 
 	
 	/**

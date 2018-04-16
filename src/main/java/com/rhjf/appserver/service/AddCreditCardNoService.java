@@ -4,11 +4,11 @@ import java.util.Map;
 
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.LoginUserDB;
-import com.rhjf.appserver.db.UserBankCardDB;
+import com.rhjf.appserver.db.LoginUserDAO;
+import com.rhjf.appserver.db.UserBankCardDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.UtilsConstant;
@@ -26,9 +26,9 @@ public class AddCreditCardNoService {
 
 	private LoggerTool log = new LoggerTool(this.getClass());
 	
-	public void addCreditCardNo(TabLoginuser user , RequestData request , ResponseData response){
+	public void addCreditCardNo(LoginUser user , RequestData request , ResponseData response){
         //  查询商户结算卡信息
-		Map<String,Object> userBankCard = LoginUserDB.getUserBankCard(user.getID());
+		Map<String,Object> userBankCard = LoginUserDAO.getUserBankCard(user.getID());
 
         String settleCreditCard = request.getCreditCardNo();
 
@@ -45,7 +45,7 @@ public class AddCreditCardNoService {
             return ;
         }
 
-        UserBankCardDB.addCreditCardNo(new Object[]{settleCreditCard , user.getID()});
+        UserBankCardDAO.addCreditCardNo(new Object[]{settleCreditCard , user.getID()});
 
         EhcacheUtil ehcache = EhcacheUtil.getInstance();
         ehcache.clear(Constant.cacheName);

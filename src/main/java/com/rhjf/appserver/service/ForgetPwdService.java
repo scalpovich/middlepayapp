@@ -2,11 +2,11 @@ package com.rhjf.appserver.service;
 
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.LoginUserDB;
-import com.rhjf.appserver.db.SmsApplyDB;
+import com.rhjf.appserver.db.LoginUserDAO;
+import com.rhjf.appserver.db.SmsApplyDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.LoadPro;
 import com.rhjf.appserver.util.LoggerTool;
@@ -23,7 +23,7 @@ public class ForgetPwdService {
 	
 	LoggerTool logger = new LoggerTool(this.getClass());
 	
-	public void ForgetPwd(TabLoginuser user , RequestData reqdata , ResponseData respdata){
+	public void ForgetPwd(LoginUser user , RequestData reqdata , ResponseData respdata){
 		
 		logger.info("用户：" + user.getLoginID() + "忘记密码，开始找回操作");
 		
@@ -73,7 +73,7 @@ public class ForgetPwdService {
 		
 		String code = reqdata.getSmsCode();
 		
-		String smsCode = SmsApplyDB.getSmsCode(new Object[]{user.getLoginID()});
+		String smsCode = SmsApplyDAO.getSmsCode(new Object[]{user.getLoginID()});
 		
 		if(smsCode==null||!code.equals(smsCode)){
 			logger.info("短息验证码错误:" + reqdata.getLoginID() + "数据库验证码：" + smsCode + "上报验证码：" + code);
@@ -82,7 +82,7 @@ public class ForgetPwdService {
 			respdata.setRespDesc(RespCode.SMSCodeError[1]);
 			return ;
 		}else{
-			SmsApplyDB.delSmsCode(new Object[]{reqdata.getLoginID()});
+			SmsApplyDAO.delSmsCode(new Object[]{reqdata.getLoginID()});
 		}
 		
 		
@@ -92,7 +92,7 @@ public class ForgetPwdService {
 		
 		String password = MakeCipherText.MakeLoginPwd(initKey2,newLoginpwd,initKey);
 		
-		int ret = LoginUserDB.updatePassword(new Object[]{password , user.getLoginID()});
+		int ret = LoginUserDAO.updatePassword(new Object[]{password , user.getLoginID()});
 		
 		EhcacheUtil ehcache = EhcacheUtil.getInstance();
 		ehcache.remove(Constant.cacheName, user.getLoginID() + "UserInfo");

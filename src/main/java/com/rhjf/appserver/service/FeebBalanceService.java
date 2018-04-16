@@ -4,12 +4,12 @@ import java.util.Map;
 
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.CapitalDB;
-import com.rhjf.appserver.db.UserProfitDB;
-import com.rhjf.appserver.db.UserWalletDB;
+import com.rhjf.appserver.db.CapitalDAO;
+import com.rhjf.appserver.db.UserProfitDAO;
+import com.rhjf.appserver.db.UserWalletDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.UtilsConstant;
@@ -26,7 +26,7 @@ public class FeebBalanceService {
 
 	private LoggerTool log = new LoggerTool(this.getClass());
 	
-	public void FeebBalance(TabLoginuser user , RequestData request , ResponseData response){
+	public void FeebBalance(LoginUser user , RequestData request , ResponseData response){
 		
 		log.info("用户：" + user.getLoginID() + "查询距离上划款后的收益金额");
 		
@@ -34,15 +34,15 @@ public class FeebBalanceService {
 		/**  信用卡收益 **/
 		String available_amount  = "0";
 		String aggregate_amount = "0";
-		Map<String,String> capitalMap = CapitalDB.getCapitalByUserID(new Object[]{user.getID()});
+		Map<String,String> capitalMap = CapitalDAO.getCapitalByUserID(new Object[]{user.getID()});
 		if(capitalMap != null && !capitalMap.isEmpty()){
 			available_amount =  UtilsConstant.strIsEmpty(capitalMap.get("available_amount"))?"0":capitalMap.get("available_amount");
 			aggregate_amount =  UtilsConstant.strIsEmpty(capitalMap.get("aggregate_amount"))?"0":capitalMap.get("aggregate_amount");
 		}
 		
-		Map<String,String> profitMap = UserProfitDB.userProfitTotal(user.getID());
+		Map<String,String> profitMap = UserProfitDAO.userProfitTotal(user.getID());
 		
-		Map<String,String> walletMap = UserWalletDB.UserWalletByUserID(new Object[]{user.getID()});
+		Map<String,String> walletMap = UserWalletDAO.UserWalletByUserID(new Object[]{user.getID()});
 		
 		Integer ContinuedDays = 0;
 		

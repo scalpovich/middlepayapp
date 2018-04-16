@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.BankCodeDB;
+import com.rhjf.appserver.db.BankCodeDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
 import com.rhjf.appserver.util.LoggerTool;
@@ -31,7 +31,7 @@ public class BankBranchListService {
 
 		log.info("获取支行名称列表： 所在省份:" + bankProv + " , 城市:" + bankCity + ", 卡号：" + accountNo);
 
-		Map<String, Object> bankBinMap = BankCodeDB.bankBinMap(new Object[] { accountNo });
+		Map<String, Object> bankBinMap = BankCodeDAO.bankBinMap(new Object[] { accountNo });
 
 		if (bankBinMap == null || bankBinMap.isEmpty()) {
 
@@ -46,7 +46,7 @@ public class BankBranchListService {
 			map.put("bankProv", bankProv);
 			map.put("bankCity", bankCity);
 
-			List<Map<String,Object>> list = BankCodeDB.bankBranchList(map);
+			List<Map<String,Object>> list = BankCodeDAO.bankBranchList(map);
 
 			List<String> banbranchlist = new ArrayList<String>();
 			for (int i = 0; i < list.size(); i++) {

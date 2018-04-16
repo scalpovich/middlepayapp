@@ -4,11 +4,11 @@ import java.util.Map;
 
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.LoginUserDB;
-import com.rhjf.appserver.db.TermkeyDB;
+import com.rhjf.appserver.db.LoginUserDAO;
+import com.rhjf.appserver.db.TermKeyDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.DESUtil;
 import com.rhjf.appserver.util.DateUtil;
 import com.rhjf.appserver.util.EhcacheUtil;
@@ -33,10 +33,10 @@ public class LoginService {
 		
 		Object obj = ehcache.get(Constant.cacheName,reqData.getLoginID() + "UserInfo" );
 		
-		TabLoginuser user ;
+		LoginUser user ;
 		if(obj == null){
 			logger.info("查询数据库");
-			user = LoginUserDB.LoginuserInfo(reqData.getLoginID());
+			user = LoginUserDAO.LoginuserInfo(reqData.getLoginID());
 			if(user == null){
 				logger.info("未查到用户 " + reqData.getLoginID() +"信息");
 				repData.setRespCode(RespCode.userDoesNotExist[0]);
@@ -46,7 +46,7 @@ public class LoginService {
 			ehcache.put(Constant.cacheName, user.getLoginID() + "UserInfo" , user);
 		}else{
 			logger.info("查询缓存");
-			user = (TabLoginuser) obj;
+			user = (LoginUser) obj;
 		}
 		
 		logger.info("用户" +  user.getLoginID() + "登录");
@@ -60,7 +60,7 @@ public class LoginService {
 			return;
 		}
 		
-		int nRef = LoginUserDB.updateUserLoginInfo(new Object[]{DateUtil.getNowTime(DateUtil.yyyyMMddHHmmss) ,reqData.getTerminalInfo() , user.getLoginID()});
+		int nRef = LoginUserDAO.updateUserLoginInfo(new Object[]{DateUtil.getNowTime(DateUtil.yyyyMMddHHmmss) ,reqData.getTerminalInfo() , user.getLoginID()});
 		
 		if(nRef == 0){
 	    	logger.info("终端号：" + reqData.getTerminalInfo() + " ,用户名："+ user.getLoginID()+"登录失败");
@@ -70,11 +70,11 @@ public class LoginService {
 	    }
 		
 		//获取终端主密钥
-	    Map<String,Object> map = TermkeyDB.selectTermKey(user.getID());
+	    Map<String,Object> map = TermKeyDAO.selectTermKey(user.getID());
 	    
 	    if(map == null || map.isEmpty()){
-	    	TermkeyDB.allocationTermk(user.getID());
-	    	map = TermkeyDB.selectTermKey(user.getID());
+	    	TermKeyDAO.allocationTermk(user.getID());
+	    	map = TermKeyDAO.selectTermKey(user.getID());
 	    }
 	    
 	    

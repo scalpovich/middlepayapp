@@ -2,10 +2,10 @@ package com.rhjf.appserver.db;
 
 import java.util.Map;
 
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.UtilsConstant;
 
-public class UserWalletDB extends DBBase {
+public class UserWalletDAO extends DBBase {
 
 	/**
 	 *    查询用户钱包信息
@@ -25,7 +25,7 @@ public class UserWalletDB extends DBBase {
 	 * @param available_amount
 	 * @return
 	 */
-	public static int[] trunwallet(TabLoginuser user , String available_amount , Integer ContinuedDays){
+	public static int[] trunwallet(LoginUser user , String available_amount , Integer ContinuedDays){
 		/** 将用户表可以转入余额更新为0 **/
 		String updateLoginUserFeeBalance = "update tab_loginuser set FeeBalance=0 where ID='" +user.getID()+ "'";
 		/**  更新钱包中的可提现余额 （用户表余额和信用卡余额） **/

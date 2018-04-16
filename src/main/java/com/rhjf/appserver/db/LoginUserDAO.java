@@ -3,13 +3,13 @@ package com.rhjf.appserver.db;
 import java.util.List;  
 import java.util.Map;
 
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.UtilsConstant;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-public class LoginUserDB extends DBBase{
+public class LoginUserDAO extends DBBase{
 	
 	
 	/**
@@ -43,10 +43,10 @@ public class LoginUserDB extends DBBase{
 	 * @return
 	 * @throws Exception
 	 */
-	public static TabLoginuser getLoginuserInfo(String ID) throws Exception{
+	public static LoginUser getLoginuserInfo(String ID) throws Exception{
 		String sql = "select * from tab_loginuser where ID=?";
 		Map<String,Object> map = queryForMap(sql, new Object[]{ID});
-		return UtilsConstant.mapToBean(map, TabLoginuser.class);
+		return UtilsConstant.mapToBean(map, LoginUser.class);
 	}
 	
 	
@@ -56,14 +56,14 @@ public class LoginUserDB extends DBBase{
 	 * @return
 	 * @throws Exception
 	 */
-	public static TabLoginuser LoginuserInfo(String Loginid){
+	public static LoginUser LoginuserInfo(String Loginid){
 		String sql = "select * from tab_loginuser where LoginID=?";
 		Map<String,Object> map = queryForMap(sql, new Object[]{Loginid});
 		if(map == null || map.isEmpty()){
 			return null;
 		}
 		try {
-			return UtilsConstant.mapToBean(map, TabLoginuser.class);
+			return UtilsConstant.mapToBean(map, LoginUser.class);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -75,7 +75,7 @@ public class LoginUserDB extends DBBase{
 	 * @param loginuser
 	 * @return
 	 */
-	public static boolean getLoginUserInfo(TabLoginuser loginuser){
+	public static boolean getLoginUserInfo(LoginUser loginuser){
 		String sql = "select * from tab_loginuser where LoginID=?";
 		Map<String,Object> map = queryForMap(sql, new Object[]{loginuser.getLoginID()});
 		if(map!=null&&!map.isEmpty()){

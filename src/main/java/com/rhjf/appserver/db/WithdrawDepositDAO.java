@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class TxDB extends DBBase {
+public class WithdrawDepositDAO extends DBBase {
 	
 	public static int tx(String loginID,String ammount,String termSerno,String txType){
 		int seqNo = 0;

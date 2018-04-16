@@ -10,6 +10,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.rhjf.appserver.db.AppConfigDAO;
+import com.rhjf.appserver.db.TradeDAO;
 import com.rhjf.appserver.service.FeeComputeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,15 +21,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
 import com.rhjf.appserver.constant.StringEncoding;
-import com.rhjf.appserver.db.AppconfigDB;
-import com.rhjf.appserver.db.DevicetokenDB;
-import com.rhjf.appserver.db.LoginUserDB;
-import com.rhjf.appserver.db.SalesManDB;
-import com.rhjf.appserver.db.TradeDB;
-import com.rhjf.appserver.db.UserProfitDB;
+import com.rhjf.appserver.db.DeviceTokenDAO;
+import com.rhjf.appserver.db.LoginUserDAO;
+import com.rhjf.appserver.db.SalesManDAO;
+import com.rhjf.appserver.db.UserProfitDAO;
 import com.rhjf.appserver.model.Fee;
 import com.rhjf.appserver.model.PayOrder;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.AmountUtil;
 import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.LoggerTool;
@@ -103,7 +103,7 @@ public class PayNotifyController {
 		}
 		
 		
-		Map<String,Object> map =  TradeDB.getMerchantInfo(merchantID,paytype);
+		Map<String,Object> map =  TradeDAO.getMerchantInfo(merchantID,paytype);
 		/**  计算签名 **/
 		String serverSign = MD5.sign(text.append(map.get("SignKey")).toString(), StringEncoding.UTF_8);
 		String reqSign = map2.get("sign");
@@ -117,7 +117,7 @@ public class PayNotifyController {
 		String orderNumber = map2.get("r2_orderNumber");
 
 		/**  查询订单信息 **/
-		PayOrder order = TradeDB.getPayOrderInfo(orderNumber);
+		PayOrder order = TradeDAO.getPayOrderInfo(orderNumber);
 		
 		if(order==null){
 			logger.info("订单号：" + orderNumber + "未查到订单信息");
@@ -145,9 +145,9 @@ public class PayNotifyController {
 				retMsg = map2.get("retMsg");
 			}
 			
-			TabLoginuser loginUser = null;
+			LoginUser loginUser = null;
 			try {
-				loginUser = LoginUserDB.getLoginuserInfo(order.getUserID());
+				loginUser = LoginUserDAO.getLoginuserInfo(order.getUserID());
 			} catch (Exception e) {
 				logger.info(e.getMessage()); 
 				return RespCode.notifyfail;
@@ -160,13 +160,13 @@ public class PayNotifyController {
 				return RespCode.notifyfail;
 			}
 			
-			int updateRet = TradeDB.updatePayOrderPayRetCode(new Object[]{retCode ,retMsg ,fee.getMerchantFee() , fee.getMerchantprofit() , order.getID()});
+			int updateRet = TradeDAO.updatePayOrderPayRetCode(new Object[]{retCode ,retMsg ,fee.getMerchantFee() , fee.getMerchantprofit() , order.getID()});
 			if(updateRet < 1){
 				logger.info("订单号：" + orderNumber + "更新数据库失败"); 
 				return RespCode.notifyfail;
 			}
 			
-			String tonken = DevicetokenDB.getDeviceToken(loginUser.getID());
+			String tonken = DeviceTokenDAO.getDeviceToken(loginUser.getID());
 			logger.info("============================订单编号:" + order.getOrderNumber() + "支付成功，用户tonken:" + tonken + "开始发送push");
 			if(!UtilsConstant.strIsEmpty(tonken)){
 				
@@ -178,7 +178,7 @@ public class PayNotifyController {
 			
 			
 			// ID,UserID,TradeID,Fee,AgentID,AgentProfit,TwoAgentID,TwoAgentProfit,DistributeProfit,PlatformProfit
-			int x = TradeDB.saveProfit(new Object[]{
+			int x = TradeDAO.saveProfit(new Object[]{
 					UtilsConstant.getUUID(),loginUser.getID(), order.getID() ,fee.getMerchantFee(),fee.getAgentID(),fee.getAgentProfit(),
 					fee.getTwoAgentID(),fee.getTwoAgentProfit(),
 					fee.getDistributeProfit(),fee.getPlatformProfit(),fee.getPlatCostFee()
@@ -195,7 +195,7 @@ public class PayNotifyController {
 			
 			if(objs.size()>0){
 				/**  保存三级分销各个商户的利润  **/
-				UserProfitDB.saveDistributeProfit(objs);
+				UserProfitDAO.saveDistributeProfit(objs);
 				/** 更新用户信息表中的 分润总额 **/
 				List<Object[]> profitlist = new ArrayList<Object[]>();
 				for (Object[] objects : objs) {
@@ -222,14 +222,14 @@ public class PayNotifyController {
 					logger.info("订单：" + order.getOrderNumber() +  "  ，没有业务员");
 				}
 				
-				LoginUserDB.merchantProfit(profitlist);
+				LoginUserDAO.merchantProfit(profitlist);
 			} else {
 				logger.info("订单号：" + orderNumber + ",没有产生分润");
 			}
 			
 			if(fee.getSalemsManID()!= null){
 				logger.info("订单号：" + orderNumber + " 交易商户 涉及业务员分润"); 
-				SalesManDB.saveSalesManProfit(new Object[]{UtilsConstant.getUUID(),fee.getSalemsManID(),order.getUserID(),order.getID()
+				SalesManDAO.saveSalesManProfit(new Object[]{UtilsConstant.getUUID(),fee.getSalemsManID(),order.getUserID(),order.getID()
 						,fee.getSalemsDistrubuteProfit(),fee.getSalemsGetAgentProfit()});
 			}
 			
@@ -249,7 +249,7 @@ public class PayNotifyController {
 					Object obj = ehcache.get(Constant.cacheName, "tradeConfig");
 					if(obj == null){
 						logger.info("缓存中获取交易配置信息失败,从数据库中查询");
-						tradeConfig = AppconfigDB.getTradeConfig(); 
+						tradeConfig = AppConfigDAO.getTradeConfig();
 						ehcache.put(Constant.cacheName, "tradeConfig", tradeConfig); 
 					}else{
 						logger.info("缓存查询交易配置信息");

@@ -5,10 +5,10 @@ import java.util.Map;
 import java.util.Set;
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.UserProfitDB;
+import com.rhjf.appserver.db.UserProfitDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.LoggerTool;
 
 import net.sf.json.JSONArray;
@@ -23,7 +23,7 @@ public class QueryProfitService {
 	
 	LoggerTool logger = new LoggerTool(this.getClass());
 	
-	public void QueryProfit(TabLoginuser user , RequestData reqData , ResponseData respData){
+	public void QueryProfit(LoginUser user , RequestData reqData , ResponseData respData){
 		
 		logger.info("用户：" +  user.getLoginID() + "查询个人收益记录");
 		
@@ -37,9 +37,9 @@ public class QueryProfitService {
 			page = 0;
 		}
 		
-		List<Map<String,Object>> list = UserProfitDB.userQueryProfitList(new Object[]{user.getID(), page*pageSize , pageSize});
+		List<Map<String,Object>> list = UserProfitDAO.userQueryProfitList(new Object[]{user.getID(), page*pageSize , pageSize});
 		
-		Integer count  = UserProfitDB.userQueryProfitCount(new Object[]{user.getID()});
+		Integer count  = UserProfitDAO.userQueryProfitCount(new Object[]{user.getID()});
 		
 		
 		JSONArray  jsonArray = new JSONArray();

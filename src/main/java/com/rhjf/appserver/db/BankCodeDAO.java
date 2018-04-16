@@ -11,7 +11,7 @@ import java.util.Map;
  *
  */
 
-public class BankCodeDB extends DBBase {
+public class BankCodeDAO extends DBBase {
 	
 	
 	public static Map<String, Object> bankBinMap(Object[] obj) {

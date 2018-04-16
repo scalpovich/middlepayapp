@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.rhjf.appserver.util.UtilsConstant;
 
-public class PayOrderDB extends DBBase{
+public class PayOrderDAO extends DBBase{
 
 	
 	

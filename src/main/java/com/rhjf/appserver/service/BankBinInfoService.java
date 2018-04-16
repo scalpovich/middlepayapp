@@ -3,7 +3,7 @@ package com.rhjf.appserver.service;
 import java.util.Map;
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.BankCodeDB;
+import com.rhjf.appserver.db.BankCodeDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
 import com.rhjf.appserver.util.LoggerTool;
@@ -24,7 +24,7 @@ public class BankBinInfoService {
 		
 		log.info("根据卡bin获取卡信息 ,接收到的卡bin 号码：" + bankCardNo);
 		
-		Map<String,Object> binMap = BankCodeDB.bankBinMap(new Object[]{bankCardNo});
+		Map<String,Object> binMap = BankCodeDAO.bankBinMap(new Object[]{bankCardNo});
 		
 		if(binMap == null || binMap.isEmpty()){
 			response.setRespCode("01");

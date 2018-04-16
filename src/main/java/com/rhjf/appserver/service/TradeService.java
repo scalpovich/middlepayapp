@@ -8,15 +8,15 @@ import java.util.Map;
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
 import com.rhjf.appserver.constant.StringEncoding;
-import com.rhjf.appserver.db.AgentDB;
-import com.rhjf.appserver.db.AppconfigDB;
-import com.rhjf.appserver.db.LoginUserDB;
-import com.rhjf.appserver.db.PayOrderDB;
-import com.rhjf.appserver.db.TradeDB;
-import com.rhjf.appserver.db.UserBankCardDB;
+import com.rhjf.appserver.db.AgentDAO;
+import com.rhjf.appserver.db.AppConfigDAO;
+import com.rhjf.appserver.db.LoginUserDAO;
+import com.rhjf.appserver.db.PayOrderDAO;
+import com.rhjf.appserver.db.TradeDAO;
+import com.rhjf.appserver.db.UserBankCardDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.AmountUtil;
 import com.rhjf.appserver.util.DESUtil;
 import com.rhjf.appserver.util.DateUtil;
@@ -30,12 +30,15 @@ import com.rhjf.appserver.util.UtilsConstant;
 
 import net.sf.json.JSONObject;
 
+/**
+ * @author hadoop
+ */
 public class TradeService {
 
 	LoggerTool log  = new LoggerTool(this.getClass());
 	
 	@SuppressWarnings("unchecked")
-	public void send(TabLoginuser loginUser,RequestData reqData , ResponseData responseData){
+	public void send(LoginUser loginUser,RequestData reqData , ResponseData responseData){
 		
 		log.info("用户"+  loginUser.getLoginID() + "发起支付请求") ;
 		
@@ -59,7 +62,7 @@ public class TradeService {
 		Map<String,Object> bankInfoMap =  null;
 		Object bankInfoObj = ehcache.get(Constant.cacheName, loginUser.getID()  + "userbankinfo");
 		if(bankInfoObj == null){
-			bankInfoMap = LoginUserDB.getUserBankCard(loginUser.getID());
+			bankInfoMap = LoginUserDAO.getUserBankCard(loginUser.getID());
 			if(bankInfoMap!=null && !bankInfoMap.isEmpty()){
 				ehcache.put(Constant.cacheName,  loginUser.getID()  + "userbankinfo", bankInfoMap);
 			}
@@ -68,7 +71,7 @@ public class TradeService {
 		}
 		
 		if(bankInfoMap!=null&&!bankInfoMap.isEmpty()){
-			Integer totalAmount =  PayOrderDB.dayTradeAmount(new Object[]{loginUser.getLoginID() , DateUtil.getNowTime(DateUtil.yyyyMMdd)});
+			Integer totalAmount =  PayOrderDAO.dayTradeAmount(new Object[]{loginUser.getLoginID() , DateUtil.getNowTime(DateUtil.yyyyMMdd)});
 			if("".equals(UtilsConstant.ObjToStr(bankInfoMap.get("SettleCreditCard")))){
 				//  没有通过信用卡鉴权
 				if(totalAmount+Integer.parseInt(reqData.getAmount()) > 3000000 ){
@@ -93,7 +96,7 @@ public class TradeService {
 		
 		if(agentConfigobj == null){
 			log.info("缓存读取代理商交易信息失败，将从数据库中读取: 交易类型：" + payChannel + "代理商ID：" + loginUser.getAgentID()); 
-			agentconfigmap = AgentDB.agentConfig(new Object[]{loginUser.getAgentID() ,payChannel });
+			agentconfigmap = AgentDAO.agentConfig(new Object[]{loginUser.getAgentID() ,payChannel });
 			if(agentconfigmap == null || agentconfigmap.isEmpty()){
 				log.info("用户：" + loginUser.getLoginID() + "对应代理商交易类型：" + payChannel + "配置信息不完整, 对应代理商ID：" +  loginUser.getAgentID());
 				responseData.setRespCode(RespCode.AgentTradeConfigError[0]);
@@ -112,25 +115,25 @@ public class TradeService {
 		if(obj == null){
 			
 			log.info("缓存读取用户支付配置信息失败，从数据中读取， 用户：" + loginUser.getID() + " , 支付类型:" + payChannel);
-			map = TradeDB.getUserConfig(new Object[]{ loginUser.getID() , payChannel});
+			map = TradeDAO.getUserConfig(new Object[]{ loginUser.getID() , payChannel});
 			if(map==null||map.isEmpty()){
 				
 				log.info("支付类型" + payChannel + "读取数据库失败, 复制支付类型为1的配置信息");
 				String id = UtilsConstant.getUUID();
 				String userid = loginUser.getID();
-				map = TradeDB.getUserConfig(new Object[]{ loginUser.getID() , "1"});
+				map = TradeDAO.getUserConfig(new Object[]{ loginUser.getID() , "1"});
 				
 				List<Object[]> list = new ArrayList<Object[]>();
 				list.add(new Object[]{id,userid , payChannel , 0 , 0 , map.get("T1SaleRate") , map.get("T0SaleRate"),
 						map.get("T1SettlementRate"),map.get("T0SettlementRate")});
-				int x = TradeDB.saveUserConfig(list)[0];
+				int x = TradeDAO.saveUserConfig(list)[0];
 				if(x < 0 ){
 					log.info("用户：" + loginUser.getID() + "支付类型：" + payChannel + " 支付配置信息复制失败,停止交易操作" );
 					responseData.setRespCode(RespCode.TradeTypeConfigError[0]);
 					responseData.setRespDesc(RespCode.TradeTypeConfigError[1]); 
 					return ;
 				}else{
-					map = TradeDB.getUserConfig(new Object[]{ loginUser.getID() , payChannel});
+					map = TradeDAO.getUserConfig(new Object[]{ loginUser.getID() , payChannel});
 				}
 			}
 			ehcache.put(Constant.cacheName, loginUser.getID() + payChannel +"userConfig" , map);
@@ -142,9 +145,9 @@ public class TradeService {
 		}
 		
 		/**  获取交易商户  **/
-		Map<String,Object> merchantMap = TradeDB.getMerchantInfo(new Object[]{loginUser.getID() ,  payChannel}); 
+		Map<String,Object> merchantMap = TradeDAO.getMerchantInfo(new Object[]{loginUser.getID() ,  payChannel});
 		if(merchantMap==null||merchantMap.isEmpty()){
-			merchantMap = TradeDB.getMerchantInfo(new Object[]{loginUser.getID() , "1"}); 
+			merchantMap = TradeDAO.getMerchantInfo(new Object[]{loginUser.getID() , "1"});
 			String MerchantID = UtilsConstant.ObjToStr(merchantMap.get("MerchantID"));
 			
 			String productType = "QQPAY";
@@ -172,13 +175,13 @@ public class TradeService {
 				String QueryKey = UtilsConstant.ObjToStr(merchantMap.get("QueryKey"));
 				String MerchantName = UtilsConstant.ObjToStr(merchantMap.get("MerchantName"));
 				
-				TradeDB.saveMerchant(new Object[]{MerchantID,MerchantName,signKey,desKey,QueryKey,loginUser.getID(),payChannel});
+				TradeDAO.saveMerchant(new Object[]{MerchantID,MerchantName,signKey,desKey,QueryKey,loginUser.getID(),payChannel});
 				
 //				merchantMap.put("MerchantID",MerchantID);
 //				merchantMap.put("SignKey",signKey);
 //				merchantMap.put("DESKey",desKey);
 				
-				merchantMap = TradeDB.getMerchantInfo(new Object[]{loginUser.getID() , payChannel}); 
+				merchantMap = TradeDAO.getMerchantInfo(new Object[]{loginUser.getID() , payChannel});
 				
 				if(merchantMap == null || merchantMap.isEmpty()){
 					log.info(loginUser.getLoginID() + "获取 " + payChannel + "商户信息失败");
@@ -199,7 +202,7 @@ public class TradeService {
 		obj = ehcache.get(Constant.cacheName, "tradeConfig");
 		if(obj == null){
 			log.info("缓存中获取交易配置信息失败,从数据库中查询");
-			tradeConfig = AppconfigDB.getTradeConfig(); 
+			tradeConfig = AppConfigDAO.getTradeConfig();
 			ehcache.put(Constant.cacheName, "tradeConfig", tradeConfig);
 		}else{
 			log.info("缓存查询交易配置信息");
@@ -313,12 +316,12 @@ public class TradeService {
 			trxType =  Constant.UNION_QRCode;
 			url = LoadPro.loadProperties("http", "UNIONQRCODE_ScanCodeUrl");
 			//  银联二维码 只支持T1 交易
-			encrypt = Constant.T1;   
+//			encrypt = Constant.T1;
 		}
 		
 		
 		/** 向数据库插入初始化数据 **/
-		int ret = TradeDB.tradeInit(new Object[]{UtilsConstant.getUUID(),reqData.getAmount() ,
+		int ret = TradeDAO.tradeInit(new Object[]{UtilsConstant.getUUID(),reqData.getAmount() ,
 				DateUtil.getNowTime(DateUtil.yyyyMMdd),DateUtil.getNowTime(DateUtil.HHmmss),
 				tradeDate,tradeTime , reqData.getSendSeqId(), Constant.TradeType[0] ,
 				encrypt, loginUser.getID(),payChannel, feeRate , merchantID,orderNumber , "" , ""  , loginUser.getAgentID() , "RONGHUI"});
@@ -356,7 +359,7 @@ public class TradeService {
 				log.error("格式化T0代付费用失败:" + e.getMessage() + "将代付费用默认设置为2元");
 				T0additional = 200;
 			}
-			int T0fee = AgentDB.makeFeeFurther(reqData.getAmount(), Double.valueOf(T0SaleRate)  , 0) + T0additional ; 
+			int T0fee = AgentDAO.makeFeeFurther(reqData.getAmount(), Double.valueOf(T0SaleRate)  , 0) + T0additional ;
 			payrequest.put("t0Fee", AmountUtil.div(T0fee + "" , "100" , 2 ));
 		}
 		
@@ -365,7 +368,7 @@ public class TradeService {
 		payrequest.put("orderIp","1.1.1.1");
 		
 		
-		Map<String,Object> bankMap = UserBankCardDB.getBankInfo(loginUser.getID());
+		Map<String,Object> bankMap = UserBankCardDAO.getBankInfo(loginUser.getID());
 		
 		
 		/**  上报结算信息  **/

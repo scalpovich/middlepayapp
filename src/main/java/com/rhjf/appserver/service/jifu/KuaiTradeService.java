@@ -1,13 +1,13 @@
 package com.rhjf.appserver.service.jifu;
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.OpenKuaiDB;
-import com.rhjf.appserver.db.TermkeyDB;
-import com.rhjf.appserver.db.TradeDB;
-import com.rhjf.appserver.db.UserBankCardDB;
+import com.rhjf.appserver.db.OpenKuaiDAO;
+import com.rhjf.appserver.db.TermKeyDAO;
+import com.rhjf.appserver.db.TradeDAO;
+import com.rhjf.appserver.db.UserBankCardDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.service.creditcard.KuaiTradeInterfaceService;
 import com.rhjf.appserver.util.AESCBCUtil;
 import com.rhjf.appserver.util.AmountUtil;
@@ -35,30 +35,29 @@ public class KuaiTradeService implements KuaiTradeInterfaceService {
 
 
 
-	/*
+	/**
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * com.rhjf.appserver.service.creditcard.KuaiTradeInterfaceService#send(com.
-	 * rhjf.appserver.model.TabLoginuser, com.rhjf.appserver.model.RequestData,
+	 * com.rhjf.appserver.service.creditcard.KuaiTradeInterfaceService#send(com.rhjf.appserver.model.LoginUser, com.rhjf.appserver.model.RequestData,
 	 * com.rhjf.appserver.model.ResponseData)
 	 */
 	@Override
-	public void send(TabLoginuser user, RequestData reqData, ResponseData repData) {
+	public void send(LoginUser user, RequestData reqData, ResponseData repData) {
 
 		JSONObject head = new JSONObject();
 
 		String txnCode = "312001";
 
-		Map<String, Object> termKey = TermkeyDB.selectTermKey(user.getID());
+		Map<String, Object> termKey = TermKeyDAO.selectTermKey(user.getID());
 		String initKey = LoadPro.loadProperties("config", "DBINDEX");
 
-		String bankCardno = "";
+		String bankCardNo;
 		try {
 			log.info("用户：" + user.getLoginID() + "请求无卡快捷支付请求 , 银行卡卡号：(密文)" + reqData.getBankCardNo());
 			String desckey = DESUtil.deskey(UtilsConstant.ObjToStr(termKey.get("MacKey")), initKey);
-			bankCardno = DES3.decode(reqData.getBankCardNo(), desckey);
-			log.info("用户：" + user.getLoginID() + "请求无卡快捷支付请求 , 银行卡卡号：(原文)" + bankCardno);
+			bankCardNo = DES3.decode(reqData.getBankCardNo(), desckey);
+			log.info("用户：" + user.getLoginID() + "请求无卡快捷支付请求 , 银行卡卡号：(原文)" + bankCardNo);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -79,13 +78,13 @@ public class KuaiTradeService implements KuaiTradeInterfaceService {
 		String tradeTime = reqData.getSendTime().substring(8);
 
 
-		Map<String,Object> userconfig  = TradeDB.getUserConfig(new Object[]{ user.getID() , reqData.getPayChannel()});
+		Map<String,Object> userconfig  = TradeDAO.getUserConfig(new Object[]{ user.getID() , reqData.getPayChannel()});
 
 		/** 向数据库插入初始化数据 **/
-		int ret = TradeDB.tradeInit(new Object[]{UtilsConstant.getUUID(),reqData.getAmount() ,
+		int ret = TradeDAO.tradeInit(new Object[]{UtilsConstant.getUUID(),reqData.getAmount() ,
 				DateUtil.getNowTime(DateUtil.yyyyMMdd),DateUtil.getNowTime(DateUtil.HHmmss),
 				tradeDate,tradeTime , reqData.getSendSeqId(), "无卡快捷" ,
-				"T0", user.getID(),reqData.getPayChannel() , userconfig.get("T0SaleRate") ,JifuConstant.merchantNo ,orderNumber , "" ,bankCardno , user.getAgentID() , "JIFU"});
+				"T0", user.getID(),reqData.getPayChannel() , userconfig.get("T0SaleRate") ,JifuConstant.merchantNo ,orderNumber , "" ,bankCardNo , user.getAgentID() , "JIFU"});
 
 		if(ret < 1 ){
 			log.info("数据库保存信息失败");
@@ -95,7 +94,7 @@ public class KuaiTradeService implements KuaiTradeInterfaceService {
 		}
 
 
-		Map<String,Object> bankCardnoMap =  OpenKuaiDB.getOpenKuai(new Object[]{bankCardno});
+		Map<String,Object> bankCardnoMap =  OpenKuaiDAO.getOpenKuai(new Object[]{bankCardNo});
 
 
 		String nowDate = DateUtil.getNowTime(DateUtil.yyyyMMdd);
@@ -125,7 +124,7 @@ public class KuaiTradeService implements KuaiTradeInterfaceService {
 //	        String payBankCardNo = "6225760013991968";
 //	        String inBankCardNo = "6214920207968049";
 
-		Map<String,Object> bankMap = UserBankCardDB.getBankInfo(user.getID());
+		Map<String,Object> bankMap = UserBankCardDAO.getBankInfo(user.getID());
 
 		json.put("head", head);
 		json.put("CutDate", nowDate);
@@ -138,11 +137,9 @@ public class KuaiTradeService implements KuaiTradeInterfaceService {
 		json.put("IdCard", user.getIDCardNo());
 		json.put("cvv2", bankCardnoMap.get("cvn2"));
 		json.put("Validity", bankCardnoMap.get("expired"));
-		json.put("payBankCardNo", bankCardno);
+		json.put("payBankCardNo", bankCardNo);
 
 		json.put("inBankCardNo", bankMap.get("AccountNo").toString());
-
-//		Map<String,Object> bankBinMap = BankCodeDB.creditCardBin(new Object[]{bankCardno});
 
 		json.put("payBankCode",JifuConstant.map.get(UtilsConstant.ObjToStr(bankCardnoMap.get("bankSymbol"))) );
 
@@ -198,7 +195,7 @@ public class KuaiTradeService implements KuaiTradeInterfaceService {
 			log.info("订单：" + orderNumber  + " ， 成功");
 			String workId = head.getString("workId");
 
-			TradeDB.updateOrderTransactionId(orderNumber , workId);
+			TradeDAO.updateOrderTransactionId(orderNumber , workId);
 
 			repData.setRespCode(RespCode.SUCCESS[0]);
 			repData.setRespDesc(RespCode.SUCCESS[1]);
@@ -213,7 +210,7 @@ public class KuaiTradeService implements KuaiTradeInterfaceService {
 	
 	
 	
-	public void confirm(TabLoginuser loginUser,RequestData reqData , ResponseData repData){
+	public void confirm(LoginUser loginUser,RequestData reqData , ResponseData repData){
 		JSONObject head = new JSONObject();
 
 		String txnCode = "312002";

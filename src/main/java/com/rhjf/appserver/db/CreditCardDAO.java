@@ -9,7 +9,7 @@ import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.UtilsConstant;
 
 
-public class CreaditCardDB extends DBBase{
+public class CreditCardDAO extends DBBase{
 	
 
 	LoggerTool logger = new LoggerTool(this.getClass());

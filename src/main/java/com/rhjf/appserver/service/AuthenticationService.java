@@ -7,12 +7,12 @@ import com.rhjf.appserver.authen.ApiTrans;
 import com.rhjf.appserver.authen.GetDynKey;
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.AuthenticationDB;
+import com.rhjf.appserver.db.AuthenticationDAO;
 import com.rhjf.appserver.model.AuthenticationRecord;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
 import com.rhjf.appserver.model.TJJQResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.UtilsConstant;
 import net.sf.json.JSONArray;
@@ -23,7 +23,7 @@ public class AuthenticationService {
 	LoggerTool logger = new LoggerTool(this.getClass());
 	
 	
-	public ResponseData send(TabLoginuser loginuser,RequestData reqData , ResponseData repData){
+	public ResponseData send(LoginUser loginuser,RequestData reqData , ResponseData repData){
 		if(reqData.getBankCardNo()==null || "".equals(reqData.getBankCardNo())){
 			repData.setRespCode(RespCode.ParamsError[0]);
 			repData.setRespCode(RespCode.ParamsError[1]);
@@ -53,7 +53,7 @@ public class AuthenticationService {
 		try {
 			GetDynKey.getDynKey();
 			TJJQResponseData tjresp = ApiTrans.doTrans(map);
-			int ret = AuthenticationDB.Authentication(new Object[]{UtilsConstant.getUUID(),loginuser.getID(),reqData.getIdNumber(),reqData.getPhoneNumber(), 
+			int ret = AuthenticationDAO.Authentication(new Object[]{UtilsConstant.getUUID(),loginuser.getID(),reqData.getIdNumber(),reqData.getPhoneNumber(),
 					reqData.getRealName() , reqData.getBankCardNo(),tjresp.getOrderId(),tjresp.getResultCode(),tjresp.getResultDesc()});
 			if(tjresp.getResultCode() =="00"){
 				if(ret>0){
@@ -85,9 +85,9 @@ public class AuthenticationService {
 		return repData;
 	}
 	
-	public void getAuthenticationList(TabLoginuser loginuser,RequestData reqData , ResponseData repData){
+	public void getAuthenticationList(LoginUser loginuser,RequestData reqData , ResponseData repData){
 		try {
-			List<AuthenticationRecord> list = AuthenticationDB.getAuthenticationRecordList(new Object[]{"00",loginuser.getID()});
+			List<AuthenticationRecord> list = AuthenticationDAO.getAuthenticationRecordList(new Object[]{"00",loginuser.getID()});
 			repData.setAuthenList(JSONArray.fromObject(list).toString()); 
 			repData.setRespCode(RespCode.SUCCESS[0]);
 			repData.setRespDesc(RespCode.SUCCESS[1]);

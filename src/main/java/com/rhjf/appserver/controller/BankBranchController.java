@@ -6,14 +6,14 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.rhjf.appserver.db.BankCodeDAO;
+import com.rhjf.appserver.db.LoginUserDAO;
+import com.rhjf.appserver.db.UserBankCardDAO;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.rhjf.appserver.db.BankCodeDB;
-import com.rhjf.appserver.db.LoginUserDB;
-import com.rhjf.appserver.db.UserBankCardDB;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.auth.AuthUtil;
 import com.rhjf.appserver.util.auth.Author;
@@ -21,6 +21,9 @@ import com.rhjf.appserver.util.auth.Author;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+/**
+ * @author hadoop
+ */
 @Controller
 @RequestMapping("/bankbranch")
 public class BankBranchController {
@@ -38,7 +41,7 @@ public class BankBranchController {
 		String prov = bankAdd.split("-")[0];
 		String city = bankAdd.split("-")[1];
 		
-		Map<String,Object> map = BankCodeDB.bankBinMap(new Object[]{bankNum});
+		Map<String,Object> map = BankCodeDAO.bankBinMap(new Object[]{bankNum});
 		
 		JSONObject json = new JSONObject();
 		
@@ -52,7 +55,7 @@ public class BankBranchController {
 		param.put("bankName", map.get("bankName").toString());
 		param.put("bankProv", prov);
 		param.put("bankCity", city);
-		List<Map<String,Object >> list =  BankCodeDB.bankBranchList(param);
+		List<Map<String,Object >> list =  BankCodeDAO.bankBranchList(param);
 			
 		json.put("code", "00");
 		json.put("list", JSONArray.fromObject(list).toString());
@@ -70,7 +73,7 @@ public class BankBranchController {
 
 		log.info("用户：" + loginID + "添加信用卡账号 , " + creditCard);
 
-		TabLoginuser user = LoginUserDB.LoginuserInfo(loginID);
+		LoginUser user = LoginUserDAO.LoginuserInfo(loginID);
 
 		Map<String, String> reqMap = AuthUtil.authentication(user.getName(), creditCard, user.getIDCardNo() , "");
 
@@ -79,7 +82,7 @@ public class BankBranchController {
 		log.info("鉴权三要素:" + user.getName() + " -- " + creditCard + " -- " + user.getIDCardNo());
 		if (reqMap.get("respCode").equals(Author.SUCESS_CODE)) {
 
-			UserBankCardDB.addCreditCardNo(new Object[] { creditCard, user.getID() });
+			UserBankCardDAO.addCreditCardNo(new Object[] { creditCard, user.getID() });
 
 			log.info("用户：" + loginID + " 信用卡账号 , " + creditCard + "鉴权卡号，并且保存成功");
 

@@ -3,7 +3,7 @@ package com.rhjf.appserver.service;
 import com.rhjf.appserver.constant.RespCode;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.MakeCipherText;
 
@@ -17,9 +17,8 @@ public class UpdatePwdVerificationOldPwdService {
 	private LoggerTool log = new LoggerTool(this.getClass());
 	
 	
-	public void UpdatePwdVerificationOldPwd(TabLoginuser user , RequestData reqdata , ResponseData respdata){
+	public void UpdatePwdVerificationOldPwd(LoginUser user , RequestData reqdata , ResponseData respdata){
 		String loginpwd = reqdata.getLoginPwd();
-//		String newLoginpwd = reqdata.getNewLoginPwd();
 		String passwd = MakeCipherText.calLoginPwd(reqdata.getLoginID(),user.getLoginPwd(), reqdata.getSendTime());
 		
 		if(!passwd.equals(reqdata.getLoginPwd())){

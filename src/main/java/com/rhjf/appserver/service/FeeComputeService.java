@@ -6,19 +6,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.rhjf.appserver.db.AgentDAO;
+import com.rhjf.appserver.db.AppConfigDAO;
+import com.rhjf.appserver.model.LoginUser;
 import org.springframework.stereotype.Service;
 
 import com.rhjf.appserver.constant.Constant;
-import com.rhjf.appserver.db.AgentDB;
-import com.rhjf.appserver.db.AppconfigDB;
-import com.rhjf.appserver.db.ChannelConfigDB;
-import com.rhjf.appserver.db.DevicetokenDB;
-import com.rhjf.appserver.db.DistributionRatioDB;
-import com.rhjf.appserver.db.SalesManDB;
-import com.rhjf.appserver.db.TradeDB;
+import com.rhjf.appserver.db.ChannelConfigDAO;
+import com.rhjf.appserver.db.DeviceTokenDAO;
+import com.rhjf.appserver.db.DistributionRatioDAO;
+import com.rhjf.appserver.db.SalesManDAO;
+import com.rhjf.appserver.db.TradeDAO;
 import com.rhjf.appserver.model.Fee;
 import com.rhjf.appserver.model.PayOrder;
-import com.rhjf.appserver.model.TabLoginuser;
 import com.rhjf.appserver.util.AmountUtil;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.PushUtil;
@@ -41,7 +41,7 @@ public class FeeComputeService {
 	 * @param loginUser
 	 * @return
 	 */
-	public Fee calProfit(PayOrder order , TabLoginuser loginUser ){
+	public Fee calProfit(PayOrder order , LoginUser loginUser ){
 		
 		logger.info("计算订单：" + order.getOrderNumber() + "手续费");
 		
@@ -55,12 +55,12 @@ public class FeeComputeService {
 		int T0additional = 0;
 		
 		/** 用户费率配置信息 **/
-		Map<String,Object> userConfig = TradeDB.getUserConfig(new Object[]{order.getUserID() ,  order.getPayChannel()}); 
+		Map<String,Object> userConfig = TradeDAO.getUserConfig(new Object[]{order.getUserID() ,  order.getPayChannel()});
 		
 		/** 代理商信息  **/
-		Map<String,Object> agentInfo = AgentDB.agentInfo(new Object[]{loginUser.getAgentID()});
+		Map<String,Object> agentInfo = AgentDAO.agentInfo(new Object[]{loginUser.getAgentID()});
 		/**  代理商配置信息  **/
-		Map<String,Object> agentConfig = AgentDB.agentConfig(new Object[]{agentInfo.get("ID") , order.getPayChannel()}); 
+		Map<String,Object> agentConfig = AgentDAO.agentConfig(new Object[]{agentInfo.get("ID") , order.getPayChannel()});
 		
 		if(agentConfig==null||agentConfig.isEmpty()){
 			logger.info("代理商：" + agentInfo.get("ID") + "没有配置支付类型：" +  order.getPayChannel()); 
@@ -68,7 +68,7 @@ public class FeeComputeService {
 		}
 		
 		/**  查询通道成本费率 **/
-		Map<String,Object> channelconfigMap = ChannelConfigDB.getChannelConfig(order.getPayChannel() , order.getChannelID());
+		Map<String,Object> channelconfigMap = ChannelConfigDAO.getChannelConfig(order.getPayChannel() , order.getChannelID());
 		if(channelconfigMap==null||channelconfigMap.isEmpty()){
 			logger.info("通道成本费率查询异常：支付类型：" + order.getPayChannel()); 
 			return null;
@@ -82,7 +82,7 @@ public class FeeComputeService {
 		String salemsManID = loginUser.getSalesManID();
 		if(salemsManID != null && !salemsManID.trim().isEmpty()){
 			flag = true;
-			salemsMan = SalesManDB.salesManInfo(salemsManID);
+			salemsMan = SalesManDAO.salesManInfo(salemsManID);
 			if(salemsMan == null || salemsMan.isEmpty()){
 				flag = false;
 			}else{
@@ -115,7 +115,7 @@ public class FeeComputeService {
 			channelRate = UtilsConstant.ObjToStr(channelconfigMap.get("T0ChannelRate"));
 			
 			//  T0附加手续费
-			T0additional = AppconfigDB.T0additional();
+			T0additional = AppConfigDAO.t0Additional();
 			
 			if(flag){
 				
@@ -155,12 +155,12 @@ public class FeeComputeService {
 		}
 		
 		/** 商户手续费 **/
-		fee.setMerchantFee(AgentDB.makeFeeRounding(order.getAmount(), Double.valueOf(feeRate) , 0) + T0additional);
+		fee.setMerchantFee(AgentDAO.makeFeeRounding(order.getAmount(), Double.valueOf(feeRate) , 0) + T0additional);
 		/** 商户自己的分润  **/
-		fee.setMerchantprofit(AgentDB.makeFeeAbandon(order.getAmount(),AmountUtil.sub(feeRate, SettlementRate), 0));
+		fee.setMerchantprofit(AgentDAO.makeFeeAbandon(order.getAmount(),AmountUtil.sub(feeRate, SettlementRate), 0));
 		
 		/** 三级分销总金额  **/
-		int distributeProfit = AgentDB.makeFeeAbandon(order.getAmount(),AmountUtil.sub(SettlementRate, merchantRate), 0);
+		int distributeProfit = AgentDAO.makeFeeAbandon(order.getAmount(),AmountUtil.sub(SettlementRate, merchantRate), 0);
 		fee.setDistributeProfit(distributeProfit);
 		
 		/** 二级代理商商户交易 **/
@@ -169,9 +169,9 @@ public class FeeComputeService {
 			logger.info(order.getOrderNumber() + "订单的商户的代理商为二级代理商");
 			
 			//  获得父级代理商ID
-			Map<String,Object> agentParent = AgentDB.agentInfo(new Object[]{agentInfo.get("ParentAgentID")});
+			Map<String,Object> agentParent = AgentDAO.agentInfo(new Object[]{agentInfo.get("ParentAgentID")});
 			//  获取父类代理商配置信息
-			Map<String,Object> agentParentConfig = AgentDB.agentConfig(new Object[]{agentParent.get("ID") , order.getPayChannel()});
+			Map<String,Object> agentParentConfig = AgentDAO.agentConfig(new Object[]{agentParent.get("ID") , order.getPayChannel()});
 			//  代理商ID
 			fee.setAgentID(agentParent.get("ID").toString());
 			//  二级代理商ID
@@ -187,7 +187,7 @@ public class FeeComputeService {
 			
 			if(flag){
 				//  如果存在业务员
-				int salemsGetAgentProfit = AgentDB.makeFeeAbandon(order.getAmount(), AmountUtil.sub(merchantRate ,salesManRate) ,0);
+				int salemsGetAgentProfit = AgentDAO.makeFeeAbandon(order.getAmount(), AmountUtil.sub(merchantRate ,salesManRate) ,0);
 				
 				logger.info("订单："+order.getOrderNumber() + "从代理商获取的收益为： " + salemsGetAgentProfit);
 				fee.setSalemsGetAgentProfit(salemsGetAgentProfit);
@@ -195,9 +195,9 @@ public class FeeComputeService {
 			}
 			
 			//  代理商分润
-			fee.setAgentProfit(AgentDB.makeFeeAbandon(order.getAmount(), AmountUtil.sub(agentRate ,parentAgentRate ) ,0));
+			fee.setAgentProfit(AgentDAO.makeFeeAbandon(order.getAmount(), AmountUtil.sub(agentRate ,parentAgentRate ) ,0));
 			//  设置二级代理商分润
-			fee.setTwoAgentProfit(AgentDB.makeFeeAbandon(order.getAmount(), AmountUtil.sub(merchantRate ,agentRate), 0));
+			fee.setTwoAgentProfit(AgentDAO.makeFeeAbandon(order.getAmount(), AmountUtil.sub(merchantRate ,agentRate), 0));
 			agentRate = parentAgentRate;
 			
 		}else{
@@ -205,7 +205,7 @@ public class FeeComputeService {
 			
 			if(flag){
 				//  如果存在业务员
-				int salemsGetAgentProfit = AgentDB.makeFeeAbandon(order.getAmount(), AmountUtil.sub(merchantRate ,salesManRate) ,0);
+				int salemsGetAgentProfit = AgentDAO.makeFeeAbandon(order.getAmount(), AmountUtil.sub(merchantRate ,salesManRate) ,0);
 				fee.setSalemsGetAgentProfit(salemsGetAgentProfit);
 				
 				logger.info("订单："+order.getOrderNumber() + "从代理商获取的收益为： " + salemsGetAgentProfit);
@@ -216,12 +216,12 @@ public class FeeComputeService {
 			// 代理商ID
 			fee.setAgentID(agentInfo.get("ID").toString());
 			//  代理商分润
-			fee.setAgentProfit(AgentDB.makeFeeAbandon(order.getAmount(), AmountUtil.sub(merchantRate ,agentRate) ,0));
+			fee.setAgentProfit(AgentDAO.makeFeeAbandon(order.getAmount(), AmountUtil.sub(merchantRate ,agentRate) ,0));
 		}
 		//计算平台手续费
-		fee.setPlatCostFee(AgentDB.makeFeeFurther(order.getAmount(), Double.valueOf(channelRate),0));
+		fee.setPlatCostFee(AgentDAO.makeFeeFurther(order.getAmount(), Double.valueOf(channelRate),0));
 		// 平台收益
-		fee.setPlatformProfit(AgentDB.makeFeeFurther(order.getAmount(),  AmountUtil.sub(agentRate, channelRate),0));
+		fee.setPlatformProfit(AgentDAO.makeFeeFurther(order.getAmount(),  AmountUtil.sub(agentRate, channelRate),0));
 		
 		logger.info("订单：" + order.getOrderNumber() + "，商户手续费：" + fee.getMerchantFee() + " , 商户分润:"
 		+ fee.getMerchantprofit() + ", 三级分销总金额:" + distributeProfit + "，平台收益:" + fee.getPlatformProfit() 
@@ -238,7 +238,7 @@ public class FeeComputeService {
 	 * @param loginUser
 	 * @return
 	 */
-	public List<Object[]> calDistributeProfit( Fee fee , PayOrder order ,TabLoginuser loginUser){
+	public List<Object[]> calDistributeProfit( Fee fee , PayOrder order ,LoginUser loginUser){
 		logger.info("开始计算订单编号为：" + order.getOrderNumber() + "的三级分销分润");
 		
 		List<Object[]> list = new ArrayList<Object[]>();
@@ -249,7 +249,7 @@ public class FeeComputeService {
 		
 		String three = loginUser.getThreeLevel();
 		
-		Map<String,Object> profitMap = DistributionRatioDB.profitMap();
+		Map<String,Object> profitMap = DistributionRatioDAO.profitMap();
 		
 		int total = fee.getDistributeProfit();
 
@@ -260,7 +260,7 @@ public class FeeComputeService {
 			if(!UtilsConstant.strIsEmpty(three)){
 				int threeProfit = total*Integer.parseInt(UtilsConstant.ObjToStr(profitMap.get("ThreeLeveFee")))/10;
 				if(threeProfit > 0){
-					String tonken = DevicetokenDB.getDeviceToken(three);
+					String tonken = DeviceTokenDAO.getDeviceToken(three);
 					logger.info("============================订单编号:" + order.getOrderNumber() + "上级用户Token:" + tonken + "开始发送push");
 					if(!UtilsConstant.strIsEmpty(tonken)){
 						String content = "爱码付为你赚了" + new BigDecimal(threeProfit).divide(new BigDecimal(100),2,RoundingMode.DOWN) + "元分润";
@@ -278,7 +278,7 @@ public class FeeComputeService {
 			if(!UtilsConstant.strIsEmpty(two)){
 				int twoProfit = total*Integer.parseInt(UtilsConstant.ObjToStr(profitMap.get("TwoLeveFee")))/10;
 				if(twoProfit > 0){
-					String tonken = DevicetokenDB.getDeviceToken(two);
+					String tonken = DeviceTokenDAO.getDeviceToken(two);
 					logger.info("============================订单编号:" + order.getOrderNumber() + "第二级用户Token:" + tonken + "开始发送push");
 					if(!UtilsConstant.strIsEmpty(tonken)){
 						String content = "爱码付为你赚了" + new BigDecimal(twoProfit).divide(new BigDecimal(100),2,RoundingMode.DOWN) + "元分润";
@@ -296,7 +296,7 @@ public class FeeComputeService {
 			if(!UtilsConstant.strIsEmpty(one)){
 				int oneProfit = total*Integer.parseInt(UtilsConstant.ObjToStr(profitMap.get("OneLeveFee")))/10;
 				if(oneProfit > 0){
-					String tonken = DevicetokenDB.getDeviceToken(one);
+					String tonken = DeviceTokenDAO.getDeviceToken(one);
 					logger.info("============================订单编号:" + order.getOrderNumber() + "第三级用户Token:" + tonken + "开始发送push");
 					if(!UtilsConstant.strIsEmpty(tonken)){
 						String content = "爱码付为你赚了" + new BigDecimal(oneProfit).divide(new BigDecimal(100),2,RoundingMode.DOWN) + "元分润";
@@ -317,7 +317,7 @@ public class FeeComputeService {
 		
 		if(fee.getMerchantprofit() > 0){
 			/** 保存商户自己的分润 **/
-			String tonken = DevicetokenDB.getDeviceToken(loginUser.getID());
+			String tonken = DeviceTokenDAO.getDeviceToken(loginUser.getID());
 			logger.info("============================订单编号:" + order.getOrderNumber() + "商户自己的token" + tonken + "开始发送push"); 
 			if(!UtilsConstant.strIsEmpty(tonken)){
 				String content = "爱码付为你赚了" + new BigDecimal(fee.getMerchantprofit()).divide(new BigDecimal(100),2,RoundingMode.DOWN)   + "元";
@@ -344,7 +344,7 @@ public class FeeComputeService {
 	 * @param qrcode
 	 * @return
 	 */
-	public Fee YMFcalProfit(PayOrder order , TabLoginuser user , Map<String,Object> qrcode){
+	public Fee YMFcalProfit(PayOrder order , LoginUser user , Map<String,Object> qrcode){
 		
 		logger.info("计算订单" + order.getOrderNumber() + "固定码手续费");
 		
@@ -363,14 +363,14 @@ public class FeeComputeService {
 		int T0additional = 0;
 		
 		/** 代理商信息 **/
-		Map<String,Object> agentInfo = AgentDB.agentInfo(new Object[]{user.getAgentID()});
+		Map<String,Object> agentInfo = AgentDAO.agentInfo(new Object[]{user.getAgentID()});
 		/** 代理商费率配置信息 **/
-		Map<String,Object> agentConfig = AgentDB.agentConfig(new Object[]{agentInfo.get("ID") , order.getPayChannel()});
+		Map<String,Object> agentConfig = AgentDAO.agentConfig(new Object[]{agentInfo.get("ID") , order.getPayChannel()});
 		
 		
 		
 		/**  查询通道成本费率 **/
-		Map<String,Object> channelconfigMap = ChannelConfigDB.getChannelConfig(order.getPayChannel() , order.getChannelID());
+		Map<String,Object> channelconfigMap = ChannelConfigDAO.getChannelConfig(order.getPayChannel() , order.getChannelID());
 		if(channelconfigMap==null||channelconfigMap.isEmpty()){
 			logger.info("通道成本费率查询异常：支付类型：" + order.getPayChannel()); 
 			return null;
@@ -385,7 +385,7 @@ public class FeeComputeService {
 		String salemsManID = user.getSalesManID();
 		if(salemsManID != null && !salemsManID.trim().isEmpty()){
 			flag = true;
-			salemsMan = SalesManDB.salesManInfo(salemsManID);
+			salemsMan = SalesManDAO.salesManInfo(salemsManID);
 			if(salemsMan == null || salemsMan.isEmpty()){
 				flag = false;
 			}else{
@@ -415,7 +415,7 @@ public class FeeComputeService {
 			merchantRate = UtilsConstant.ObjToStr(agentConfig.get("T0MerchantRate"));
 			
 			//  T0附加手续费
-			T0additional = AppconfigDB.T0additional();
+			T0additional = AppConfigDAO.t0Additional();
 			
 			if(flag){
 				
@@ -451,12 +451,12 @@ public class FeeComputeService {
 		}
 		
 		/** 商户手续费 **/
-		fee.setMerchantFee(AgentDB.makeFeeRounding(order.getAmount(), Double.valueOf(rate) , 0) + T0additional);
+		fee.setMerchantFee(AgentDAO.makeFeeRounding(order.getAmount(), Double.valueOf(rate) , 0) + T0additional);
 		
 		/** 商户自己的分润  **/
-		fee.setMerchantprofit(AgentDB.makeFeeAbandon(order.getAmount(),AmountUtil.sub(rate, SettlementRate), 0));
+		fee.setMerchantprofit(AgentDAO.makeFeeAbandon(order.getAmount(),AmountUtil.sub(rate, SettlementRate), 0));
 		/** 三级分销总金额  **/
-		int distributeProfit = AgentDB.makeFeeAbandon(order.getAmount(),AmountUtil.sub(SettlementRate, merchantRate), 0);
+		int distributeProfit = AgentDAO.makeFeeAbandon(order.getAmount(),AmountUtil.sub(SettlementRate, merchantRate), 0);
 		fee.setDistributeProfit(distributeProfit);
 		
 		if("1".equals(UtilsConstant.ObjToStr(qrcode.get("AgentProfit")))){
@@ -467,9 +467,9 @@ public class FeeComputeService {
 				logger.info(order.getOrderNumber() + "订单的商户的代理商为二级代理商");
 				
 				//  获得父级代理商ID
-				Map<String,Object> agentParent = AgentDB.agentInfo(new Object[]{agentInfo.get("ParentAgentID")});
+				Map<String,Object> agentParent = AgentDAO.agentInfo(new Object[]{agentInfo.get("ParentAgentID")});
 				//  获取父类代理商配置信息
-				Map<String,Object> agentParentConfig = AgentDB.agentConfig(new Object[]{agentParent.get("ID") , order.getPayChannel()});
+				Map<String,Object> agentParentConfig = AgentDAO.agentConfig(new Object[]{agentParent.get("ID") , order.getPayChannel()});
 				//  代理商ID
 				fee.setAgentID(agentParent.get("ID").toString());
 				//  二级代理商ID
@@ -485,7 +485,7 @@ public class FeeComputeService {
 				
 				if(flag){
 					//  如果存在业务员
-					int salemsGetAgentProfit = AgentDB.makeFeeAbandon(order.getAmount(), AmountUtil.sub(merchantRate ,salesManRate) ,0);
+					int salemsGetAgentProfit = AgentDAO.makeFeeAbandon(order.getAmount(), AmountUtil.sub(merchantRate ,salesManRate) ,0);
 					
 					logger.info("订单："+order.getOrderNumber() + "从代理商获取的收益为： " + salemsGetAgentProfit);
 					fee.setSalemsGetAgentProfit(salemsGetAgentProfit);
@@ -493,9 +493,9 @@ public class FeeComputeService {
 				}
 				
 				//  代理商分润
-				fee.setAgentProfit(AgentDB.makeFeeAbandon(order.getAmount(), AmountUtil.sub(agentRate ,parentAgentRate ) ,0));
+				fee.setAgentProfit(AgentDAO.makeFeeAbandon(order.getAmount(), AmountUtil.sub(agentRate ,parentAgentRate ) ,0));
 				//  设置二级代理商分润
-				fee.setTwoAgentProfit(AgentDB.makeFeeAbandon(order.getAmount(), AmountUtil.sub(merchantRate ,agentRate), 0));
+				fee.setTwoAgentProfit(AgentDAO.makeFeeAbandon(order.getAmount(), AmountUtil.sub(merchantRate ,agentRate), 0));
 				
 				agentRate = parentAgentRate;
 			}else{
@@ -503,7 +503,7 @@ public class FeeComputeService {
 				
 				if(flag){
 					//  如果存在业务员
-					int salemsGetAgentProfit = AgentDB.makeFeeAbandon(order.getAmount(), AmountUtil.sub(merchantRate ,salesManRate) ,0);
+					int salemsGetAgentProfit = AgentDAO.makeFeeAbandon(order.getAmount(), AmountUtil.sub(merchantRate ,salesManRate) ,0);
 					fee.setSalemsGetAgentProfit(salemsGetAgentProfit);
 					
 					logger.info("订单："+order.getOrderNumber() + "从代理商获取的收益为： " + salemsGetAgentProfit);
@@ -514,16 +514,16 @@ public class FeeComputeService {
 				// 代理商ID
 				fee.setAgentID(agentInfo.get("ID").toString());
 				//  代理商分润
-				fee.setAgentProfit(AgentDB.makeFeeAbandon(order.getAmount(), AmountUtil.sub(merchantRate ,agentRate) ,0));
+				fee.setAgentProfit(AgentDAO.makeFeeAbandon(order.getAmount(), AmountUtil.sub(merchantRate ,agentRate) ,0));
 			} 
 		} else {
 			logger.info(order.getOrderNumber() + "不计算代理商分润, 使用的固定码为：" + UtilsConstant.ObjToStr(qrcode.get("code"))); 
 		}
 		
 		//计算平台手续费
-		fee.setPlatCostFee(AgentDB.makeFeeFurther(order.getAmount(), Double.valueOf(channelRate),0));
+		fee.setPlatCostFee(AgentDAO.makeFeeFurther(order.getAmount(), Double.valueOf(channelRate),0));
 		// 平台收益
-		fee.setPlatformProfit(AgentDB.makeFeeFurther(order.getAmount(),  AmountUtil.sub(agentRate, channelRate),0));
+		fee.setPlatformProfit(AgentDAO.makeFeeFurther(order.getAmount(),  AmountUtil.sub(agentRate, channelRate),0));
 		
 		
 		logger.info("订单：" + order.getOrderNumber() + "，商户手续费：" + fee.getMerchantFee() + " , 商户分润:"
@@ -542,7 +542,7 @@ public class FeeComputeService {
 	 * @param loginUser
 	 * @return
 	 */
-	public Fee calProfit(String orderNumber ,PayOrder  order , TabLoginuser loginUser ){
+	public Fee calProfit(String orderNumber , PayOrder  order , LoginUser loginUser ){
 		
 		logger.info("计算订单：" + orderNumber + "手续费");
 		
@@ -554,13 +554,13 @@ public class FeeComputeService {
 		int T0additional = 0;
 		
 		/** 用户费率配置信息 **/
-		Map<String,Object> userConfig = TradeDB.getUserConfig(new Object[]{loginUser.getID() ,  order.getPayChannel() }); 
+		Map<String,Object> userConfig = TradeDAO.getUserConfig(new Object[]{loginUser.getID() ,  order.getPayChannel() });
 		
 		/**    渠道成本   **/
 		String channelRate ="0";
 		
 		/**  查询通道成本费率 **/
-		Map<String,Object> channelconfigMap = ChannelConfigDB.getChannelConfig(order.getPayChannel() , order.getChannelID());
+		Map<String,Object> channelconfigMap = ChannelConfigDAO.getChannelConfig(order.getPayChannel() , order.getChannelID());
 		if(channelconfigMap==null||channelconfigMap.isEmpty()){
 			logger.info("通道成本费率查询异常：支付类型：" + order.getPayChannel()); 
 			return null;
@@ -574,13 +574,13 @@ public class FeeComputeService {
 		logger.info(orderNumber  + "交易费率为：" + feeRate  + ",T0渠道成本:" + channelRate + ",T0附加费用：" + T0additional);
 			
 		/** 商户手续费 **/
-		fee.setMerchantFee(AgentDB.makeFeeRounding(order.getAmount(), Double.valueOf(feeRate)  , 0) + T0additional);
+		fee.setMerchantFee(AgentDAO.makeFeeRounding(order.getAmount(), Double.valueOf(feeRate)  , 0) + T0additional);
 		
 		//计算平台手续费
-		fee.setPlatCostFee(AgentDB.makeFeeFurther(order.getAmount(), Double.valueOf(channelRate),0));
+		fee.setPlatCostFee(AgentDAO.makeFeeFurther(order.getAmount(), Double.valueOf(channelRate),0));
 		
 		// 平台收益
-		fee.setPlatformProfit(AgentDB.makeFeeFurther(order.getAmount() ,  AmountUtil.sub(feeRate, channelRate),0));
+		fee.setPlatformProfit(AgentDAO.makeFeeFurther(order.getAmount() ,  AmountUtil.sub(feeRate, channelRate),0));
 		
 		logger.info("订单：" + orderNumber + "，商户手续费：" + fee.getMerchantFee()  + "，平台收益:" + fee.getPlatformProfit()  + "，平台手续费:" + fee.getPlatCostFee()) ;
 		

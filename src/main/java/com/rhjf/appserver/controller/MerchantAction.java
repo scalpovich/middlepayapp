@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.rhjf.appserver.constant.Constant;
-import com.rhjf.appserver.db.LoginUserDB;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.db.LoginUserDAO;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.service.H5PerfectInfoService;
 import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.LoggerTool;
@@ -46,7 +46,7 @@ public class MerchantAction {
 			
 			EhcacheUtil ehcache = EhcacheUtil.getInstance();
 			
-			TabLoginuser user = null;
+			LoginUser user = null;
 			
 			Object obj = ehcache.get(Constant.cacheName,loginID + "UserInfo" );
 			if(obj == null){
@@ -59,7 +59,7 @@ public class MerchantAction {
 				ehcache.put(Constant.cacheName, loginID + "UserInfo" , user);
 			}else{
 				logger.info("查询缓存");
-				user = (TabLoginuser) obj;
+				user = (LoginUser) obj;
 			}
 			
 //			//  商户名称
@@ -345,7 +345,7 @@ public class MerchantAction {
 	@ResponseBody
 	public Object getmerchantinfo(HttpServletRequest request){
 		String loginID = request.getParameter("loginID");
-		TabLoginuser user = h5perfectInfoService.getMerchantInfoByLoginID(loginID);
+		LoginUser user = h5perfectInfoService.getMerchantInfoByLoginID(loginID);
 		try {
 			JSONObject json = JSONObject.fromObject(user);
 			return json;
@@ -359,7 +359,7 @@ public class MerchantAction {
 	@ResponseBody
 	public Object getUserBankCard(HttpServletRequest request){
 		String loginID = request.getParameter("loginID");
-		TabLoginuser user = h5perfectInfoService.getMerchantInfoByLoginID(loginID);
+		LoginUser user = h5perfectInfoService.getMerchantInfoByLoginID(loginID);
 		Map<String,Object> map = h5perfectInfoService.getUserBankCard(user.getID());
 		try {
 			return JSONObject.fromObject(map);
@@ -374,7 +374,7 @@ public class MerchantAction {
 	public Object getmerchantinfo(HttpServletRequest request , HttpServletResponse response){
 		
 		String loginID = request.getParameter("tjr");
-		TabLoginuser user = LoginUserDB.LoginuserInfo(loginID);
+		LoginUser user = LoginUserDAO.LoginuserInfo(loginID);
 		
 		JSONObject json = new JSONObject();
 		

@@ -2,7 +2,7 @@ package com.rhjf.appserver.db;
 
 import java.util.Map;
 
-public class AppVersionDB extends DBBase {
+public class AppVersionDAO extends DBBase {
 
 	
 	

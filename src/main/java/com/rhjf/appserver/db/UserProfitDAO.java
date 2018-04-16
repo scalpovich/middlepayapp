@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class UserProfitDB extends DBBase{
+public class UserProfitDAO extends DBBase{
 
 	
 	

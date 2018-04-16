@@ -1,10 +1,10 @@
 package com.rhjf.appserver.service;
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.LoginUserDB;
+import com.rhjf.appserver.db.LoginUserDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.UtilsConstant;
 
@@ -19,7 +19,7 @@ public class MyMerchantService {
 	
 	LoggerTool logger = new LoggerTool(this.getClass());
 	
-	public void MyMerchant(TabLoginuser user, RequestData reqdata, ResponseData respdata) {
+	public void MyMerchant(LoginUser user, RequestData reqdata, ResponseData respdata) {
 		
 		String merchantName = UtilsConstant.ObjToStr(reqdata.getMerchantName());
 		
@@ -27,7 +27,7 @@ public class MyMerchantService {
 		logger.info("用户" + user.getLoginID() + "查询发展商户"); 
 
 		// 查询交易
-		String returnString = LoginUserDB.getMyMerchant(new Object[]{user.getID() , "%" + merchantName + "%"});
+		String returnString = LoginUserDAO.getMyMerchant(new Object[]{user.getID() , "%" + merchantName + "%"});
 
 		respdata.setLoginID(reqdata.getLoginID());
 		respdata.setTranslist(returnString);

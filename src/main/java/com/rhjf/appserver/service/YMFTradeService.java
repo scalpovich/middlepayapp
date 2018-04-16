@@ -8,11 +8,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.StringEncoding;
-import com.rhjf.appserver.db.LoginUserDB;
-import com.rhjf.appserver.db.TradeDB;
-import com.rhjf.appserver.db.UserBankCardDB;
-import com.rhjf.appserver.db.YMFTradeDB;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.db.LoginUserDAO;
+import com.rhjf.appserver.db.TradeDAO;
+import com.rhjf.appserver.db.UserBankCardDAO;
+import com.rhjf.appserver.db.YMFTradeDAO;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.AmountUtil;
 import com.rhjf.appserver.util.DESUtil;
 import com.rhjf.appserver.util.DateUtil;
@@ -51,18 +51,18 @@ public class YMFTradeService   {
 		String orderNumber = map.get("orderNumber");
 		
 		/**  查询固定码信息 **/
-		Map<String,Object> qrCodeMap = YMFTradeDB.getYMFCode(new Object[]{ymfCode});
+		Map<String,Object> qrCodeMap = YMFTradeDAO.getYMFCode(new Object[]{ymfCode});
 		
-		TabLoginuser user = null;
+		LoginUser user = null;
 		try {
-			user = LoginUserDB.getLoginuserInfo(userID);
+			user = LoginUserDAO.getLoginuserInfo(userID);
 		} catch (Exception e1) {
 			logger.error("固定交易异常" +  e1.getMessage());
 			return ;
 		}
 		
 		/**  获取交易商户  **/
-		Map<String,Object> merchantMap = TradeDB.getMerchantInfo(new Object[]{user.getID()}); 
+		Map<String,Object> merchantMap = TradeDAO.getMerchantInfo(new Object[]{user.getID()});
 		if(merchantMap==null||merchantMap.isEmpty()){
 			logger.info(user.getLoginID() + "获取商户信息失败");
 			return ;
@@ -79,7 +79,7 @@ public class YMFTradeService   {
 		String desKey = merchantMap.get("DESKey").toString();
 		
 		/** 向数据库插入初始化数据 **/
-		int ret = TradeDB.YMFTradeInit(new Object[]{UtilsConstant.getUUID(),amount ,DateUtil.getNowTime(DateUtil.yyyyMMdd),DateUtil.getNowTime(DateUtil.HHmmss),
+		int ret = TradeDAO.YMFTradeInit(new Object[]{UtilsConstant.getUUID(),amount ,DateUtil.getNowTime(DateUtil.yyyyMMdd),DateUtil.getNowTime(DateUtil.HHmmss),
 				tradeDate,tradeTime , DateUtil.getNowTime(DateUtil.yyyyMMddHHmmssSSS), Constant.TradeType[1] ,encrypt, 
 				user.getID(),qrCodeMap.get("PayChannel"), merchantID,orderNumber , ymfCode , user.getAgentID(),"RONGHUI"});
 		if(ret < 1 ){
@@ -109,7 +109,7 @@ public class YMFTradeService   {
 		/** T0 交易上报结算信息  **/
 		if(encrypt.equals(Constant.T0)){
 			try {
-				Map<String,Object> bankMap = UserBankCardDB.getBankInfo(user.getID());
+				Map<String,Object> bankMap = UserBankCardDAO.getBankInfo(user.getID());
 				
 				
 //				String cardNo = DESUtil.encode(desKey,user.getBankCardNo());

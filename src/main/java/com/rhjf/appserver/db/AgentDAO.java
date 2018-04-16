@@ -5,7 +5,10 @@ import java.util.Map;
 
 import com.rhjf.appserver.util.AmountUtil;
 
-public class AgentDB extends DBBase{
+/**
+ * @author hadoop
+ */
+public class AgentDAO extends DBBase{
 
 	
 	/**

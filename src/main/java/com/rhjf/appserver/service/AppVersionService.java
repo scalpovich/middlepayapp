@@ -5,11 +5,11 @@ import java.util.Map;
 
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.ADListDB;
-import com.rhjf.appserver.db.AppVersionDB;
+import com.rhjf.appserver.db.AdvertisementListDAO;
+import com.rhjf.appserver.db.AppVersionDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.LoadPro;
 import com.rhjf.appserver.util.LoggerTool;
@@ -44,7 +44,7 @@ public class AppVersionService {
 		
 		Object obj = ehcache.get(Constant.cacheName,  deviceType + "appversion");
 		if(obj==null){
-			map = AppVersionDB.getAppVersionInfo(new Object[]{deviceType});
+			map = AppVersionDAO.getAppVersionInfo(new Object[]{deviceType});
 			ehcache.put(Constant.cacheName,  deviceType +  "appversion", map);
 		}else{
 			map = (Map<String,Object>) obj;
@@ -55,7 +55,7 @@ public class AppVersionService {
 	}
 	
 	
-	public void MyQRCode(TabLoginuser user ,RequestData reqdata, ResponseData repdata){
+	public void MyQRCode(LoginUser user ,RequestData reqdata, ResponseData repdata){
 		
 		logger.info("获取我的二维码"); 
 		
@@ -72,7 +72,7 @@ public class AppVersionService {
 	
 	public void adlist(RequestData reqdata, ResponseData repdata){
 		
-		List<Map<String,Object>> list = ADListDB.adlist();
+		List<Map<String,Object>> list = AdvertisementListDAO.adlist();
 		
 		
 		repdata.setList(JSONArray.fromObject(list).toString());  

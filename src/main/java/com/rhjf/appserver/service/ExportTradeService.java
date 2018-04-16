@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Map;
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.LoginUserDB;
-import com.rhjf.appserver.db.PayOrderDB;
+import com.rhjf.appserver.db.LoginUserDAO;
+import com.rhjf.appserver.db.PayOrderDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.AmountUtil;
 import com.rhjf.appserver.util.CreateExcel;
 import com.rhjf.appserver.util.LoadPro;
@@ -23,7 +23,7 @@ public class ExportTradeService {
 
 	LoggerTool logger = new LoggerTool(this.getClass());
 	
-	public void ExportTrade(TabLoginuser user , RequestData request, ResponseData response){
+	public void ExportTrade(LoginUser user , RequestData request, ResponseData response){
 		
 		String tradeDate = request.getTradeDate();
 		StringBuffer stringBuffer = new StringBuffer(tradeDate);	
@@ -34,13 +34,13 @@ public class ExportTradeService {
  		
 		logger.info("用户" +  user.getLoginID() + "获取" + stringBuffer.toString() + "交易数据");
 		
-		List<Map<String,Object>> list = PayOrderDB.exportTrade(user.getID() , stringBuffer.toString());
+		List<Map<String,Object>> list = PayOrderDAO.exportTrade(user.getID() , stringBuffer.toString());
 	
 		String[] title = {"商户名称" ,"手机号"  , "支付类型" , "订单号" , "交易时间" , "交易金额" , "交易手续费" , "结算周期" , "返利"};
 		
 		if(!user.getEmail().equals(request.getEmail())){
 			//  用户上传的邮箱和系统中保存的邮箱不一致 ， 将用户上传的邮箱更新到系统中
-			LoginUserDB.updateUserEmail(new Object[]{request.getEmail() , user.getID()});
+			LoginUserDAO.updateUserEmail(new Object[]{request.getEmail() , user.getID()});
 		}
 		
 		String path = LoadPro.loadProperties("config", "imgpath") + user.getLoginID() + File.separator;

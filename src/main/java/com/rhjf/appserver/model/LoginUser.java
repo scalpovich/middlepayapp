@@ -1,5 +1,9 @@
 package	com.rhjf.appserver.model;
-public class TabLoginuser {
+
+/**
+ * @author hadoop
+ */
+public class LoginUser {
 	private String iD;
 	private String loginID;
 	private String loginPwd;

@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.rhjf.appserver.util.UtilsConstant;
 
-public class SmsApplyDB extends DBBase{
+public class SmsApplyDAO extends DBBase{
 	
 	public static int insertSmsCode(String phone,String smsCode){
 		//删除以前的校验码

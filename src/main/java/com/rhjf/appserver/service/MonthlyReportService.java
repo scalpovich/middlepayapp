@@ -11,10 +11,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.PayOrderDB;
+import com.rhjf.appserver.db.PayOrderDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.LoggerTool;
 
 import net.sf.json.JSONArray;
@@ -30,12 +30,12 @@ public class MonthlyReportService {
 	
 	LoggerTool logger = new LoggerTool(this.getClass());
 	
-	public void MonthlyReport(TabLoginuser user , RequestData request, ResponseData respdata){
+	public void MonthlyReport(LoginUser user , RequestData request, ResponseData respdata){
 		
 		
 		logger.info("用户：" + user.getLoginID() + "查询交易月报数据");
 		
-		List<Map<String,String>> monthlyReportlist = PayOrderDB.monthlyReport(user.getID());
+		List<Map<String,String>> monthlyReportlist = PayOrderDAO.monthlyReport(user.getID());
 		
 		Map<String,List<Map<String,String>>> map = new LinkedHashMap<>(); 
 		

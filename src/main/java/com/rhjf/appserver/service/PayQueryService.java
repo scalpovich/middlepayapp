@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.StringEncoding;
-import com.rhjf.appserver.db.TradeDB;
+import com.rhjf.appserver.db.TradeDAO;
 import com.rhjf.appserver.model.PayOrder;
 import com.rhjf.appserver.util.HttpClient;
 import com.rhjf.appserver.util.LoadPro;
@@ -66,7 +66,7 @@ public class PayQueryService {
 				/** 提现状态成功  **/
 				if(withdrawStatus.equals(Constant.orderStatus)){
 					logger.info("");
-					TradeDB.updateWithdrawStatus(new Object[]{ retCode , "成功-承兑或交易成功" ,order.getID()});
+					TradeDAO.updateWithdrawStatus(new Object[]{ retCode , "成功-承兑或交易成功" ,order.getID()});
 				}
 			}
 		} catch (Exception e) {

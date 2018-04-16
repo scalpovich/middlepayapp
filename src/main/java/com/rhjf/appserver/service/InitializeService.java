@@ -4,12 +4,12 @@ import java.util.Map;
 
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.AppVersionDB;
-import com.rhjf.appserver.db.AppconfigDB;
-import com.rhjf.appserver.db.UserWalletDB;
+import com.rhjf.appserver.db.AppConfigDAO;
+import com.rhjf.appserver.db.AppVersionDAO;
+import com.rhjf.appserver.db.UserWalletDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.KeyBean;
 import com.rhjf.appserver.util.LoadPro;
@@ -26,12 +26,12 @@ public class InitializeService {
 	private LoggerTool log = new LoggerTool(this.getClass());
 	
 	@SuppressWarnings("unchecked")
-	public void init(TabLoginuser user , RequestData request , ResponseData response){
+	public void init(LoginUser user , RequestData request , ResponseData response){
 		
 		/*
 		 *	 商户钱包信息 
 		 */
-		Map<String,String> walletmap = UserWalletDB.UserWalletByUserID(new Object[]{user.getID()});
+		Map<String,String> walletmap = UserWalletDAO.UserWalletByUserID(new Object[]{user.getID()});
 		if(walletmap!=null &&! walletmap.isEmpty()){
 			response.setTotal(walletmap.get("WalletBalance"));
 		}
@@ -43,7 +43,7 @@ public class InitializeService {
 			Map<String,Object> map = null;
 			obj = ehcache.get(Constant.cacheName,  deviceType + "appversion");
 			if(obj==null){
-				map = AppVersionDB.getAppVersionInfo(new Object[]{deviceType});
+				map = AppVersionDAO.getAppVersionInfo(new Object[]{deviceType});
 				ehcache.put(Constant.cacheName,  deviceType +  "appversion", map);
 			}else{
 				map = (Map<String,Object>) obj;
@@ -71,7 +71,7 @@ public class InitializeService {
 		obj = ehcache.get(Constant.cacheName, "tradeConfig");
 		if(obj == null){
 			log.info("缓存中获取交易配置信息失败,从数据库中查询");
-			tradeConfig = AppconfigDB.getTradeConfig(); 
+			tradeConfig = AppConfigDAO.getTradeConfig();
 			ehcache.put(Constant.cacheName, "tradeConfig", tradeConfig);
 		}else{
 			log.info("缓存查询交易配置信息");

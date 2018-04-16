@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import com.rhjf.appserver.constant.Constant;
-import com.rhjf.appserver.db.AuthenticationDB;
+import com.rhjf.appserver.db.AuthenticationDAO;
 import com.rhjf.appserver.util.DESUtil;
 import com.rhjf.appserver.util.HttpClient;
 import com.rhjf.appserver.util.LoadPro;
@@ -21,7 +21,7 @@ public class AuthUtil {
 	private static LoggerTool log = new LoggerTool(AuthUtil.class);
 
 //	public static Map<String,String> Auth(String name,String bankCardNo,String IDcardNumber){
-//		 Map<String, Object> bankAuthencationMan = AuthenticationDB.bankAuthenticationInfo(new Object[]{bankCardNo});
+//		 Map<String, Object> bankAuthencationMan = AuthenticationDAO.bankAuthenticationInfo(new Object[]{bankCardNo});
 //		 Map<String,String> reqMap=new HashMap<String,String>();
 //		 if (bankAuthencationMan == null || bankAuthencationMan.isEmpty()){
 //			 Map<String,String> authMap=new HashMap<String,String>();
@@ -32,7 +32,7 @@ public class AuthUtil {
 //				reqMap=authService.authKuai(authMap);
 //				System.out.println(reqMap.toString());
 //				if(reqMap.get("respCode").equals(Author.SUCESS_CODE)){
-//				AuthenticationDB.addAuthencationInfo(new Object[]{UtilsConstant.getUUID() , IDcardNumber , name , bankCardNo , "00" , reqMap.get("respMsg") });
+//				AuthenticationDAO.addAuthencationInfo(new Object[]{UtilsConstant.getUUID() , IDcardNumber , name , bankCardNo , "00" , reqMap.get("respMsg") });
 //				}
 //				return reqMap;
 //		 }else{
@@ -50,7 +50,7 @@ public class AuthUtil {
 	
 	
 	public static Map<String, String> authentication(String name, String bankCardNo, String IDcardNumber ,  String payerPhone) {
-		Map<String, Object> bankAuthencationMan = AuthenticationDB.bankAuthenticationInfo(new Object[] { bankCardNo });
+		Map<String, Object> bankAuthencationMan = AuthenticationDAO.bankAuthenticationInfo(new Object[] { bankCardNo });
 		Map<String, String> reqMap = new HashMap<String, String>();
 		if (bankAuthencationMan == null || bankAuthencationMan.isEmpty()) {
 			try {
@@ -97,7 +97,7 @@ public class AuthUtil {
 				
 				
 				if (resCode.equals(Constant.payRetCode)) {
-					AuthenticationDB.addAuthencationInfo(new Object[] { UtilsConstant.getUUID(), IDcardNumber, payerPhone ,name,bankCardNo, "00", reqMap.get("respMsg") });
+					AuthenticationDAO.addAuthencationInfo(new Object[] { UtilsConstant.getUUID(), IDcardNumber, payerPhone ,name,bankCardNo, "00", reqMap.get("respMsg") });
 					reqMap.put("respCode", Author.SUCESS_CODE);
 					reqMap.put("respMsg", "鉴权成功");
 					return reqMap;

@@ -9,7 +9,7 @@ import com.rhjf.appserver.util.UtilsConstant;
 
 import net.sf.json.JSONObject;
 
-public class MposDB extends DBBase{
+public class MposDAO extends DBBase{
 
 	/**
 	 *   交易表插入数据

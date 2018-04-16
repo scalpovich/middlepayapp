@@ -5,10 +5,10 @@ import java.io.IOException;
 
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.LoginUserDB;
+import com.rhjf.appserver.db.LoginUserDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.Image64Bit;
 import com.rhjf.appserver.util.LoadPro;
@@ -25,7 +25,7 @@ public class UploadPhotoService {
 	
 	LoggerTool logger = new LoggerTool(this.getClass());
 	
-	public void UploadPhoto(TabLoginuser user, RequestData reqdata, ResponseData respdata){
+	public void UploadPhoto(LoginUser user, RequestData reqdata, ResponseData respdata){
 		
 		
 		logger.info(user.getLoginID() + "上传图片信息");
@@ -125,7 +125,7 @@ public class UploadPhotoService {
 			return ;
 		}
 		
-		int ret = LoginUserDB.updatePhotoInfo(new Object[]{handheldIDurl , iDCardFront  , iDCardReverse ,bankCard ,business ,  user.getLoginID()});
+		int ret = LoginUserDAO.updatePhotoInfo(new Object[]{handheldIDurl , iDCardFront  , iDCardReverse ,bankCard ,business ,  user.getLoginID()});
 		
 		EhcacheUtil ehcache = EhcacheUtil.getInstance();
 		ehcache.remove(Constant.cacheName, user.getLoginID() + "UserInfo");

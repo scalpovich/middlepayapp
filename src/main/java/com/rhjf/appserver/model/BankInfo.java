@@ -1,5 +1,8 @@
 package com.rhjf.appserver.model;
 
+/**
+ * @author hadoop
+ */
 public class BankInfo {
 	private int netCode;
 	private String netCodeRemarks;

@@ -1,6 +1,6 @@
 package com.rhjf.appserver.db;
 
-public class FeedbackDB extends DBBase{
+public class FeedbackDAO extends DBBase{
 
 	
 	public static Integer saveFeedback(Object[] obj){

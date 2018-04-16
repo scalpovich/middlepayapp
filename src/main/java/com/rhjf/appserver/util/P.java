@@ -38,7 +38,7 @@ public class P {
 		
 		System.out.println(json.toString());
 
-//		channel.basicPublish(EXCHANGE,"againDF",null,json.toString().getBytes());
+		channel.basicPublish(EXCHANGE,"againDF",null,json.toString().getBytes());
 		
 		// 关闭频道和连接
 		channel.close();

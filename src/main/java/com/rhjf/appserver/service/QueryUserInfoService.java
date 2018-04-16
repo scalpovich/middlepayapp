@@ -3,14 +3,14 @@ package com.rhjf.appserver.service;
 import java.util.Map; 
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.BankCodeDB;
-import com.rhjf.appserver.db.CapitalDB;
-import com.rhjf.appserver.db.CreaditCardDB;
-import com.rhjf.appserver.db.DevicetokenDB;
-import com.rhjf.appserver.db.LoginUserDB;
+import com.rhjf.appserver.db.BankCodeDAO;
+import com.rhjf.appserver.db.CapitalDAO;
+import com.rhjf.appserver.db.CreditCardDAO;
+import com.rhjf.appserver.db.DeviceTokenDAO;
+import com.rhjf.appserver.db.LoginUserDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.UtilsConstant;
 
@@ -19,7 +19,7 @@ public class QueryUserInfoService {
 	
 	LoggerTool logger = new LoggerTool(this.getClass());
 	
-	public void QueryUserInfo(TabLoginuser user , RequestData reqData , ResponseData respData){
+	public void QueryUserInfo(LoginUser user , RequestData reqData , ResponseData respData){
 		
 		logger.info(user.getLoginID() + "查询个人信息");
 		
@@ -36,7 +36,7 @@ public class QueryUserInfoService {
 		/*
 		 *    商户结算卡信息
 		 */
-		Map<String,Object> bankInfoMap = LoginUserDB.getUserBankCard(user.getID());
+		Map<String,Object> bankInfoMap = LoginUserDAO.getUserBankCard(user.getID());
 		if(bankInfoMap!=null&&!bankInfoMap.isEmpty()){
 			respData.setBankCardNo(UtilsConstant.ObjToStr(bankInfoMap.get("AccountNo")));
 			respData.setBankName(UtilsConstant.ObjToStr(bankInfoMap.get("BankName"))); 
@@ -46,20 +46,20 @@ public class QueryUserInfoService {
 			respData.setCreditCardNo(UtilsConstant.ObjToStr(bankInfoMap.get("SettleCreditCard")));
 			
 			// 银联号   bankName,unite_bank_no
-			Map<String,Object> bankmap = BankCodeDB.bankBinMap(new Object[]{UtilsConstant.ObjToStr(bankInfoMap.get("AccountNo"))});
+			Map<String,Object> bankmap = BankCodeDAO.bankBinMap(new Object[]{UtilsConstant.ObjToStr(bankInfoMap.get("AccountNo"))});
 			respData.setBankNo(UtilsConstant.ObjToStr(bankmap.get("bankCode"))); 
 		}
 		
 		/*
 		 *	 商户钱包信息 
 		 */
-//		Map<String,String> walletmap = UserWalletDB.UserWalletByUserID(new Object[]{user.getID()});
+//		Map<String,String> walletmap = UserWalletDAO.UserWalletByUserID(new Object[]{user.getID()});
 //		if(walletmap!=null &&! walletmap.isEmpty()){
 //			respData.setTotal(walletmap.get("WalletBalance"));
 //		}
 		
 		String available_amount  = "0";
-		Map<String,String> capitalMap = CapitalDB.getCapitalByUserID(new Object[]{user.getID()});
+		Map<String,String> capitalMap = CapitalDAO.getCapitalByUserID(new Object[]{user.getID()});
 		if(capitalMap != null && !capitalMap.isEmpty()){
 			available_amount =  UtilsConstant.strIsEmpty(capitalMap.get("available_amount"))?"0":capitalMap.get("available_amount");
 		}
@@ -89,7 +89,7 @@ public class QueryUserInfoService {
 		respData.setTradeCode(user.getTradeCode());
 		
 		
-		Map<String, Object> map = CreaditCardDB.myCardFeeAmount(user.getID());
+		Map<String, Object> map = CreditCardDAO.myCardFeeAmount(user.getID());
 		if(map!=null && !map.isEmpty()){
 			respData.setCardFeeAmount(map.get("aggregate_amount").toString());
 			respData.setCardFeeBlance(map.get("available_amount").toString());
@@ -102,7 +102,7 @@ public class QueryUserInfoService {
 		 /** 获取ios设备token **/
 	    String deviceToken = reqData.getDeviceToken();
     	String deviceType = reqData.getDeviceType();
-    	DevicetokenDB.saveOrUpToken(new Object[]{user.getID() , deviceToken , deviceType  , deviceToken ,deviceType });
+    	DeviceTokenDAO.saveOrUpToken(new Object[]{user.getID() , deviceToken , deviceType  , deviceToken ,deviceType });
 	    
 		
 //		if(user.getPhoto1()!=null && !user.getPhoto1().equals("")){

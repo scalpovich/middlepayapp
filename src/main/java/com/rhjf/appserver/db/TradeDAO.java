@@ -9,7 +9,7 @@ import com.rhjf.appserver.util.UtilsConstant;
 
 import net.sf.json.JSONObject;
 
-public class TradeDB extends DBBase{
+public class TradeDAO extends DBBase{
 
 	
 	/**

@@ -7,7 +7,7 @@ import java.util.Map;
 import com.rhjf.appserver.model.AuthenticationRecord;
 import com.rhjf.appserver.util.UtilsConstant;
 
-public class AuthenticationDB extends DBBase{
+public class AuthenticationDAO extends DBBase{
 	
 	
 	public static int Authentication(Object[] obj){

@@ -2,11 +2,11 @@ package com.rhjf.appserver.service.jifu;
 
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.LoginUserDB;
-import com.rhjf.appserver.db.TradeDB;
+import com.rhjf.appserver.db.LoginUserDAO;
+import com.rhjf.appserver.db.TradeDAO;
 import com.rhjf.appserver.model.Fee;
 import com.rhjf.appserver.model.PayOrder;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.service.FeeComputeService;
 import com.rhjf.appserver.util.*;
 import net.sf.json.JSONObject;
@@ -57,7 +57,7 @@ public class PayNotifyService {
 
         String orderNumber = head.getString("orderId");
 
-        PayOrder order = TradeDB.getPayOrderInfo(orderNumber);
+        PayOrder order = TradeDAO.getPayOrderInfo(orderNumber);
 
 
         if(order==null){
@@ -81,9 +81,9 @@ public class PayNotifyService {
             String retMsg = "支付成功";
             respCode = Constant.payRetCode;
 
-            TabLoginuser loginUser;
+            LoginUser loginUser;
             try {
-                loginUser = LoginUserDB.getLoginuserInfo(order.getUserID());
+                loginUser = LoginUserDAO.getLoginuserInfo(order.getUserID());
             } catch (Exception e) {
                 log.info(e.getMessage());
                 return RespCode.notifyfail;
@@ -98,12 +98,12 @@ public class PayNotifyService {
                 return RespCode.notifyfail;
             }
 
-            int updateRet = TradeDB.updatePayOrder(new Object[]{respCode ,retMsg ,fee.getMerchantFee() , 0  , order.getID()});
+            int updateRet = TradeDAO.updatePayOrder(new Object[]{respCode ,retMsg ,fee.getMerchantFee() , 0  , order.getID()});
             if(updateRet < 1){
                 log.info("订单号：" + orderNumber + "更新数据库失败");
                 return RespCode.notifyfail;
             }
-            int x = TradeDB.saveProfit(new Object[]{
+            int x = TradeDAO.saveProfit(new Object[]{
                     UtilsConstant.getUUID(),loginUser.getID(), order.getID() ,fee.getMerchantFee(),null,0,
                     null,0,
                     0,fee.getPlatformProfit(),fee.getPlatCostFee()

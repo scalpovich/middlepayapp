@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.rhjf.appserver.db.TradeDAO;
 import com.rhjf.appserver.service.FeeComputeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -15,12 +16,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
 import com.rhjf.appserver.constant.StringEncoding;
-import com.rhjf.appserver.db.AppconfigDB;
-import com.rhjf.appserver.db.LoginUserDB;
-import com.rhjf.appserver.db.TradeDB;
+import com.rhjf.appserver.db.AppConfigDAO;
+import com.rhjf.appserver.db.LoginUserDAO;
 import com.rhjf.appserver.model.Fee;
 import com.rhjf.appserver.model.PayOrder;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.MD5;
@@ -81,7 +81,7 @@ LoggerTool logger = new LoggerTool(this.getClass());
 		String merchantID = map2.get("r1_merchantNo");
 		String paytype = "4";
 		
-		Map<String,Object> map =  TradeDB.getMerchantInfo(merchantID,paytype);
+		Map<String,Object> map =  TradeDAO.getMerchantInfo(merchantID,paytype);
 		/**  计算签名 **/
 		String serverSign = MD5.sign(text.append(map.get("SignKey")).toString(), StringEncoding.UTF_8);
 		String reqSign = map2.get("sign");
@@ -95,7 +95,7 @@ LoggerTool logger = new LoggerTool(this.getClass());
 		String orderNumber = map2.get("r2_orderNumber");
 
 		/**  查询订单信息 **/
-		PayOrder order = TradeDB.getPayOrderInfo(orderNumber);
+		PayOrder order = TradeDAO.getPayOrderInfo(orderNumber);
 		
 		if(order==null){
 			logger.info("订单号：" + orderNumber + "未查到订单信息");
@@ -123,9 +123,9 @@ LoggerTool logger = new LoggerTool(this.getClass());
 				retMsg = map2.get("retMsg");
 			}
 			
-			TabLoginuser loginUser = null;
+			LoginUser loginUser = null;
 			try {
-				loginUser = LoginUserDB.getLoginuserInfo(order.getUserID());
+				loginUser = LoginUserDAO.getLoginuserInfo(order.getUserID());
 			} catch (Exception e) {
 				logger.info(e.getMessage()); 
 				return RespCode.notifyfail;
@@ -138,13 +138,13 @@ LoggerTool logger = new LoggerTool(this.getClass());
 				return RespCode.notifyfail;
 			}
 			
-			int updateRet = TradeDB.updatePayOrderPayRetCode(new Object[]{retCode ,retMsg ,fee.getMerchantFee() , 0  , order.getID()});
+			int updateRet = TradeDAO.updatePayOrderPayRetCode(new Object[]{retCode ,retMsg ,fee.getMerchantFee() , 0  , order.getID()});
 			if(updateRet < 1){
 				logger.info("订单号：" + orderNumber + "更新数据库失败"); 
 				return RespCode.notifyfail;
 			}
 			// ID,UserID,TradeID,Fee,AgentID,AgentProfit,TwoAgentID,TwoAgentProfit,DistributeProfit,PlatformProfit
-			int x = TradeDB.saveProfit(new Object[]{
+			int x = TradeDAO.saveProfit(new Object[]{
 					UtilsConstant.getUUID(),loginUser.getID(), order.getID() ,fee.getMerchantFee(),null,0,
 					null,0,
 					0,fee.getPlatformProfit(),fee.getPlatCostFee()
@@ -168,7 +168,7 @@ LoggerTool logger = new LoggerTool(this.getClass());
 				Object obj = ehcache.get(Constant.cacheName, "tradeConfig");
 				if(obj == null){
 					logger.info("缓存中获取交易配置信息失败,从数据库中查询");
-					tradeConfig = AppconfigDB.getTradeConfig(); 
+					tradeConfig = AppConfigDAO.getTradeConfig();
 					ehcache.put(Constant.cacheName, "tradeConfig", tradeConfig); 
 				}else{
 					logger.info("缓存查询交易配置信息");

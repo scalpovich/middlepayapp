@@ -8,7 +8,7 @@ import java.util.Map;
  * @author hadoop
  *
  */
-public class UserCreditCardDB extends DBBase{
+public class UserCreditCardDAO extends DBBase{
 
 	
 	/**

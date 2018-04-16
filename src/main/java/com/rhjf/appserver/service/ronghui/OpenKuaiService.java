@@ -3,13 +3,13 @@ package com.rhjf.appserver.service.ronghui;
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
 import com.rhjf.appserver.constant.StringEncoding;
-import com.rhjf.appserver.db.AgentDB;
-import com.rhjf.appserver.db.OpenKuaiDB;
-import com.rhjf.appserver.db.TermkeyDB;
-import com.rhjf.appserver.db.TradeDB;
+import com.rhjf.appserver.db.AgentDAO;
+import com.rhjf.appserver.db.OpenKuaiDAO;
+import com.rhjf.appserver.db.TermKeyDAO;
+import com.rhjf.appserver.db.TradeDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.*;
 import net.sf.json.JSONObject;
 
@@ -30,7 +30,7 @@ public class OpenKuaiService {
 	
 	
 	@SuppressWarnings("unchecked")
-	public void openKuai(TabLoginuser user ,RequestData reqData , ResponseData repData){
+	public void openKuai(LoginUser user ,RequestData reqData , ResponseData repData){
 		
 		logger.info("用户：" + user.getLoginID() + "请求开通无卡快捷支付请求 , 开通银行卡卡号：(密文)" + reqData.getBankCardNo());
 		
@@ -43,7 +43,7 @@ public class OpenKuaiService {
 		
 		if(agentConfigobj == null){
 			logger.info("缓存读取代理商交易信息失败，将从数据库中读取: 交易类型："+payChannel+" , 代理商ID：" + user.getAgentID()); 
-			agentconfigmap = AgentDB.agentConfig(new Object[]{user.getAgentID() ,payChannel });
+			agentconfigmap = AgentDAO.agentConfig(new Object[]{user.getAgentID() ,payChannel });
 			if(agentconfigmap == null || agentconfigmap.isEmpty()){
 				logger.info("用户：" + user.getLoginID() + "对应代理商交易类型： "+payChannel+" 配置信息不完整, 对应代理商ID：" +  user.getAgentID());
 				repData.setRespCode(RespCode.AgentTradeConfigError[0]);
@@ -57,23 +57,23 @@ public class OpenKuaiService {
 		Object obj = ehcache.get(Constant.cacheName, user.getID() + payChannel + "userConfig");
 		if(obj == null){
 			logger.info("缓存读取用户支付配置信息失败，从数据中读取， 用户：" + user.getID() + " , 支付类型:" + payChannel);
-			map = TradeDB.getUserConfig(new Object[]{ user.getID() ,payChannel});
+			map = TradeDAO.getUserConfig(new Object[]{ user.getID() ,payChannel});
 			if(map==null||map.isEmpty()){
 				// ID,UserID,PayChannel,SaleAmountMax,SaleAmountMaxDay,T1SaleRate,T0SaleRate,T1SettlementRate,T0SettlementRate
 				String id = UtilsConstant.getUUID();
 				String userid = user.getID();
-				map = TradeDB.getUserConfig(new Object[]{ user.getID() , "1"});
+				map = TradeDAO.getUserConfig(new Object[]{ user.getID() , "1"});
 				
 				List<Object[]> list = new ArrayList<Object[]>();
 				list.add(new Object[]{id,userid,payChannel,0,0,map.get("T1SaleRate"),map.get("T0SaleRate"),map.get("T1SettlementRate"),map.get("T0SettlementRate")});
-				int x = TradeDB.saveUserConfig(list)[0];
+				int x = TradeDAO.saveUserConfig(list)[0];
 				if(x < 0 ){
 					logger.info("用户：" + user.getID() + "支付类型：" + payChannel + "系统为查到该类型配置信息" );
 					repData.setRespCode(RespCode.TradeTypeConfigError[0]);
 					repData.setRespDesc(RespCode.TradeTypeConfigError[1]); 
 					return ;
 				}else{
-					map = TradeDB.getUserConfig(new Object[]{ user.getID() , payChannel});
+					map = TradeDAO.getUserConfig(new Object[]{ user.getID() , payChannel});
 				}
 			}
 			ehcache.put(Constant.cacheName, user.getID() + payChannel + "userConfig" , map);
@@ -85,10 +85,10 @@ public class OpenKuaiService {
 		
 		
 		/**  获取交易商户  **/
-		Map<String,Object> merchantMap = TradeDB.getMerchantInfo(new Object[]{user.getID() , payChannel}); 
+		Map<String,Object> merchantMap = TradeDAO.getMerchantInfo(new Object[]{user.getID() , payChannel});
 		if(merchantMap==null||merchantMap.isEmpty()){
 			
-			merchantMap = TradeDB.getMerchantInfo(new Object[]{user.getID() , "1"}); 
+			merchantMap = TradeDAO.getMerchantInfo(new Object[]{user.getID() , "1"});
 			
 			String MerchantID = UtilsConstant.ObjToStr(merchantMap.get("MerchantID"));
 			
@@ -108,7 +108,7 @@ public class OpenKuaiService {
 				String QueryKey = UtilsConstant.ObjToStr(merchantMap.get("QueryKey"));
 				String MerchantName = UtilsConstant.ObjToStr(merchantMap.get("MerchantName"));
 				
-				TradeDB.saveMerchant(new Object[]{MerchantID,MerchantName,signKey,desKey,QueryKey,user.getID(),payChannel});
+				TradeDAO.saveMerchant(new Object[]{MerchantID,MerchantName,signKey,desKey,QueryKey,user.getID(),payChannel});
 				
 				merchantMap.put("MerchantID",MerchantID);
 				merchantMap.put("SignKey",signKey);
@@ -129,23 +129,23 @@ public class OpenKuaiService {
 		if(obj == null){
 			
 			logger.info("缓存读取用户支付配置信息失败，从数据中读取， 用户：" + user.getID() + " , 支付类型:" + payChannel);
-			userconfigmap = TradeDB.getUserConfig(new Object[]{ user.getID() , payChannel});
+			userconfigmap = TradeDAO.getUserConfig(new Object[]{ user.getID() , payChannel});
 			if(userconfigmap==null||userconfigmap.isEmpty()){
 				String id = UtilsConstant.getUUID();
 				String userid = user.getID();
-				userconfigmap = TradeDB.getUserConfig(new Object[]{ user.getID() , "1"});
+				userconfigmap = TradeDAO.getUserConfig(new Object[]{ user.getID() , "1"});
 				
 				List<Object[]> list = new ArrayList<Object[]>();
 				list.add(new Object[] { id, userid, payChannel, 0, 0, userconfigmap.get("T1SaleRate"), userconfigmap.get("T0SaleRate"), 
 						userconfigmap.get("T1SettlementRate"), userconfigmap.get("T0SettlementRate") });
-				int x = TradeDB.saveUserConfig(list)[0];
+				int x = TradeDAO.saveUserConfig(list)[0];
 				if(x < 0 ){
 					logger.info("用户：" + user.getID() + "支付类型："+payChannel+"系统为查到该类型配置信息" );
 					repData.setRespCode(RespCode.TradeTypeConfigError[0]);
 					repData.setRespDesc(RespCode.TradeTypeConfigError[1]); 
 					return ;
 				}else{
-					userconfigmap = TradeDB.getUserConfig(new Object[]{ user.getID() , payChannel});
+					userconfigmap = TradeDAO.getUserConfig(new Object[]{ user.getID() , payChannel});
 				}
 			}
 			ehcache.put(Constant.cacheName, user.getID() + payChannel + "userConfig" , userconfigmap);
@@ -155,10 +155,10 @@ public class OpenKuaiService {
 			obj = null;
 		}
 		
-		Map<String, Object> termKey = TermkeyDB.selectTermKey(user.getID());
+		Map<String, Object> termKey = TermKeyDAO.selectTermKey(user.getID());
 		String initKey = LoadPro.loadProperties("config", "DBINDEX");
 		
-//		Map<String,Object> merchantMap = TradeDB.getMerchantInfo(new Object[]{user.getID(),1});
+//		Map<String,Object> merchantMap = TradeDAO.getMerchantInfo(new Object[]{user.getID(),1});
 		Map<String,Object> queryMap = new TreeMap<>();
 		String bankCardno = "";
 		try {
@@ -197,7 +197,7 @@ public class OpenKuaiService {
 //			obj = ehcache.get(Constant.cacheName, "tradeConfig");
 //			if(obj == null){
 //				logger.info("缓存中获取交易配置信息失败,从数据库中查询");
-//				tradeConfig = AppconfigDB.getTradeConfig(); 
+//				tradeConfig = AppConfigDAO.getTradeConfig();
 //				ehcache.put(Constant.cacheName, "tradeConfig", tradeConfig); 
 //			}else{
 //				logger.info("缓存查询交易配置信息");
@@ -223,7 +223,7 @@ public class OpenKuaiService {
 				
 				String orderID = UtilsConstant.getOrderNumber();
 				
-				OpenKuaiDB.save(new Object[]{UtilsConstant.getUUID(),user.getID(),bankCardno,reqData.getPayerPhone() 
+				OpenKuaiDAO.save(new Object[]{UtilsConstant.getUUID(),user.getID(),bankCardno,reqData.getPayerPhone()
 						, result , "00" , orderID , reqData.getCvn2() ,reqData.getExpired() ,result , orderID,});
 				
 				if(!"3".equals(result)){

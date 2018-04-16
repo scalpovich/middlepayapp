@@ -258,6 +258,33 @@
 			</plugin>
 		</plugins>
 	</build>
+
+
+	<repositories>
+		<repository>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<id>public</id>
+			<name>public</name>
+			<url>http://111.207.6.230:38081/nexus/content/groups/public/</url>
+		</repository>
+	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<releases>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<id>public</id>
+			<name>public</name>
+			<url>http://111.207.6.230:38081/nexus/content/groups/public/</url>
+		</pluginRepository>
+	</pluginRepositories>
+
+
 	<properties>
 		<!-- spring版本号 -->
 		<spring.version>4.2.6.RELEASE</spring.version>

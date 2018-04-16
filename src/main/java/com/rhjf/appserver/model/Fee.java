@@ -1,5 +1,8 @@
 package com.rhjf.appserver.model;
 
+/**
+ * @author hadoop
+ */
 public class Fee {
 
 	/**  商户手续费 **/

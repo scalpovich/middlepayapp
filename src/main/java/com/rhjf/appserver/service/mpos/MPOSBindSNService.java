@@ -9,12 +9,12 @@ import java.util.Random;
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.MCCConstant;
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.LoginUserDB;
-import com.rhjf.appserver.db.MposDB;
-import com.rhjf.appserver.db.TradeDB;
+import com.rhjf.appserver.db.LoginUserDAO;
+import com.rhjf.appserver.db.MposDAO;
+import com.rhjf.appserver.db.TradeDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.HttpClient;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.UtilsConstant;
@@ -26,11 +26,11 @@ public class MPOSBindSNService {
 	
 	LoggerTool logger = new LoggerTool(this.getClass());
 	
-	public void mposBindSN(TabLoginuser user ,  RequestData  request, ResponseData response){
+	public void mposBindSN(LoginUser user ,  RequestData  request, ResponseData response){
 		
 		String sn = request.getSn();
 		
-		boolean flag =  MposDB.getBindSN(sn);
+		boolean flag =  MposDAO.getBindSN(sn);
 		if(flag){
 			logger.info("设备:" + sn + "已经绑定过了");
 			response.setRespCode(RespCode.SNBindError[0]);
@@ -38,31 +38,31 @@ public class MPOSBindSNService {
 			return ;
 		}
 		
-		Map<String , Object> merchantInfo = MposDB.getMPOSMerchant(user.getID());
+		Map<String , Object> merchantInfo = MposDAO.getMPOSMerchant(user.getID());
 		
 		if(merchantInfo == null || merchantInfo.isEmpty()){
 			logger.info("查询pos商户失败");
 			
 			/** 如果查询mpos商户为空  将向上游入网  **/
 		
-			Map<String,Object> merchantConfig = TradeDB.getUserConfig(new Object[]{user.getID() , Constant.payChannelMpos});
+			Map<String,Object> merchantConfig = TradeDAO.getUserConfig(new Object[]{user.getID() , Constant.payChannelMpos});
 			
 			if(merchantConfig == null || merchantConfig.isEmpty()){
 				List<Object[]> list = new ArrayList<Object[]>();
 				list.add(new Object[]{UtilsConstant.getUUID() , user.getID() , Constant.payChannelMpos , 0 , 0 , Constant.FeeRate , Constant.FeeRate,
 						Constant.FeeRate , Constant.FeeRate });
-				int x = TradeDB.saveUserConfig(list)[0];
+				int x = TradeDAO.saveUserConfig(list)[0];
 				if(x < 0 ){
 					logger.info("用户：" + user.getID() + "支付类型：" + Constant.payChannelMpos + " 支付配置信息获取失败,停止交易操作" );
 					response.setRespCode(RespCode.TradeTypeConfigError[0]);
 					response.setRespDesc(RespCode.TradeTypeConfigError[1]); 
 					return ;
 				}else{
-					merchantConfig = TradeDB.getUserConfig(new Object[]{ user.getID() , Constant.payChannelMpos});
+					merchantConfig = TradeDAO.getUserConfig(new Object[]{ user.getID() , Constant.payChannelMpos});
 				}
 			}
 			
-			Map<String,Object> merchantBankInfO = LoginUserDB.getUserBankCard(user.getID());
+			Map<String,Object> merchantBankInfO = LoginUserDAO.getUserBankCard(user.getID());
 			
 			Map<String, Object> params = new HashMap<String, Object>();
 			
@@ -123,7 +123,7 @@ public class MPOSBindSNService {
 				String posCati = json.getString("posCati");
 				String PosShop = json.getString("PosShop");
 				String CustomerNo = json.getString("CustomerNo");
-				MposDB.saveMposMerchant(new Object[]{user.getID(),"1",PosShop,posCati, CustomerNo ,"1","1",request.getSn()});
+				MposDAO.saveMposMerchant(new Object[]{user.getID(),"1",PosShop,posCati, CustomerNo ,"1","1",request.getSn()});
 			}
 		} else {
 			
@@ -152,7 +152,7 @@ public class MPOSBindSNService {
 				
 				
 				if("0000".equals(respCode)){
-					int x = MposDB.BindSN(user.getID(), sn);
+					int x = MposDAO.BindSN(user.getID(), sn);
 					if(x > 0){
 						response.setRespCode(RespCode.SUCCESS[0]);
 						response.setRespDesc(RespCode.SUCCESS[1]);

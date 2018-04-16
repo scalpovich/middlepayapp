@@ -4,11 +4,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import com.rhjf.appserver.db.TradeDB;
+import com.rhjf.appserver.db.TradeDAO;
 import com.rhjf.appserver.model.PayOrder;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.UtilsConstant;
 
@@ -19,12 +19,12 @@ import com.rhjf.appserver.util.UtilsConstant;
 public class KuaiTradeService {
 	LoggerTool log = new LoggerTool(this.getClass());
 
-	public void send(TabLoginuser loginUser, RequestData reqData, ResponseData repData) {
+	public void send(LoginUser loginUser, RequestData reqData, ResponseData repData) {
 
 		Map<String,Object> routeMap = null;
 		
 		try {
-			Class<?> payRouteDBClass = Class.forName("com.rhjf.appserver.db.PayRouteDB");
+			Class<?> payRouteDBClass = Class.forName("com.rhjf.appserver.db.PayRouteDAO");
 			Object obj = payRouteDBClass.newInstance();
 			routeMap = (Map<String,Object>) payRouteDBClass.getMethod("routeMap", String.class).invoke(obj, reqData.getPayChannel());
 			
@@ -32,7 +32,7 @@ public class KuaiTradeService {
 			
 			Class<?> kuaiTradeServiceClass = Class.forName("com.rhjf.appserver.service." + channelID.toLowerCase().trim() + ".KuaiTradeService");
 			
-			Method method = kuaiTradeServiceClass.getMethod("send", new Class[]{TabLoginuser.class ,RequestData.class , ResponseData.class });
+			Method method = kuaiTradeServiceClass.getMethod("send", new Class[]{LoginUser.class ,RequestData.class , ResponseData.class });
 			
 			method.invoke(kuaiTradeServiceClass.newInstance(), loginUser , reqData , repData);
 			
@@ -53,13 +53,13 @@ public class KuaiTradeService {
 		}
 	}
 
-	public void confirm(TabLoginuser loginUser, RequestData reqData, ResponseData repData) {
+	public void confirm(LoginUser loginUser, RequestData reqData, ResponseData repData) {
 		String orderNumber = reqData.getOrderNumber();
-		PayOrder order = TradeDB.getPayOrderInfo(orderNumber);
+		PayOrder order = TradeDAO.getPayOrderInfo(orderNumber);
 		
 		try{
 			Class<?> kuaiTradeServiceClass = Class.forName("com.rhjf.appserver.service." + order.getChannelID().trim().toLowerCase() + ".KuaiTradeService");
-			Method method = kuaiTradeServiceClass.getMethod("confirm", new Class[]{TabLoginuser.class ,RequestData.class , ResponseData.class });
+			Method method = kuaiTradeServiceClass.getMethod("confirm", new Class[]{LoginUser.class ,RequestData.class , ResponseData.class });
 			method.invoke(kuaiTradeServiceClass.newInstance(), loginUser , reqData , repData);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();

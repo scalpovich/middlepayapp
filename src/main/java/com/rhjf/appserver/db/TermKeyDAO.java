@@ -5,7 +5,7 @@ import java.util.Map;
 import com.rhjf.appserver.util.MD5;
 import com.rhjf.appserver.util.UtilsConstant;
 
-public class TermkeyDB extends  DBBase{
+public class TermKeyDAO extends  DBBase{
 
 	/**
 	 *   为新注册用户分配秘钥

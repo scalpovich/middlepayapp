@@ -8,13 +8,13 @@ import java.util.TreeMap;
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
 import com.rhjf.appserver.constant.StringEncoding;
-import com.rhjf.appserver.db.AppconfigDB;
-import com.rhjf.appserver.db.OpenKuaiDB;
-import com.rhjf.appserver.db.TermkeyDB;
-import com.rhjf.appserver.db.TradeDB;
+import com.rhjf.appserver.db.AppConfigDAO;
+import com.rhjf.appserver.db.OpenKuaiDAO;
+import com.rhjf.appserver.db.TermKeyDAO;
+import com.rhjf.appserver.db.TradeDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.DES3;
 import com.rhjf.appserver.util.DESUtil;
 import com.rhjf.appserver.util.DateUtil;
@@ -37,7 +37,7 @@ public class KuaiCardListService {
 	
 	
 	@SuppressWarnings("unchecked")
-	public void kuaiCardList(TabLoginuser user,RequestData reqData , ResponseData repData){
+	public void kuaiCardList(LoginUser user,RequestData reqData , ResponseData repData){
 		
 		
 		logger.info("-----用户：" + user.getLoginID() + "请求开通快捷银行卡列表");
@@ -51,7 +51,7 @@ public class KuaiCardListService {
 		obj = ehcache.get(Constant.cacheName, "tradeConfig");
 		if(obj == null){
 			logger.info("缓存中获取交易配置信息失败,从数据库中查询");
-			tradeConfig = AppconfigDB.getTradeConfig(); 
+			tradeConfig = AppConfigDAO.getTradeConfig();
 		}else{
 			logger.info("缓存查询交易配置信息");
 			tradeConfig = (Map<String,Object>) obj;
@@ -76,13 +76,13 @@ public class KuaiCardListService {
 			t0Result = 0;
 		}
 		
-		List<Map<String,Object>> noOpenList = OpenKuaiDB.kuaiCardlistNoOpen(new Object[]{user.getID()});
+		List<Map<String,Object>> noOpenList = OpenKuaiDAO.kuaiCardlistNoOpen(new Object[]{user.getID()});
 		if(noOpenList!=null && noOpenList.size() > 0){
 			
 			/**  获取交易商户  **/
-			Map<String,Object> merchantMap = TradeDB.getMerchantInfo(new Object[]{user.getID() , "4"}); 
+			Map<String,Object> merchantMap = TradeDAO.getMerchantInfo(new Object[]{user.getID() , "4"});
 
-//			Map<String, Object> termKey = TermkeyDB.selectTermKey(user.getID());
+//			Map<String, Object> termKey = TermKeyDAO.selectTermKey(user.getID());
 //			String initKey = LoadPro.loadProperties("config", "DBINDEX");
 			
 			List<Object[]> objlist = new ArrayList<Object[]>();
@@ -128,13 +128,13 @@ public class KuaiCardListService {
 				}
 			}
 			if(objlist.size() > 0){
-				OpenKuaiDB.updateBankCardResult(objlist);
+				OpenKuaiDAO.updateBankCardResult(objlist);
 			}
 		}
 		
-		List<Map<String,Object>> list = OpenKuaiDB.kuaiCardlist(new Object[]{user.getID() });
+		List<Map<String,Object>> list = OpenKuaiDAO.kuaiCardlist(new Object[]{user.getID() });
 		
-		Map<String, Object> termKey = TermkeyDB.selectTermKey(user.getID());
+		Map<String, Object> termKey = TermKeyDAO.selectTermKey(user.getID());
 		String initKey = LoadPro.loadProperties("config", "DBINDEX");
 		
 		logger.info("卡号列表：" + JSONArray.fromObject(list));

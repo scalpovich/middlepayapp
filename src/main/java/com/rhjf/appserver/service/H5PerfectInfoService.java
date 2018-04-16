@@ -6,14 +6,14 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 
+import com.rhjf.appserver.db.BankCodeDAO;
+import com.rhjf.appserver.db.LoginUserDAO;
+import com.rhjf.appserver.db.TradeDAO;
 import org.springframework.stereotype.Service;
 
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.StringEncoding;
-import com.rhjf.appserver.db.BankCodeDB;
-import com.rhjf.appserver.db.LoginUserDB;
-import com.rhjf.appserver.db.TradeDB;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.DESUtil;
 import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.HttpClient;
@@ -78,7 +78,7 @@ public class H5PerfectInfoService {
 		// 商户类型
 		String merchantType = "PERSON";
 
-		LoginUserDB.h5updateUserInfo(new Object[]{merchantType,legalPersonName,legalPersonID,merchantName,installProvince,
+		LoginUserDAO.h5updateUserInfo(new Object[]{merchantType,legalPersonName,legalPersonID,merchantName,installProvince,
 				installCity,installCounty,businessLicense,operateAddress,merchantPersonEmail,merchantBillName,merchantPersonName,loginID});
 		
 		
@@ -98,7 +98,7 @@ public class H5PerfectInfoService {
 		String bankCity = json.getString("bankCity");
 		
 		
-		Map<String,Object> bankmap = BankCodeDB.bankBinMap(new Object[]{accountNo});
+		Map<String,Object> bankmap = BankCodeDAO.bankBinMap(new Object[]{accountNo});
 		if(bankmap == null){
 			log.info("银行卡号：" + accountNo + "获取银行名称和银联号失败");
 			js.put("respCode", "01");
@@ -113,33 +113,33 @@ public class H5PerfectInfoService {
 		// 结算账户性质  对公或对私
 		String bankType = "TOPRIVATE";
 		
-		List<Map<String,Object>> payChannelList = TradeDB.getPayChannel();
+		List<Map<String,Object>> payChannelList = TradeDAO.getPayChannel();
 		
 		List<Object[]> userConfig = new ArrayList<Object[]>();
 		for (Map<String, Object> map : payChannelList) {
 			Object[] obj = new Object[]{UtilsConstant.getUUID(),userID,map.get("ID"),0,0,Constant.FeeRate ,Constant.FeeRate ,Constant.SettlementRate, Constant.SettlementRate};
 			userConfig.add(obj);
 		}
-		TradeDB.saveUserConfig(userConfig);
+		TradeDAO.saveUserConfig(userConfig);
 		
 		//  根据银行名称 开户行省份 城市 等信息 查询分行名称信息表 
-		Map<String,Object> bankinfomap = BankCodeDB.bankInfo(new Object[]{bankName,bankBranch,bankProv,bankCity});
+		Map<String,Object> bankinfomap = BankCodeDAO.bankInfo(new Object[]{bankName,bankBranch,bankProv,bankCity});
 		if(bankinfomap!=null){
 			log.info("查询到的银行信息:" + bankinfomap.toString()); 
-//			LoginUserDB.saveOrUpBankInfotest(new Object[]{UtilsConstant.getUUID(),userID,accountName,accountNo,bankinfomap.get("BankBranch"),
+//			LoginUserDAO.saveOrUpBankInfotest(new Object[]{UtilsConstant.getUUID(),userID,accountName,accountNo,bankinfomap.get("BankBranch"),
 //					bankProv,bankCity,bankinfomap.get("BankCode"),bankinfomap.get("BankName"),creditCardNo,bankType
 //					,accountName,accountNo,bankinfomap.get("BankBranch"),bankProv,bankCity,bankinfomap.get("BankCode"),bankinfomap.get("BankName"),creditCardNo,bankType});
 			bankCode = bankinfomap.get("BankCode").toString();
 			bankName = bankinfomap.get("BankName").toString();
 			bankBranch = bankinfomap.get("BankBranch").toString();
 		}else{
-			bankinfomap = BankCodeDB.bankInfo(new Object[]{bankName,"分行营业部",bankProv,bankCity});
+			bankinfomap = BankCodeDAO.bankInfo(new Object[]{bankName,"分行营业部",bankProv,bankCity});
 			if(bankinfomap!=null){
 				bankCode = bankinfomap.get("BankCode").toString();
 				bankName = bankinfomap.get("BankName").toString();
 				bankBranch = bankinfomap.get("BankBranch").toString();
 			}else{
-				bankinfomap = BankCodeDB.bankInfo(new Object[]{bankName, bankCity + "分行",bankProv,bankCity});
+				bankinfomap = BankCodeDAO.bankInfo(new Object[]{bankName, bankCity + "分行",bankProv,bankCity});
 				if(bankinfomap!=null){
 					log.info("查询到的银行信息:" + bankinfomap.toString());
 					bankCode = bankinfomap.get("BankCode").toString();
@@ -151,7 +151,7 @@ public class H5PerfectInfoService {
 			}
 		}
 		
-		LoginUserDB.saveOrUpBankInfo(new Object[]{UtilsConstant.getUUID(),userID,accountName,accountNo,bankBranch,bankProv,bankCity,bankCode,bankName,creditCardNo,bankType
+		LoginUserDAO.saveOrUpBankInfo(new Object[]{UtilsConstant.getUUID(),userID,accountName,accountNo,bankBranch,bankProv,bankCity,bankCode,bankName,creditCardNo,bankType
 				, "",accountName,accountNo,bankBranch,bankProv,bankCity,bankCode,bankName,creditCardNo,bankType , ""});
 		
 //		/**********  鉴权   *************************/
@@ -167,7 +167,7 @@ public class H5PerfectInfoService {
 		if(reqMap.get("respCode").equals(Author.SUCESS_CODE)){
 			//鉴权成功，向上游报商户
 			EhcacheUtil ehcache = EhcacheUtil.getInstance();
-			TabLoginuser user = null;
+			LoginUser user = null;
 			Object obj = ehcache.get(Constant.cacheName,loginID + "UserInfo" );
 			if(obj == null){
 				log.info("查询数据库");
@@ -178,7 +178,7 @@ public class H5PerfectInfoService {
 				ehcache.put(Constant.cacheName, loginID + "UserInfo" , user);
 			}else{
 				log.info("查询缓存");
-				user = (TabLoginuser) obj;
+				user = (LoginUser) obj;
 			}
 			int alipaylength = Constant.alipayMCCType.length;
 			
@@ -290,53 +290,53 @@ public class H5PerfectInfoService {
 	
 	
 	public int[] saveMerchantInfo(List<Object[]> list) {
-		return LoginUserDB.saveMerchantInfo(list);
+		return LoginUserDAO.saveMerchantInfo(list);
 	}
 
 
 	public List<Map<String,Object>> merchantTypeList(){
-		return LoginUserDB.merchantTypeList();
+		return LoginUserDAO.merchantTypeList();
 	}
 	
 	
-	public TabLoginuser getMerchantInfoByLoginID(String loginID){
-		return LoginUserDB.LoginuserInfo(loginID);
+	public LoginUser getMerchantInfoByLoginID(String loginID){
+		return LoginUserDAO.LoginuserInfo(loginID);
 	}
 	
 	public Map<String,Object> getUserBankCard(String userID){
-		return LoginUserDB.getUserBankCard(userID);
+		return LoginUserDAO.getUserBankCard(userID);
 	}
 	
 	public Map<String,Object> getUserConfig(Object[] obj){
-		return TradeDB.getUserConfig(obj);
+		return TradeDAO.getUserConfig(obj);
 	}
 	
-	public TabLoginuser loginuser(String loginID){
-		return LoginUserDB.LoginuserInfo(loginID);
+	public LoginUser loginuser(String loginID){
+		return LoginUserDAO.LoginuserInfo(loginID);
 	}
 	
 	public int updateUserBankStatus(Object[] obj){
-		return LoginUserDB.updateUserBankStatus(obj);
+		return LoginUserDAO.updateUserBankStatus(obj);
 	}
 	
 	public Map<String,Object> bankBinMap(Object[] obj){
-		return BankCodeDB.bankBinMap(obj);
+		return BankCodeDAO.bankBinMap(obj);
 	}
 	
 	public String levelUp(String UserID) {
 		// 查询出审核用户的上一级用户商户类型和用户ID (topUser)
 		try {
-			TabLoginuser user = LoginUserDB.getLoginuserInfo(UserID);
+			LoginUser user = LoginUserDAO.getLoginuserInfo(UserID);
 			if (user != null) {
 				int MerchantLevel = user.getMerchantLeve();
 
 				log.info("上级商户 " + UserID + "目前等级为：" + MerchantLevel);
 
 				if (MerchantLevel < 2) {
-					int userCount = LoginUserDB.getUserCount(UserID);
+					int userCount = LoginUserDAO.getUserCount(UserID);
 					log.info("上级商户：" + UserID + "直接扩展商户 ，  并且通过审核的数量：" + userCount);
 					
-					Map<String, Object> result = LoginUserDB.userLevelUpCount(MerchantLevel + 1);
+					Map<String, Object> result = LoginUserDAO.userLevelUpCount(MerchantLevel + 1);
 					
 					int levelUpCount = Integer.parseInt(result.get("UserCount").toString());
 					
@@ -347,14 +347,14 @@ public class H5PerfectInfoService {
 						log.info("上级商户：" + UserID + "符合升级条件：当前扩展人数：" + userCount + "，系统需要扩展人数：" + levelUpCount ); 
 						
 						// 升级
-						int modifyLoginUserMerchantLevel = LoginUserDB.updateUserLev(MerchantLevel + 1, UserID);
+						int modifyLoginUserMerchantLevel = LoginUserDAO.updateUserLev(MerchantLevel + 1, UserID);
 						if (modifyLoginUserMerchantLevel == 0) {
 							log.info("上级商户：" + UserID + "更新商户等级失败");
 							
 							return "fail";
 						}
 						// 同时查出升级之后费率（使用升级后商户类型查询费率）
-						int statusResult = LoginUserDB.updateUserRate(new Object[]{UserID , MerchantLevel + 1});
+						int statusResult = LoginUserDAO.updateUserRate(new Object[]{UserID , MerchantLevel + 1});
 						if (statusResult == 0) {
 							
 							log.info("上级商户：" + UserID + "更新商户费率失败");

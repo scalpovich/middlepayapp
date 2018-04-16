@@ -1,5 +1,8 @@
 package com.rhjf.appserver.model;
 
+/**
+ * @author hadoop
+ */
 public class BankKey {
 	private String macKey;
 	private String pinKey;

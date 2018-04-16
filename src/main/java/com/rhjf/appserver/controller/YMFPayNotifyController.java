@@ -6,7 +6,7 @@ import com.rhjf.appserver.constant.StringEncoding;
 import com.rhjf.appserver.db.*;
 import com.rhjf.appserver.model.Fee;
 import com.rhjf.appserver.model.PayOrder;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.service.FeeComputeService;
 import com.rhjf.appserver.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +74,7 @@ public class YMFPayNotifyController {
 				payType = "2";
 			}
 			
-			Map<String,Object> map =  TradeDB.getMerchantInfo(merchantID , payType);
+			Map<String,Object> map =  TradeDAO.getMerchantInfo(merchantID , payType);
 			/**  计算签名 **/
 			String serverSign = MD5.sign(text.append(map.get("SignKey")).toString(), StringEncoding.UTF_8);
 			String reqSign = map2.get("sign");
@@ -88,7 +88,7 @@ public class YMFPayNotifyController {
 			String orderNumber = map2.get("r2_orderNumber");
 
 			/**  查询订单信息 **/
-			PayOrder order = TradeDB.getPayOrderInfo(orderNumber);
+			PayOrder order = TradeDAO.getPayOrderInfo(orderNumber);
 			
 			if(order==null){
 				logger.info("订单号：" + orderNumber + "未查到订单信息");
@@ -101,7 +101,7 @@ public class YMFPayNotifyController {
 			}
 			
 			/** 查询固定码信息  **/
-			Map<String,Object> qrcode = YMFTradeDB.getYMFCode(new Object[]{order.getYMFCode()});
+			Map<String,Object> qrcode = YMFTradeDAO.getYMFCode(new Object[]{order.getYMFCode()});
 			if(qrcode==null||map.isEmpty()){
 				logger.info("订单号：" + orderNumber + "固定码信息为空");
 				return RespCode.notifyfail;
@@ -119,18 +119,18 @@ public class YMFPayNotifyController {
 				if(map2.containsKey("retMsg")){
 					retMsg = map2.get("retMsg");
 				}
-				TabLoginuser loginUser = LoginUserDB.getLoginuserInfo(order.getUserID());
+				LoginUser loginUser = LoginUserDAO.getLoginuserInfo(order.getUserID());
 				
 				Fee fee = notifyService.YMFcalProfit(order, loginUser, qrcode);
 				
-				int updateRet = TradeDB.updatePayOrderPayRetCode(new Object[]{retCode ,retMsg ,fee.getMerchantFee() , fee.getMerchantprofit() , order.getID()});
+				int updateRet = TradeDAO.updatePayOrderPayRetCode(new Object[]{retCode ,retMsg ,fee.getMerchantFee() , fee.getMerchantprofit() , order.getID()});
 				
 				if(updateRet < 1){
 					logger.info("订单号：" + orderNumber + "更新数据库失败"); 
 					return RespCode.notifyfail;
 				}
 				
-				String tonken = DevicetokenDB.getDeviceToken(loginUser.getID());
+				String tonken = DeviceTokenDAO.getDeviceToken(loginUser.getID());
 				logger.info("============================订单编号:" + order.getOrderNumber() + "支付成功，用户tonken:" + tonken + "开始发送push");
 				if(!UtilsConstant.strIsEmpty(tonken)){
 					String content = "爱码付收款金额" + AmountUtil.div(order.getAmount(), "100")  + "元";
@@ -140,7 +140,7 @@ public class YMFPayNotifyController {
 					PushUtil.androidSend("收款通知", content , tonken, "1");
 				}
 				
-				TradeDB.saveProfit(new Object[]{
+				TradeDAO.saveProfit(new Object[]{
 						UtilsConstant.getUUID(),loginUser.getID(), order.getID() ,fee.getMerchantFee(),fee.getAgentID(),fee.getAgentProfit(),
 						fee.getTwoAgentID(),fee.getTwoAgentProfit(),
 						 fee.getDistributeProfit() , fee.getPlatformProfit(),fee.getPlatCostFee()
@@ -154,7 +154,7 @@ public class YMFPayNotifyController {
 				
 				if(objs.size()>0){
 					/**  保存三级分销各个商户的利润  **/
-					UserProfitDB.saveDistributeProfit(objs);
+					UserProfitDAO.saveDistributeProfit(objs);
 					/** 更新用户信息表中的 分润总额 **/
 					List<Object[]> profitlist = new ArrayList<Object[]>();
 					for (Object[] objects : objs) {
@@ -177,14 +177,14 @@ public class YMFPayNotifyController {
 						logger.info("交易单号：" + order.getOrderNumber() + "  ====用户分润list中的值：" + Arrays.toString(objects)); 
 						profitlist.add(new Object[]{ profit , profit , objects[1]});
 					}
-					LoginUserDB.merchantProfit(profitlist);
+					LoginUserDAO.merchantProfit(profitlist);
 				} else {
 					logger.info("订单号：" + orderNumber + ",没有产生分润");
 				}
 				
 				if(fee.getSalemsManID()!= null){
 					logger.info("订单号：" + orderNumber + " 交易商户 涉及业务员分润"); 
-					SalesManDB.saveSalesManProfit(new Object[]{UtilsConstant.getUUID(),fee.getSalemsManID(),order.getUserID(),order.getID()
+					SalesManDAO.saveSalesManProfit(new Object[]{UtilsConstant.getUUID(),fee.getSalemsManID(),order.getUserID(),order.getID()
 							,fee.getSalemsDistrubuteProfit(),fee.getSalemsGetAgentProfit()});
 				}
 				

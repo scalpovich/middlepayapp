@@ -5,13 +5,13 @@ import java.util.Map;
 
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.UserBankCardDB;
-import com.rhjf.appserver.db.UserProfitDB;
-import com.rhjf.appserver.db.UserWalletDB;
-import com.rhjf.appserver.db.WithdrawDB;
+import com.rhjf.appserver.db.UserBankCardDAO;
+import com.rhjf.appserver.db.UserProfitDAO;
+import com.rhjf.appserver.db.UserWalletDAO;
+import com.rhjf.appserver.db.WithdrawDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.UtilsConstant;
@@ -28,11 +28,11 @@ public class DrawMoneyService {
 
 	private LoggerTool log = new LoggerTool(this.getClass());
 	
-	public void DrawMoney(TabLoginuser user , RequestData request , ResponseData response){
+	public void DrawMoney(LoginUser user , RequestData request , ResponseData response){
 		
 		log.info("用户：" + user.getLoginID() + "发起提现请求");
 		
-		Map<String ,String> userwalletMap = UserWalletDB.UserWalletByUserID(new Object[]{user.getID()});
+		Map<String ,String> userwalletMap = UserWalletDAO.UserWalletByUserID(new Object[]{user.getID()});
 		
 		if(request.getAmount()==null ){
 			log.info("提现金额为空");
@@ -57,11 +57,11 @@ public class DrawMoneyService {
 		}
 		
 		/**  获取用户结算卡信息 **/
-		Map<String,Object> map = UserBankCardDB.getBankInfo(user.getID());
+		Map<String,Object> map = UserBankCardDAO.getBankInfo(user.getID());
 		
 		String orderNumber = UtilsConstant.getOrderNumber();
 		
-		int[] ret = UserWalletDB.drawMoney(Integer.parseInt(request.getAmount()), user.getID(), request.getSendSeqId() ,
+		int[] ret = UserWalletDAO.drawMoney(Integer.parseInt(request.getAmount()), user.getID(), request.getSendSeqId() ,
 					UtilsConstant.ObjToStr(map.get("AccountNo")) , orderNumber );
 		
 		if(ret == null){
@@ -95,7 +95,7 @@ public class DrawMoneyService {
 	 * @param request
 	 * @param response
 	 */
-	public void DrawMoneylist(TabLoginuser user , RequestData request , ResponseData response){
+	public void DrawMoneylist(LoginUser user , RequestData request , ResponseData response){
 		
 		String tradeDate = request.getTradeDate();
 		
@@ -115,9 +115,9 @@ public class DrawMoneyService {
 			page = 0;
 		}
 				
-		List<Map<String,String>> list = WithdrawDB.getTxRecordList(user.getID(), sbf.toString() , page, pageSize);
+		List<Map<String,String>> list = WithdrawDAO.getTxRecordList(user.getID(), sbf.toString() , page, pageSize);
 		
-		String totalAmount = UserProfitDB.monthProfitTotalAmount(new Object[]{ user.getID() ,tradeDate});
+		String totalAmount = UserProfitDAO.monthProfitTotalAmount(new Object[]{ user.getID() ,tradeDate});
 		
 		response.setList(JSONArray.fromObject(list).toString());
 		response.setTotal(totalAmount);

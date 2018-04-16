@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.PayOrderDB;
+import com.rhjf.appserver.db.PayOrderDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.LoggerTool;
 
 import net.sf.json.JSONArray;
@@ -21,7 +21,7 @@ public class TradingCurveService {
 
 	LoggerTool  logger = new LoggerTool(this.getClass());
 	
-	public void TradingCurve(TabLoginuser user , RequestData request , ResponseData response){
+	public void TradingCurve(LoginUser user , RequestData request , ResponseData response){
 		
 		
 		/** 查询月报的时间 年月 20176 **/
@@ -52,7 +52,7 @@ public class TradingCurveService {
 			endDate = newyear + "" + (newmonth-1 < 10?"0"+(newmonth-1):(newmonth-1));
 		}
 		
-		List<Map<String,String>> list = PayOrderDB.tradingCurvelist(new Object[]{user.getID(),startDate , endDate});
+		List<Map<String,String>> list = PayOrderDAO.tradingCurvelist(new Object[]{user.getID(),startDate , endDate});
 		
 		StringBuffer stringBuffer = new StringBuffer(tradeDate);	
 		
@@ -60,7 +60,7 @@ public class TradingCurveService {
 			stringBuffer.insert(4, "0");
 		}
 		//  sum(Amount) as amount , sum(Fee) as fee , count(1) as count , sum(amount)-sum(fee) as pureProfit 
-		Map<String,String> map = PayOrderDB.tradeTotal(new Object[]{user.getID(),stringBuffer.toString()});
+		Map<String,String> map = PayOrderDAO.tradeTotal(new Object[]{user.getID(),stringBuffer.toString()});
 		
 		response.setList(JSONArray.fromObject(list).toString());
 		response.setTotalCount(Integer.parseInt(map.get("count").toString()));

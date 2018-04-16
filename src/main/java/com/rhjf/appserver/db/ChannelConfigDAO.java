@@ -2,7 +2,7 @@ package com.rhjf.appserver.db;
 
 import java.util.Map;
 
-public class ChannelConfigDB extends DBBase{
+public class ChannelConfigDAO extends DBBase{
 
 	
 	

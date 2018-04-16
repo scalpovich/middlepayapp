@@ -5,11 +5,11 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.TermkeyDB;
-import com.rhjf.appserver.db.UserCreditCardDB;
+import com.rhjf.appserver.db.TermKeyDAO;
+import com.rhjf.appserver.db.UserCreditCardDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.DES3;
 import com.rhjf.appserver.util.DESUtil;
 import com.rhjf.appserver.util.LoadPro;
@@ -26,12 +26,12 @@ public class UpdateCreditCardRepayDayService {
 
 	private LoggerTool log = new LoggerTool(this.getClass());
 
-	public void updateCreditCardRepayDay(TabLoginuser user, RequestData request, ResponseData response) {
+	public void updateCreditCardRepayDay(LoginUser user, RequestData request, ResponseData response) {
 
 		String creditCardNo = request.getCreditCardNo();
 		String repayDay = request.getTradeDate();
 
-		Map<String, Object> termKey = TermkeyDB.selectTermKey(user.getID());
+		Map<String, Object> termKey = TermKeyDAO.selectTermKey(user.getID());
 		String initKey = LoadPro.loadProperties("config", "DBINDEX");
 
 		String bankCardno = "";
@@ -46,12 +46,12 @@ public class UpdateCreditCardRepayDayService {
 			return;
 		}
 
-		UserCreditCardDB.updateRepayDay(new Object[] { repayDay, user.getID(), bankCardno });
+		UserCreditCardDAO.updateRepayDay(new Object[] { repayDay, user.getID(), bankCardno });
 
 		try {
 			String methodName = "creditCardList";
 			Class<?> clz = Class.forName("com.rhjf.appserver.service.creditcard.CreditCardListService");
-			Method m = clz.getDeclaredMethod(methodName, new Class[] { TabLoginuser.class, RequestData.class, ResponseData.class });
+			Method m = clz.getDeclaredMethod(methodName, new Class[] { LoginUser.class, RequestData.class, ResponseData.class });
 			m.invoke(clz.newInstance(), user, request, response);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();

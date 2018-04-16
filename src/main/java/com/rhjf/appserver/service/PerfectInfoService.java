@@ -9,12 +9,12 @@ import java.util.TreeMap;
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
 import com.rhjf.appserver.constant.StringEncoding;
-import com.rhjf.appserver.db.BankCodeDB;
-import com.rhjf.appserver.db.LoginUserDB;
-import com.rhjf.appserver.db.TradeDB;
+import com.rhjf.appserver.db.BankCodeDAO;
+import com.rhjf.appserver.db.LoginUserDAO;
+import com.rhjf.appserver.db.TradeDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.DESUtil;
 import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.HttpClient;
@@ -36,10 +36,10 @@ public class PerfectInfoService {
 	
 	LoggerTool logger = new LoggerTool(this.getClass());
 	
-	public void PerfectInfo(TabLoginuser user , RequestData reqData , ResponseData respData) throws Exception{
+	public void PerfectInfo(LoginUser user , RequestData reqData , ResponseData respData) throws Exception{
 
 		
-		boolean flag = LoginUserDB.merchantPortalStatus(user.getLoginID());
+		boolean flag = LoginUserDAO.merchantPortalStatus(user.getLoginID());
 		
 		if(flag){
 			logger.info("商户：" + user.getLoginID() + "已经入网成功");
@@ -105,7 +105,7 @@ public class PerfectInfoService {
 		String merchantType = "PERSON";
 
 		// 银联号   bankName,unite_bank_no
-		Map<String,Object> bankmap = BankCodeDB.bankBinMap(new Object[]{bankCardNo});
+		Map<String,Object> bankmap = BankCodeDAO.bankBinMap(new Object[]{bankCardNo});
 		if(bankmap == null){
 			
 			respData.setRespCode(RespCode.BankCardInfoErroe[0]);
@@ -116,11 +116,11 @@ public class PerfectInfoService {
 		String bankCode = "";
 		String bankSymbol = "";
 		
-		int x = LoginUserDB.h5updateUserInfo(new Object[]{merchantType,name,IDcardNumber,merchantName,state,
+		int x = LoginUserDAO.h5updateUserInfo(new Object[]{merchantType,name,IDcardNumber,merchantName,state,
 				city,county,businessLicense,address,email,merchantName,name,user.getLoginID()});
 		
 		//  根据银行名称 开户行省份 城市 等信息 查询分行名称信息表 
-		Map<String,Object> bankinfomap =  BankCodeDB.bankInfo(new Object[]{bankName,bankSubbranch,bankProv,bankCity});
+		Map<String,Object> bankinfomap =  BankCodeDAO.bankInfo(new Object[]{bankName,bankSubbranch,bankProv,bankCity});
 		if(bankinfomap!=null){
 			logger.info("查询到的银行信息:" + bankinfomap.toString()); 
 			bankCode = bankinfomap.get("BankCode").toString();
@@ -128,7 +128,7 @@ public class PerfectInfoService {
 			bankName = bankinfomap.get("BankName").toString();
 			bankSymbol = bankinfomap.get("BankSymbol").toString();
 		}else{
-			bankinfomap = BankCodeDB.bankInfo(new Object[]{bankName,"分行营业部",bankProv,bankCity});
+			bankinfomap = BankCodeDAO.bankInfo(new Object[]{bankName,"分行营业部",bankProv,bankCity});
 			if(bankinfomap!=null){
 				logger.info("查询到的银行信息:" + bankinfomap.toString());
 				bankCode = bankinfomap.get("BankCode").toString();
@@ -136,7 +136,7 @@ public class PerfectInfoService {
 				bankName = bankinfomap.get("BankName").toString();
 				bankSymbol = bankinfomap.get("BankSymbol").toString();
 			}else{
-				bankinfomap = BankCodeDB.bankInfo(new Object[]{bankName, bankCity + "分行",bankProv,bankCity});
+				bankinfomap = BankCodeDAO.bankInfo(new Object[]{bankName, bankCity + "分行",bankProv,bankCity});
 				if(bankinfomap!=null){
 					logger.info("查询到的银行信息:" + bankinfomap.toString());
 					bankCode = bankinfomap.get("BankCode").toString();
@@ -149,11 +149,11 @@ public class PerfectInfoService {
 			}
 		}
 		
-		LoginUserDB.saveOrUpBankInfo(new Object[]{UtilsConstant.getUUID(),user.getID(),name,bankCardNo,bankSubbranch,
+		LoginUserDAO.saveOrUpBankInfo(new Object[]{UtilsConstant.getUUID(),user.getID(),name,bankCardNo,bankSubbranch,
 				bankProv,bankCity,bankCode,bankName, bankSymbol ,creditCardNo,bankType,reqData.getPayerPhone() ,name,
 				bankCardNo,bankSubbranch,bankProv,bankCity,bankCode,bankName,bankSymbol,creditCardNo,bankType,reqData.getPayerPhone()});
 		
-		List<Map<String,Object>> payChannelList = TradeDB.getPayChannel();
+		List<Map<String,Object>> payChannelList = TradeDAO.getPayChannel();
 		
 		List<Object[]> userConfig = new ArrayList<Object[]>();
 		for (Map<String, Object> map : payChannelList) {
@@ -162,15 +162,15 @@ public class PerfectInfoService {
 			userConfig.add(obj);
 		}
 		
-		TradeDB.saveUserConfig(userConfig);
+		TradeDAO.saveUserConfig(userConfig);
 		
 		EhcacheUtil ehcache = EhcacheUtil.getInstance();
 		ehcache.clear(Constant.cacheName);
 		
-		Map<String,Object> BKmap = BankCodeDB.bankBinMap(new Object[]{bankCardNo});
+		Map<String,Object> BKmap = BankCodeDAO.bankBinMap(new Object[]{bankCardNo});
 		if(BKmap!=null&&"CREDIT_CARD".equals(UtilsConstant.ObjToStr(BKmap.get("cardName")))){
 			logger.info("用户：" +  user.getLoginID() + "填写的结算账号为信用卡, 卡号为：" +  bankCardNo);
-			LoginUserDB.updateUserBankStatus(new Object[]{3 , 0 , user.getID()});
+			LoginUserDAO.updateUserBankStatus(new Object[]{3 , 0 , user.getID()});
 			respData.setRespCode(RespCode.AccountNoError[0]);
 			respData.setRespDesc(RespCode.AccountNoError[1]);
 			return ;
@@ -196,8 +196,8 @@ public class PerfectInfoService {
 //			Map<String,Object> wxmap = h5perfectInfoService.getUserConfig(new Object[]{user.getID(),1});
 //			Map<String,Object> alipaymap = h5perfectInfoService.getUserConfig(new Object[]{user.getID(),2});
 			
-			Map<String,Object> wxmap  = TradeDB.getUserConfig(new Object[]{user.getID(),1});
-			Map<String,Object> alipaymap = TradeDB.getUserConfig(new Object[]{user.getID(),2});
+			Map<String,Object> wxmap  = TradeDAO.getUserConfig(new Object[]{user.getID(),1});
+			Map<String,Object> alipaymap = TradeDAO.getUserConfig(new Object[]{user.getID(),2});
 			Map<String,Object> map = new TreeMap<String, Object>();
 			map.put("channelName", Constant.REPORT_CHANNELNAME);
 			map.put("channelNo", Constant.REPORT_CHANNELNO);
@@ -261,7 +261,7 @@ public class PerfectInfoService {
 //					String AlipaydesKey = respJS.getString("AlipaydesKey");		// 支付des秘钥
 					//MerchantID,MerchantName,SignKey,DESKey,QueryKey,UserID,PayType
 					
-					LoginUserDB.delUserMerchant(user.getID());
+					LoginUserDAO.delUserMerchant(user.getID());
 					
 					/*
 					 *  保存商户秘钥等信息 
@@ -272,9 +272,9 @@ public class PerfectInfoService {
 					list.add(objs);
 					objs = new Object[]{merchantNo,merchantName,signKey,desKey,queryKey,user.getID(),Constant.payChannelAliScancode};
 					list.add(objs);
-					LoginUserDB.saveMerchantInfo(list);
+					LoginUserDAO.saveMerchantInfo(list);
 					
-					LoginUserDB.updateUserBankStatus(new Object[] { 1, 0, user.getLoginID() });
+					LoginUserDAO.updateUserBankStatus(new Object[] { 1, 0, user.getLoginID() });
 					
 					if (user.getThreeLevel() != null && !user.getThreeLevel().toString().equals("")) {
 						logger.info("判断商户上级商户是否需要升级 , 上级商户ID：" + user.getThreeLevel());
@@ -289,7 +289,7 @@ public class PerfectInfoService {
 					respData.setRespCode("00");
 					respData.setRespDesc("入网成功");
 				}else{
-					LoginUserDB.updateUserBankStatus(new Object[]{0 , 0 , user.getLoginID()});
+					LoginUserDAO.updateUserBankStatus(new Object[]{0 , 0 , user.getLoginID()});
 					logger.info(user.getLoginID()+"入网异常：上游报备失败");
 					respData.setRespCode("01");
 					respData.setRespDesc(respJS.getString("respMsg"));
@@ -307,7 +307,7 @@ public class PerfectInfoService {
 	}
 	
 //	public Map<String,String> Auth(String name,String bankCardNo,String IDcardNumber){
-//		 Map<String, Object> bankAuthencationMan = AuthenticationDB.bankAuthenticationInfo(new Object[]{bankCardNo});
+//		 Map<String, Object> bankAuthencationMan = AuthenticationDAO.bankAuthenticationInfo(new Object[]{bankCardNo});
 //		 Map<String,String> reqMap=new HashMap<String,String>();
 //		 if (bankAuthencationMan == null || bankAuthencationMan.isEmpty()){
 //			 Map<String,String> authMap=new HashMap<String,String>();
@@ -318,7 +318,7 @@ public class PerfectInfoService {
 //				reqMap=authService.authKuai(authMap);
 //				System.out.println(reqMap.toString());
 //				if(reqMap.get("respCode").equals(Author.SUCESS_CODE)){
-//				AuthenticationDB.addAuthencationInfo(new Object[]{UtilsConstant.getUUID() , IDcardNumber , name , bankCardNo , "00" , reqMap.get("respMsg") });
+//				AuthenticationDAO.addAuthencationInfo(new Object[]{UtilsConstant.getUUID() , IDcardNumber , name , bankCardNo , "00" , reqMap.get("respMsg") });
 //				}
 //				return reqMap;
 //		 }else{
@@ -338,17 +338,17 @@ public class PerfectInfoService {
 	public String levelUp(String UserID) {
 		// 查询出审核用户的上一级用户商户类型和用户ID (topUser)
 		try {
-			TabLoginuser user = LoginUserDB.getLoginuserInfo(UserID);
+			LoginUser user = LoginUserDAO.getLoginuserInfo(UserID);
 			if (user != null) {
 				int MerchantLevel = user.getMerchantLeve();
 
 				logger.info("上级商户 " + UserID + "目前等级为：" + MerchantLevel);
 
 				if (MerchantLevel < 2) {
-					int userCount = LoginUserDB.getUserCount(UserID);
+					int userCount = LoginUserDAO.getUserCount(UserID);
 					logger.info("上级商户：" + UserID + "直接扩展商户 ，  并且通过审核的数量：" + userCount);
 					
-					Map<String, Object> result = LoginUserDB.userLevelUpCount(MerchantLevel + 1);
+					Map<String, Object> result = LoginUserDAO.userLevelUpCount(MerchantLevel + 1);
 					
 					int levelUpCount = Integer.parseInt(result.get("UserCount").toString());
 					
@@ -359,14 +359,14 @@ public class PerfectInfoService {
 						logger.info("上级商户：" + UserID + "符合升级条件：当前扩展人数：" + userCount + "，系统需要扩展人数：" + levelUpCount ); 
 						
 						// 升级
-						int modifyLoginUserMerchantLevel = LoginUserDB.updateUserLev(MerchantLevel + 1, UserID);
+						int modifyLoginUserMerchantLevel = LoginUserDAO.updateUserLev(MerchantLevel + 1, UserID);
 						if (modifyLoginUserMerchantLevel == 0) {
 							logger.info("上级商户：" + UserID + "更新商户等级失败");
 							
 							return "fail";
 						}
 						// 同时查出升级之后费率（使用升级后商户类型查询费率）
-						int statusResult = LoginUserDB.updateUserRate(new Object[]{UserID , MerchantLevel + 1});
+						int statusResult = LoginUserDAO.updateUserRate(new Object[]{UserID , MerchantLevel + 1});
 						if (statusResult == 0) {
 							logger.info("上级商户：" + UserID + "更新商户费率失败");
 							return "fail";

@@ -1,12 +1,12 @@
 package com.rhjf.appserver.service;
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.LoginUserDB;
-import com.rhjf.appserver.db.SmsApplyDB;
-import com.rhjf.appserver.db.TermkeyDB;
+import com.rhjf.appserver.db.LoginUserDAO;
+import com.rhjf.appserver.db.SmsApplyDAO;
+import com.rhjf.appserver.db.TermKeyDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.DateUtil;
 import com.rhjf.appserver.util.LoadPro;
 import com.rhjf.appserver.util.LoggerTool;
@@ -39,11 +39,11 @@ public class RegisterService {
 			return;
 		}
 		
-		TabLoginuser loginUser = new TabLoginuser();
+		LoginUser loginUser = new LoginUser();
 		loginUser.setLoginID(reqData.getLoginID()); 
 		
 		/*** 判断注册用户是否存在 ***/
-		boolean flag = LoginUserDB.getLoginUserInfo(loginUser);
+		boolean flag = LoginUserDAO.getLoginUserInfo(loginUser);
 		if(flag){
 			logger.info(reqData.getLoginID() +  "已经存在");
 			respData.setRespCode(RespCode.RegisterError[0]);
@@ -53,7 +53,7 @@ public class RegisterService {
 		
 		String code = reqData.getSmsCode();
 		
-		String smsCode = SmsApplyDB.getSmsCode(new Object[]{reqData.getLoginID()});
+		String smsCode = SmsApplyDAO.getSmsCode(new Object[]{reqData.getLoginID()});
 		
 		if(!code.equals(smsCode)){
 			
@@ -63,7 +63,7 @@ public class RegisterService {
 			respData.setRespDesc(RespCode.SMSCodeError[1]);
 			return ;
 		}else{
-			SmsApplyDB.delSmsCode(new Object[]{reqData.getLoginID()});
+			SmsApplyDAO.delSmsCode(new Object[]{reqData.getLoginID()});
 		}
 		
 		
@@ -81,7 +81,7 @@ public class RegisterService {
 		// SalesManID,UserType
 		if(!UtilsConstant.strIsEmpty(tgr)){
 			logger.info("推广人信息不为空，填写三级用户ID");
-			TabLoginuser user = LoginUserDB.LoginuserInfo(tgr); 
+			LoginUser user = LoginUserDAO.LoginuserInfo(tgr);
 			if(user!=null){
 				threeLevel  = user.getID();
 				twoLevel = user.getThreeLevel();
@@ -95,11 +95,11 @@ public class RegisterService {
 		
 		String nowTime = DateUtil.getNowTime(DateUtil.yyyyMMddHHmmss);
 		String userID = UtilsConstant.getUUID();
-		int ret = LoginUserDB.registerUser(new Object[]{userID,reqData.getLoginID(),password,threeLevel, twoLevel , oneLevel, agentID ,nowTime,salesManID
+		int ret = LoginUserDAO.registerUser(new Object[]{userID,reqData.getLoginID(),password,threeLevel, twoLevel , oneLevel, agentID ,nowTime,salesManID
 				,"MERCHANT"}); 
 		
 		logger.info("为新注册用户：" + reqData.getLoginID() + "分配秘钥");
-		TermkeyDB.allocationTermk(userID);
+		TermKeyDAO.allocationTermk(userID);
 
 		if(ret > 0){
 			logger.info("用户" + reqData.getLoginID() + "注册成功");

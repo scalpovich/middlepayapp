@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.rhjf.appserver.db.DBBase;
 
-public class DistributionRatioDB extends DBBase{
+public class DistributionRatioDAO extends DBBase{
 	
 	
 	public static Map<String,Object> profitMap(){

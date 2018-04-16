@@ -16,11 +16,11 @@ public class JifuConstant {
 	 *   测试参数
 	 */
 
-//	public static String url = "http://ip:19085/rest/api/";
+//	public static String url = "http://fast.jfpays.com:19085/rest/api/";
 //
-//	public static String merchantNo = "";
+//	public static String merchantNo = "0001YSJF";
 //
-//	public static String aesKey = "";
+//	public static String aesKey = "0000000000000000";
 //
 //	public static String signKey = "0000000000000000";
 //
@@ -30,6 +30,15 @@ public class JifuConstant {
 	/**
 	 *   生产参数
 	 */
+	public static String url = "http://fast.jfpays.com:19085/rest/api/";
+
+	public static String merchantNo = "HTu3kLl0";
+
+	public static String aesKey = "0AC2B46B7B86489A";
+
+	public static String signKey = "607370D8CAA8667C";
+
+	public static String notifyUrl = "http://app.ronghuijinfubj.com/appserver/tradenotify/jifu";
 
 	public static Map<String,String> map = null;
 	

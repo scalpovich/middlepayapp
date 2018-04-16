@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.rhjf.appserver.util.UtilsConstant;
 
-public class DevicetokenDB extends DBBase{
+public class DeviceTokenDAO extends DBBase{
 
 	
 	/** 

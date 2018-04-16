@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class BankConfigDB extends DBBase{
+public class BankConfigDAO extends DBBase{
 
 	public static List<Map<String,String>> getBankList(){
 		String sql = "select tbc.ID , tbc.BankName as bankName , tbc.BankUrl as bankUrl , tbc.BankStatus as bankStatus , tcar.count from "

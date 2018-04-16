@@ -147,7 +147,7 @@ public class GetDynKey {
 	}
 	
 	public static String getRandomPwdReq() throws Exception {
-		String result = "";
+		String result;
 		
 		TJJQRequestData request = new TJJQRequestData();
 		request.setCharCode(StringEncoding.UTF_8);

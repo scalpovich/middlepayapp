@@ -2,10 +2,10 @@ package com.rhjf.appserver.service;
 
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.LoginUserDB;
+import com.rhjf.appserver.db.LoginUserDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.EhcacheUtil;
 import com.rhjf.appserver.util.LoadPro;
 import com.rhjf.appserver.util.LoggerTool;
@@ -22,7 +22,7 @@ public class ForgetPwdUpdateService {
 
 	LoggerTool logger = new LoggerTool(this.getClass());
 	
-	public void ForgetPwdUpdate(TabLoginuser user , RequestData reqdata , ResponseData respdata){
+	public void ForgetPwdUpdate(LoginUser user , RequestData reqdata , ResponseData respdata){
 		
 		logger.info("用户：" + user.getLoginID() + "忘记密码，开始找回操作");
 		
@@ -41,7 +41,7 @@ public class ForgetPwdUpdateService {
 		
 		String password = MakeCipherText.MakeLoginPwd(initKey2,newLoginpwd,initKey);
 		
-		int ret = LoginUserDB.updatePassword(new Object[]{password , user.getLoginID()});
+		int ret = LoginUserDAO.updatePassword(new Object[]{password , user.getLoginID()});
 		
 		EhcacheUtil ehcache = EhcacheUtil.getInstance();
 		ehcache.remove(Constant.cacheName, user.getLoginID() + "UserInfo");

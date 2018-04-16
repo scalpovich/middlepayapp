@@ -8,7 +8,7 @@ import java.util.Map;
  * 2018年3月19日 - 下午2:54:24
  * 2018
  */
-public class PayRouteDB extends DBBase{
+public class PayRouteDAO extends DBBase{
 	
 	
 	

@@ -9,12 +9,12 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import com.rhjf.appserver.constant.Constant;
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.AgentDB;
-import com.rhjf.appserver.db.TradeDB;
-import com.rhjf.appserver.db.YMFTradeDB;
+import com.rhjf.appserver.db.AgentDAO;
+import com.rhjf.appserver.db.TradeDAO;
+import com.rhjf.appserver.db.YMFTradeDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.LoadPro;
 import com.rhjf.appserver.util.LoggerTool;
 import com.rhjf.appserver.util.MD5;
@@ -31,7 +31,7 @@ public class ApplyYMFService {
 	
 	LoggerTool logger = new LoggerTool(this.getClass());
 	
-	public void ApplyYMF(TabLoginuser user , RequestData reqdata , ResponseData respData){
+	public void ApplyYMF(LoginUser user , RequestData reqdata , ResponseData respData){
 		logger.info("用户：" + user.getLoginID() + "申请到账类型" +  reqdata.getTradeCode() + "的固定码"); 
 		
 		
@@ -48,7 +48,7 @@ public class ApplyYMFService {
 		String date = sdf.format(new Date());
 		
 		
-		List<Map<String,String>> ymflist = YMFTradeDB.getUserYMFlist(new Object[]{user.getID() ,reqdata.getTradeCode()});
+		List<Map<String,String>> ymflist = YMFTradeDAO.getUserYMFlist(new Object[]{user.getID() ,reqdata.getTradeCode()});
 		
 		if(ymflist!=null&&ymflist.size()>0){
 			respData.setRespCode(RespCode.BindedErrir[0]);
@@ -60,7 +60,7 @@ public class ApplyYMFService {
 		
 		ThreadLocalRandom random = ThreadLocalRandom.current();
 		
-		Map<String,Object> agentMap = AgentDB.agentInfo(new Object[]{user.getAgentID()});
+		Map<String,Object> agentMap = AgentDAO.agentInfo(new Object[]{user.getAgentID()});
 		String AgentMobile = UtilsConstant.ObjToStr( agentMap.get("AgentPhone")); 
 		
 		// 二维码图片保存路径
@@ -73,7 +73,7 @@ public class ApplyYMFService {
 		
 		String YMFUrl = LoadPro.loadProperties("config", "YMFUrl");
 		
-		List<Map<String,Object>> ratelist = TradeDB.getUserFeeRate(new Object[]{user.getID()});
+		List<Map<String,Object>> ratelist = TradeDAO.getUserFeeRate(new Object[]{user.getID()});
 		
 		// ID,Code,UserID,Valid,PayChannel,Binded,AgentID,TradeCode,Rate,GenDate,BindedDate,AgentProfit,SettlementRate
 		for(int i = 0 ; i < ratelist.size() ; i++){
@@ -104,7 +104,7 @@ public class ApplyYMFService {
 				
 				MatrixToImageWriter.encode(text, new File(outputpath + File.separator + Code + ".jpg"), "", false);
 				
-				YMFTradeDB.applyymf(new Object[]{ID,Code,UserID,Valid,null,Binded,AgentID,TradeCode,Rate,date,date,AgentProfit,SettlementRate});
+				YMFTradeDAO.applyymf(new Object[]{ID,Code,UserID,Valid,null,Binded,AgentID,TradeCode,Rate,date,date,AgentProfit,SettlementRate});
 				isok = false;
 				break;
 			}

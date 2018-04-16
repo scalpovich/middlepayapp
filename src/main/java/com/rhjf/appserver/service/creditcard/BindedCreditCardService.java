@@ -3,12 +3,12 @@ package com.rhjf.appserver.service.creditcard;
 import java.util.Map;
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.BankCodeDB;
-import com.rhjf.appserver.db.TermkeyDB;
-import com.rhjf.appserver.db.UserCreditCardDB;
+import com.rhjf.appserver.db.BankCodeDAO;
+import com.rhjf.appserver.db.TermKeyDAO;
+import com.rhjf.appserver.db.UserCreditCardDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.DES3;
 import com.rhjf.appserver.util.DESUtil;
 import com.rhjf.appserver.util.LoadPro;
@@ -27,7 +27,7 @@ public class BindedCreditCardService {
 
 	private LoggerTool log = new LoggerTool(this.getClass());
 	
-	public void bindedCreditCard(TabLoginuser user , RequestData request , ResponseData response){
+	public void bindedCreditCard(LoginUser user , RequestData request , ResponseData response){
 		
 		log.info("用户：" + user.getLoginID() + "添加信用卡"); 
 		
@@ -45,7 +45,7 @@ public class BindedCreditCardService {
 		String bankName = "";
 		
 		
-		Map<String, Object> termKey = TermkeyDB.selectTermKey(user.getID());
+		Map<String, Object> termKey = TermKeyDAO.selectTermKey(user.getID());
 		String initKey = LoadPro.loadProperties("config", "DBINDEX");
 		
 		String bankCardno = "";
@@ -60,7 +60,7 @@ public class BindedCreditCardService {
 			return ;
 		}
 		
-		Map<String,Object> creditCardBin = BankCodeDB.creditCardBin(new Object[] {bankCardno});
+		Map<String,Object> creditCardBin = BankCodeDAO.creditCardBin(new Object[] {bankCardno});
 		if(creditCardBin == null || creditCardBin.isEmpty()){
 			response.setRespCode(RespCode.BankCardInfoErroe[0]);
 			response.setRespDesc("暂不支持该银行卡");
@@ -85,7 +85,7 @@ public class BindedCreditCardService {
 		if(reqMap.get("respCode").equals(Author.SUCESS_CODE)){
 			log.info("用户：" + user.getLoginID() + "添加信用卡 ,  卡号：" + bankCardno + "鉴权通过， 保存记录");
 			
-			UserCreditCardDB.saveUserCreditCard(new Object[]{id, user.getID() , name ,bankCardno , bankName , bankSubbranch ,bankCode ,
+			UserCreditCardDAO.saveUserCreditCard(new Object[]{id, user.getID() , name ,bankCardno , bankName , bankSubbranch ,bankCode ,
 					bankProv , bankCity , bankSymbol, cvn2 ,expired ,payerPhone ,tradeDate , cvn2 ,expired ,payerPhone , tradeDate });
 			response.setRespCode(RespCode.SUCCESS[0]);
 			response.setRespDesc(RespCode.SUCCESS[1]);

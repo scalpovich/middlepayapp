@@ -7,10 +7,10 @@ import java.util.Random;
 import org.springframework.stereotype.Service;
 
 import com.rhjf.appserver.constant.RespCode;
-import com.rhjf.appserver.db.TermkeyDB;
+import com.rhjf.appserver.db.TermKeyDAO;
 import com.rhjf.appserver.model.RequestData;
 import com.rhjf.appserver.model.ResponseData;
-import com.rhjf.appserver.model.TabLoginuser;
+import com.rhjf.appserver.model.LoginUser;
 import com.rhjf.appserver.util.DESUtil;
 import com.rhjf.appserver.util.LoadPro;
 import com.rhjf.appserver.util.LoggerTool;
@@ -22,30 +22,30 @@ public class SignService {
 	
 	LoggerTool log = new LoggerTool(this.getClass());
 	
-	public void send(TabLoginuser user , RequestData reqData , ResponseData respData) throws Exception{
+	public void send(LoginUser user , RequestData reqData , ResponseData respData) throws Exception{
 		
 		
 		log.info("用户 : " + user.getLoginID() + "进行签到操作"); 
 		
 		
-		//生成密钥
-		String tmkIndex = LoadPro.loadProperties("config", "TMKINDEXDB");  //3
-		String dbIndex = LoadPro.loadProperties("config", "DBINDEX");	// 2
+		//生成密钥  tmkIndex = 3  dbIndex = 2
+		String tmkIndex = LoadPro.loadProperties("config", "TMKINDEXDB");
+		String dbIndex = LoadPro.loadProperties("config", "DBINDEX");
 		
-		Map<String,Object> termKey = TermkeyDB.selectTermKey(user.getID());
-		HashMap<String, String> MACKEY = GetKey(tmkIndex,UtilsConstant.ObjToStr(termKey.get("TermTmkKey")), dbIndex);
-		HashMap<String, String> PINKEY = GetKey(tmkIndex,UtilsConstant.ObjToStr(termKey.get("TermTmkKey")), dbIndex);
-		HashMap<String, String> TDKEY = GetKey(tmkIndex,UtilsConstant.ObjToStr(termKey.get("TermTmkKey")), dbIndex);
+		Map<String,Object> termKey = TermKeyDAO.selectTermKey(user.getID());
+		HashMap<String, String> mackey = GetKey(tmkIndex,UtilsConstant.ObjToStr(termKey.get("TermTmkKey")), dbIndex);
+		HashMap<String, String> pinKey = GetKey(tmkIndex,UtilsConstant.ObjToStr(termKey.get("TermTmkKey")), dbIndex);
+		HashMap<String, String> tdKey = GetKey(tmkIndex,UtilsConstant.ObjToStr(termKey.get("TermTmkKey")), dbIndex);
 
 		
-		respData.setTerminalInfo(MACKEY.get("keyTerm"));
+		respData.setTerminalInfo(mackey.get("keyTerm"));
 		
 		//记录数据库  
-		int i = TermkeyDB.updateKey(user.getID(),  MACKEY.get("keyDB") ,  PINKEY.get("keyDB") ,  TDKEY.get("keyDB"));
+		int i = TermKeyDAO.updateKey(user.getID(),  mackey.get("keyDB") ,  pinKey.get("keyDB") ,  tdKey.get("keyDB"));
 		
-		respData.setSecretKey(PINKEY.get("keyTerm")  + PINKEY.get("checkCode") + MACKEY.get("keyTerm")  + MACKEY.get("checkCode") + TDKEY.get("keyTerm") + TDKEY.get("checkCode"));
+		respData.setSecretKey(pinKey.get("keyTerm")  + pinKey.get("checkCode") + mackey.get("keyTerm")  + mackey.get("checkCode") + tdKey.get("keyTerm") + tdKey.get("checkCode"));
 		
-		log.info("用户 : " + user.getLoginID() + "获取秘钥" + PINKEY.get("keyTerm")  + PINKEY.get("checkCode") + MACKEY.get("keyTerm")  + MACKEY.get("checkCode") + TDKEY.get("keyTerm") + TDKEY.get("checkCode"));
+		log.info("用户 : " + user.getLoginID() + "获取秘钥" + pinKey.get("keyTerm")  + pinKey.get("checkCode") + mackey.get("keyTerm")  + mackey.get("checkCode") + tdKey.get("keyTerm") + tdKey.get("checkCode"));
 		
 		if(user.getRegisterTime()!=null){
 			respData.setRegisterDate(user.getRegisterTime().substring(0, 8));
@@ -111,23 +111,5 @@ public class SignService {
 			return null;
 		}
 		return keyMap;
-
 	}
-	
-	public void init(){
-		HashMap<String, String> m = GetKey("3","879E6AA8B1710049B494C45A4397C5A8","2") ;
-		System.out.println(m.toString());
-	}
-	
-	public static void main(String[] args) {
-		SignService sign = new SignService();
-		sign.init();
-	}
-//	key:82926C4FFE612D30BA4F39E5ECE977BB
-//	tmk:6555303FB6D9013F5E22D687B9C10B14    解密 6555303FB6D9013F5E22D687B9C10B14
-//	keyTerm:29F330EAA3998C3B9D8F4337058928CE
-//	keyDB:7A87504EBE25A40032B39964744CB00E
-//	{keyDB=7A87504EBE25A40032B39964744CB00E, keyTerm=29F330EAA3998C3B9D8F4337058928CE}
-//	  BA47B342363943A17755EDC7E1A8893D
-	
 }

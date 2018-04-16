@@ -2,7 +2,7 @@ package com.rhjf.appserver.db;
 
 import java.util.Map;
 
-public class UserBankCardDB extends DBBase{
+public class UserBankCardDAO extends DBBase{
 
 	
 	public static int addCreditCardNo(Object[] obj){
