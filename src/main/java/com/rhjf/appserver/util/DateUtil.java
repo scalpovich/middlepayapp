@@ -67,8 +67,8 @@ public class DateUtil {
 	 */
 	public static List<String> getBetweenDates(String startTime , String endTime) throws Exception{
 		
-		List<String> dataList = new ArrayList<>();
-		dataList.add(startTime);
+		List<String> dateList = new ArrayList<>();
+		dateList.add(startTime);
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		Date dBegin = sdf.parse(startTime);
@@ -84,9 +84,9 @@ public class DateUtil {
 		while (dEnd.after(calBegin.getTime())) {
 			// 根据日历的规则，为给定的日历字段添加或减去指定的时间量
 			calBegin.add(Calendar.DAY_OF_MONTH, 1);
-			dataList.add(sdf.format(calBegin.getTime()));
+			dateList.add(sdf.format(calBegin.getTime()));
 		}
-		return dataList;
+		return dateList;
 	}
 	
 	
